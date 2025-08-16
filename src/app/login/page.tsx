@@ -60,6 +60,11 @@ export default function LoginPage() {
       }
       
       try {
+        if(auth) {
+            // Set language for reCAPTCHA and SMS message
+            auth.useDeviceLanguage();
+        }
+
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           'size': 'invisible',
           'callback': (response: any) => {
@@ -237,3 +242,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
