@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent } from "lucide-react";
+import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload } from "lucide-react";
 import Image from 'next/image';
 import { getDoctorById } from '@/lib/mock-data';
 import type { Doctor } from '@/lib/types';
@@ -133,13 +133,8 @@ function PaymentForm() {
     }
   };
 
-  const getCashbackMessage = () => {
-      // This can be expanded later if more consultation types are added
-      if (consultationType === 'video') {
-          return "You will get cashback upto ₹40 on this payment!";
-      }
-      // Default to clinic consultation cashback
-      return "You will get cashback upto ₹25 on this payment!";
+  const getCashbackAmount = () => {
+      return consultationType === 'video' ? 40 : 25;
   }
 
   if (isAuthLoading || isDataLoading) {
@@ -186,8 +181,12 @@ function PaymentForm() {
               </div>
               <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg p-3 text-sm font-medium flex items-center justify-center gap-2">
                  <BadgePercent className="h-5 w-5" />
-                 <span>{getCashbackMessage()}</span>
+                 <span>Get up to ₹{getCashbackAmount()} cashback!</span>
               </div>
+               <p className="text-xs text-muted-foreground text-center">
+                    <Upload className="inline-block h-3 w-3 mr-1"/>
+                    Upload a valid doctor's prescription post-consultation to receive your cashback.
+                </p>
             </div>
 
             {/* Payment Options */}

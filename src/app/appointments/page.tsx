@@ -1,22 +1,109 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForUser } from '@/lib/mock-data';
+import { getAppointmentsForUser, updateAppointmentStatus } from '@/lib/mock-data';
 import type { Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, IndianRupee } from "lucide-react";
+import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { verifyPrescription, VerifyPrescriptionOutput } from '@/ai/flows/verify-prescription-flow';
+import { Input } from '@/components/ui/input';
 
-const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
-   const appointmentDate = new Date(appointment.date);
-   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
+const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void }) => {
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<VerifyPrescriptionOutput | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) { // 4MB limit
+        toast({ title: "File too large", description: "Please upload an image smaller than 4MB.", variant: "destructive" });
+        return;
+    }
+
+    setIsVerifying(true);
+    setVerificationResult(null);
+
+    // Convert image to data URI
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const photoDataUri = reader.result as string;
+        try {
+            const result = await verifyPrescription({ 
+                photoDataUri, 
+                doctorName: appointment.doctor.name 
+            });
+            setVerificationResult(result);
+            if (result.isValid) {
+                onStatusChange(appointment.id, 'Completed');
+                toast({ title: "Prescription Verified!", description: "Cashback of will be processed within 24 hours.", variant: "default" });
+            } else {
+                 toast({ title: "Verification Failed", description: "Could not verify the doctor's name on the prescription. Please try again.", variant: "destructive" });
+            }
+        } catch (error) {
+            console.error("Verification error:", error);
+            toast({ title: "An Error Occurred", description: "Could not verify the prescription. Please try again later.", variant: "destructive" });
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+    reader.onerror = (error) => {
+        console.error("File reading error:", error);
+        toast({ title: "File Read Error", description: "Could not read the selected file.", variant: "destructive" });
+        setIsVerifying(false);
+    };
+  };
+  
+  const appointmentDate = new Date(appointment.date);
+  const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
+
+  const renderVerificationSection = () => {
+    if (appointment.status === 'Completed') {
+        return (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 p-2 rounded-md bg-green-500/10">
+                <CheckCircle className="h-5 w-5" />
+                <p className="font-semibold text-sm">Cashback Processed</p>
+            </div>
+        )
+    }
+
+    if (appointment.status === 'Confirmed') {
+        return (
+            <div>
+                 <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" id={`file-upload-${appointment.id}`}/>
+                 <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isVerifying}
+                >
+                    {isVerifying ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin"/> Verifying...
+                        </>
+                    ) : (
+                        <>
+                            <Upload className="mr-2 h-4 w-4"/> Upload Prescription for Cashback
+                        </>
+                    )}
+                 </Button>
+            </div>
+        )
+    }
+    return null;
+  }
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow bg-card">
@@ -26,11 +113,23 @@ const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
                  <CardTitle className="text-xl font-headline">Dr. {appointment.doctor.name}</CardTitle>
                  <CardDescription>{appointment.doctor.specialty}</CardDescription>
             </div>
-            <Badge variant={appointment.status === 'Confirmed' ? 'default' : 'secondary'}>{appointment.status}</Badge>
+            <Badge 
+                variant={appointment.status === 'Completed' ? 'default' : (appointment.status === 'Confirmed' ? 'secondary' : 'destructive')}
+                className={appointment.status === 'Completed' ? 'bg-green-600 text-white' : ''}
+            >
+                {appointment.status}
+            </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 p-2 rounded-md bg-primary/10">
+            <Ticket className="h-5 w-5 text-primary"/>
+            <div className="flex-1">
+                <p className="text-xs text-primary/80">Your Token</p>
+                <p className="font-bold text-primary text-lg">{appointment.token}</p>
+            </div>
+        </div>
+         <div className="flex items-center gap-3">
             <Building className="h-4 w-4 text-muted-foreground"/>
             <span className="font-medium">{appointment.clinic.name}</span>
         </div>
@@ -42,15 +141,10 @@ const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
             <Clock className="h-4 w-4 text-muted-foreground"/>
             <span className="font-medium">{appointment.time}</span>
         </div>
-         <Separator className="my-3"/>
-         <div className="flex items-center gap-3 p-2 rounded-md bg-primary/10">
-            <Ticket className="h-5 w-5 text-primary"/>
-            <div className="flex-1">
-                <p className="text-xs text-primary/80">Your Token</p>
-                <p className="font-bold text-primary text-lg">{appointment.token}</p>
-            </div>
-        </div>
       </CardContent>
+      <CardFooter className="flex flex-col items-stretch bg-muted/30 p-4">
+        {renderVerificationSection()}
+      </CardFooter>
     </Card>
   )
 }
@@ -59,6 +153,11 @@ export default function AppointmentsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleStatusChange = (id: string, status: Appointment['status']) => {
+    setAppointments(prev => prev.map(app => app.id === id ? {...app, status} : app));
+    updateAppointmentStatus(id, status); // Update in mock data
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -104,7 +203,7 @@ export default function AppointmentsPage() {
     if (appointments.length === 0) {
         return (
            <div className="text-center space-y-4">
-                <p className="text-muted-foreground">You have no upcoming appointments.</p>
+                <p className="text-muted-foreground">You have no upcoming or past appointments.</p>
                 <Button asChild>
                     <Link href="/search">
                         <Stethoscope className="mr-2 h-4 w-4"/>
@@ -117,7 +216,7 @@ export default function AppointmentsPage() {
 
     return (
       <div className="space-y-6">
-        {appointments.map(app => <AppointmentCard key={app.id} appointment={app} />)}
+        {appointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} />)}
       </div>
     );
   };
@@ -130,7 +229,7 @@ export default function AppointmentsPage() {
             <Calendar className="h-10 w-10 text-primary" />
           </div>
           <CardTitle className="text-3xl font-headline">My Appointments</CardTitle>
-          <CardDescription>View your upcoming and past appointments here.</CardDescription>
+          <CardDescription>View your appointments and manage cashback here.</CardDescription>
         </CardHeader>
         <CardContent>
           {renderContent()}
@@ -139,3 +238,5 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+
+    

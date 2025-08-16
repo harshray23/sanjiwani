@@ -295,13 +295,25 @@ export const createAppointment = async (
 export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
   return new Promise(resolve => {
     const userAppointments = appointments.filter(a => a.patientId === patientId);
+    // Sort by date descending
+    userAppointments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setTimeout(() => resolve(userAppointments), 500);
   });
 };
+
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
    return new Promise(resolve => {
     const appointment = appointments.find(a => a.id === id);
     setTimeout(() => resolve(appointment), 500);
   });
-}
+};
+
+export const updateAppointmentStatus = (id: string, status: Appointment['status']) => {
+    const index = appointments.findIndex(a => a.id === id);
+    if (index !== -1) {
+        appointments[index].status = status;
+    }
+};
+
+    
