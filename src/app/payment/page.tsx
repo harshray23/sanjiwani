@@ -1,8 +1,8 @@
 
 "use client";
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -21,7 +21,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, QrCode, ShieldCheck } from "lucide-react";
 import Image from 'next/image';
-import { useState } from 'react';
+import { getDoctorById } from '@/lib/mock-data';
+import type { Doctor } from '@/lib/types';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createAppointment } from '@/lib/mock-data';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -36,11 +40,54 @@ const upiFormSchema = z.object({
 
 function PaymentForm() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
-  // In a real app, you'd fetch details based on these params
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  
+  const [user, setUser] = useState<User | null>(null);
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [slot, setSlot] = useState<string | null>(null);
+  
   const doctorId = searchParams.get('doctorId');
-  const slot = searchParams.get('slot');
+  const selectedSlot = searchParams.get('slot');
+  
+  const platformFee = 50;
+  const totalFee = (doctor?.consultationFee ?? 0) + platformFee;
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthLoading(false);
+      if (!currentUser) {
+         router.push('/login');
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      if (!doctorId || !selectedSlot) {
+        toast({ title: "Missing Information", description: "Doctor ID or slot not provided.", variant: "destructive" });
+        router.push('/');
+        return;
+      }
+      setIsDataLoading(true);
+      const doctorData = await getDoctorById(doctorId);
+      if (doctorData) {
+        setDoctor(doctorData);
+        setSlot(selectedSlot);
+      } else {
+        toast({ title: "Doctor Not Found", description: "The selected doctor could not be found.", variant: "destructive" });
+        router.push('/search');
+      }
+      setIsDataLoading(false);
+    }
+    fetchDoctor();
+  }, [doctorId, selectedSlot, router, toast]);
 
   const cardForm = useForm<z.infer<typeof cardFormSchema>>({
     resolver: zodResolver(cardFormSchema),
@@ -52,20 +99,42 @@ function PaymentForm() {
     defaultValues: { upiId: "" },
   });
 
-  const handlePayment = async (paymentMethod: "card" | "upi", values: any) => {
+  const handlePayment = async () => {
+    if (!user || !doctorId || !slot) return;
+
     setIsLoading(true);
-    console.log(`Processing ${paymentMethod} payment with values:`, values);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    toast({
-      title: "Payment Successful!",
-      description: "Your appointment has been booked. You will receive a token shortly.",
-      variant: "default",
-    });
-    // Redirect to appointments page or confirmation page
-    window.location.href = '/appointments';
+    
+    // In a real app, this would talk to a payment gateway.
+    // Here we simulate the process and then create the appointment.
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      
+      // On successful payment, create the appointment
+      const appointment = await createAppointment(user.uid, user.displayName || "Anonymous User", doctorId, slot);
+      
+      toast({
+        title: "Payment Successful!",
+        description: "Your appointment has been booked.",
+        variant: "default",
+      });
+      
+      // Redirect to the confirmation page
+      router.push(`/appointments/confirmed?id=${appointment.id}`);
+
+    } catch (error) {
+      console.error("Payment/Booking Error:", error);
+      toast({
+        title: "Booking Failed",
+        description: "We could not complete your booking. Please try again.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+    }
   };
+
+  if (isAuthLoading || isDataLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+  }
 
   return (
     <div className="py-12">
@@ -85,7 +154,7 @@ function PaymentForm() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Doctor:</span>
-                  <span className="font-medium">Dr. Emily Carter</span>
+                  <span className="font-medium">{doctor?.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Time Slot:</span>
@@ -93,16 +162,16 @@ function PaymentForm() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Consultation Fee:</span>
-                  <span className="font-medium">₹500.00</span>
+                  <span className="font-medium">₹{doctor?.consultationFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Platform Fee:</span>
-                  <span className="font-medium">₹50.00</span>
+                  <span className="font-medium">₹{platformFee.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-dashed my-2"></div>
                 <div className="flex justify-between text-base font-bold">
                   <span>Total Payable:</span>
-                  <span className="text-primary">₹550.00</span>
+                  <span className="text-primary">₹{totalFee.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -126,7 +195,7 @@ function PaymentForm() {
                         <div className="flex-grow border-t"></div>
                       </div>
                     <Form {...upiForm}>
-                      <form onSubmit={upiForm.handleSubmit((values) => handlePayment("upi", values))} className="w-full space-y-4">
+                      <form onSubmit={upiForm.handleSubmit(handlePayment)} className="w-full space-y-4">
                         <FormField
                           control={upiForm.control}
                           name="upiId"
@@ -152,7 +221,7 @@ function PaymentForm() {
                 {/* Card Tab */}
                 <TabsContent value="card" className="pt-4">
                   <Form {...cardForm}>
-                    <form onSubmit={cardForm.handleSubmit((values) => handlePayment("card", values))} className="space-y-4">
+                    <form onSubmit={cardForm.handleSubmit(handlePayment)} className="space-y-4">
                       <FormField
                         control={cardForm.control}
                         name="cardNumber"
@@ -201,7 +270,7 @@ function PaymentForm() {
                       </div>
                       <Button type="submit" className="w-full" disabled={isLoading}>
                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                         Pay ₹550.00
+                         Pay ₹{totalFee.toFixed(2)}
                       </Button>
                     </form>
                   </Form>

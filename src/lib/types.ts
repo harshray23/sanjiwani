@@ -33,14 +33,21 @@ export interface Clinic {
 
 export interface Appointment {
   id: string;
-  patientName: string;
+  patientId: string; // Corresponds to user's UID
+  patientName: string; // In a real app, this would come from a user profile
   doctor: Doctor;
   clinic: Clinic;
   time: string;
-  date: string;
-  status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
+  date: string; // e.g., "2024-07-30"
+  status: 'Confirmed' | 'Completed' | 'Cancelled';
   token: string;
+  feeDetails: {
+    consultationFee: number;
+    platformFee: number;
+    total: number;
+  };
 }
+
 
 export interface Hospital {
   id: string;

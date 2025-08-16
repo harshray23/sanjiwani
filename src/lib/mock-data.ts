@@ -1,5 +1,5 @@
 
-import type { Doctor, Clinic, Hospital } from './types';
+import type { Doctor, Clinic, Hospital, Appointment } from './types';
 import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
@@ -199,6 +199,9 @@ const hospitals: Hospital[] = [
   }
 ];
 
+// In a real app, this would be a database. We'll use an in-memory array for now.
+const appointments: Appointment[] = [];
+
 // Helper functions to simulate data fetching
 export const getClinics = async (): Promise<Clinic[]> => {
   return new Promise(resolve => setTimeout(() => resolve(clinics), 500));
@@ -243,3 +246,62 @@ export const searchHospitals = async (query: string): Promise<Hospital[]> => {
     );
     return new Promise(resolve => setTimeout(() => resolve(filteredHospitals), 500));
 };
+
+
+// --- Appointment Management ---
+export const createAppointment = async (
+  patientId: string, 
+  patientName: string, 
+  doctorId: string, 
+  slot: string
+): Promise<Appointment> => {
+  return new Promise(async (resolve, reject) => {
+    const doctor = await getDoctorById(doctorId);
+    if (!doctor) return reject("Doctor not found");
+    const clinic = await getClinicById(doctor.clinicId);
+    if (!clinic) return reject("Clinic not found");
+
+    const platformFee = 50;
+    const newAppointment: Appointment = {
+      id: `apt-${Date.now()}`,
+      patientId,
+      patientName,
+      doctor,
+      clinic,
+      time: slot,
+      date: new Date().toISOString().split('T')[0], // Today's date
+      status: 'Confirmed',
+      token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      feeDetails: {
+        consultationFee: doctor.consultationFee,
+        platformFee,
+        total: doctor.consultationFee + platformFee
+      }
+    };
+
+    // Simulate notifying doctor/clinic and saving to a database
+    console.log("--- NEW APPOINTMENT BOOKED ---");
+    console.log("PATIENT:", newAppointment.patientName);
+    console.log("DOCTOR:", newAppointment.doctor.name);
+    console.log("CLINIC:", newAppointment.clinic.name);
+    console.log("TOKEN:", newAppointment.token);
+    console.log("----------------------------");
+
+    appointments.push(newAppointment);
+    setTimeout(() => resolve(newAppointment), 500);
+  });
+};
+
+export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
+  return new Promise(resolve => {
+    const userAppointments = appointments.filter(a => a.patientId === patientId);
+    setTimeout(() => resolve(userAppointments), 500);
+  });
+};
+
+export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
+   return new Promise(resolve => {
+    const appointment = appointments.find(a => a.id === id);
+    setTimeout(() => resolve(appointment), 500);
+  });
+}
