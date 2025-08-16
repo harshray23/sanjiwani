@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CreditCard, QrCode, ShieldCheck } from "lucide-react";
+import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent } from "lucide-react";
 import Image from 'next/image';
 import { getDoctorById } from '@/lib/mock-data';
 import type { Doctor } from '@/lib/types';
@@ -53,6 +53,7 @@ function PaymentForm() {
   
   const doctorId = searchParams.get('doctorId');
   const selectedSlot = searchParams.get('slot');
+  const consultationType = searchParams.get('type') || 'clinic'; // Default to clinic
   
   const platformFee = 50;
   const totalFee = (doctor?.consultationFee ?? 0) + platformFee;
@@ -132,6 +133,15 @@ function PaymentForm() {
     }
   };
 
+  const getCashbackMessage = () => {
+      // This can be expanded later if more consultation types are added
+      if (consultationType === 'video') {
+          return "You will get cashback upto ₹40 on this payment!";
+      }
+      // Default to clinic consultation cashback
+      return "You will get cashback upto ₹25 on this payment!";
+  }
+
   if (isAuthLoading || isDataLoading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
   }
@@ -149,8 +159,8 @@ function PaymentForm() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Order Summary */}
-            <div className="bg-muted/50 rounded-lg p-6">
-              <h3 className="text-lg font-bold mb-4">Booking Summary</h3>
+            <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+              <h3 className="text-lg font-bold">Booking Summary</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Doctor:</span>
@@ -173,6 +183,10 @@ function PaymentForm() {
                   <span>Total Payable:</span>
                   <span className="text-primary">₹{totalFee.toFixed(2)}</span>
                 </div>
+              </div>
+              <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg p-3 text-sm font-medium flex items-center justify-center gap-2">
+                 <BadgePercent className="h-5 w-5" />
+                 <span>{getCashbackMessage()}</span>
               </div>
             </div>
 
@@ -295,3 +309,5 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
+
+    
