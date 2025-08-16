@@ -59,10 +59,6 @@ export default function LoginPage() {
     const recaptchaContainer = document.getElementById('recaptcha-container');
     if (recaptchaContainer) {
         recaptchaContainer.innerHTML = "";
-    } else {
-        const container = document.createElement('div');
-        container.id = 'recaptcha-container';
-        document.body.appendChild(container);
     }
     
     try {
@@ -70,10 +66,11 @@ export default function LoginPage() {
         auth.useDeviceLanguage();
         
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
+          'size': 'normal',
           'callback': (response: any) => {
             // reCAPTCHA solved, allow signInWithPhoneNumber.
             console.log("reCAPTCHA verified");
+            // This callback is for auto-verification, we can trigger OTP send here if we want
           },
           'expired-callback': () => {
             // Response expired. Ask user to solve reCAPTCHA again.
@@ -217,6 +214,8 @@ export default function LoginPage() {
                 )}
               />
 
+              <div id="recaptcha-container" className="flex justify-center"></div>
+
               {isOtpSent && (
                 <FormField
                   control={form.control}
@@ -253,7 +252,7 @@ export default function LoginPage() {
                 </Button>
               )}
                {isOtpSent && (
-                  <Button variant="link" size="sm" className="w-full" onClick={() => {setIsOtpSent(false); form.reset();}}>
+                  <Button variant="link" size="sm" className="w-full" onClick={() => {setIsOtpSent(false); form.reset(); window.recaptchaVerifier?.clear(); setupRecaptcha();}}>
                     Use a different number?
                   </Button>
                )}
