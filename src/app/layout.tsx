@@ -13,7 +13,7 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: 'HospConnect - Book Doctor Appointments',
+  title: 'Sanjiwani Health - Book Doctor Appointments',
   description: 'Find doctors, book appointments, and get tokens with exclusive discounts.',
 };
 

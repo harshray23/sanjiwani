@@ -92,7 +92,7 @@ export default function HomePage() {
                 Discover Our Services
               </h2>
               <p className="text-lg text-muted-foreground mb-6">
-                See how HospConnect is revolutionizing the way you access healthcare. Our platform is designed to be simple, transparent, and patient-focused.
+                See how Sanjiwani Health is revolutionizing the way you access healthcare. Our platform is designed to be simple, transparent, and patient-focused.
               </p>
               <Button asChild size="lg">
                 <Link href="/search">Find a Doctor Now <ArrowRight className="ml-2 h-5 w-5"/></Link>
