@@ -121,8 +121,16 @@ export default function LoginPage() {
         return;
     }
 
-    try {
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+    if (!auth) {
+      setIsLoading(false);
+      toast({ title: "Authentication Error", description: "Firebase Auth is not configured.", variant: "destructive"});
+      return;
+    }
+
+    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+    .then((confirmationResult) => {
+      // SMS sent. Prompt user to type the code from the message, then sign the
+      // user in with confirmationResult.confirm(code).
       window.confirmationResult = confirmationResult;
       setIsLoading(false);
       setIsOtpSent(true);
@@ -130,8 +138,9 @@ export default function LoginPage() {
         title: "OTP Sent!",
         description: `An OTP has been sent to ${phoneNumber}.`,
       });
-    } catch (error: any) {
-       setIsLoading(false);
+    }).catch((error) => {
+      // Error; SMS not sent
+      setIsLoading(false);
        console.error("Error sending OTP: ", error);
        // Reset reCAPTCHA if it fails
        window.recaptchaVerifier?.clear();
@@ -141,7 +150,7 @@ export default function LoginPage() {
         description: error.message || "Could not send OTP. Please try again.",
         variant: "destructive",
       });
-    }
+    });
   };
 
   async function onSubmit(values: z.infer<typeof loginFormSchema>) {
