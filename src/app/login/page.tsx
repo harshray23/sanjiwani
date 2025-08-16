@@ -50,21 +50,25 @@ export default function LoginPage() {
   });
   
   // Set up reCAPTCHA on component mount
-  useEffect(() => {
-    // This effect should only run once
-    if (!window.recaptchaVerifier) {
-      // Ensure the container is empty before rendering
-      const recaptchaContainer = document.getElementById('recaptcha-container');
-      if (recaptchaContainer) {
-          recaptchaContainer.innerHTML = "";
-      }
-      
-      try {
-        if(auth) {
-            // Set language for reCAPTCHA and SMS message
-            auth.useDeviceLanguage();
-        }
-
+  const setupRecaptcha = () => {
+    if (!auth) {
+        console.error("Firebase auth is not initialized.");
+        return;
+    }
+     // Ensure the container is empty before rendering
+    const recaptchaContainer = document.getElementById('recaptcha-container');
+    if (recaptchaContainer) {
+        recaptchaContainer.innerHTML = "";
+    } else {
+        const container = document.createElement('div');
+        container.id = 'recaptcha-container';
+        document.body.appendChild(container);
+    }
+    
+    try {
+        // Set language for reCAPTCHA and SMS message
+        auth.useDeviceLanguage();
+        
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           'size': 'invisible',
           'callback': (response: any) => {
@@ -73,7 +77,12 @@ export default function LoginPage() {
           },
           'expired-callback': () => {
             // Response expired. Ask user to solve reCAPTCHA again.
-            console.log("reCAPTCHA expired");
+            console.log("reCAPTCHA expired, please try again.");
+            toast({
+                title: "reCAPTCHA Expired",
+                description: "Please try sending the OTP again.",
+                variant: "destructive"
+            })
           }
         });
         // Render the reCAPTCHA
@@ -81,7 +90,18 @@ export default function LoginPage() {
 
       } catch (error) {
         console.error("reCAPTCHA rendering error:", error);
+         toast({
+            title: "reCAPTCHA Error",
+            description: "Could not initialize reCAPTCHA. Please refresh and try again.",
+            variant: "destructive"
+        });
       }
+  }
+
+  useEffect(() => {
+    // This effect should only run once on the client
+    if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+      setupRecaptcha();
     }
   }, []);
 
@@ -116,6 +136,9 @@ export default function LoginPage() {
     } catch (error: any) {
        setIsLoading(false);
        console.error("Error sending OTP: ", error);
+       // Reset reCAPTCHA if it fails
+       window.recaptchaVerifier?.clear();
+       setupRecaptcha(); // Re-initialize
        toast({
         title: "Error Sending OTP",
         description: error.message || "Could not send OTP. Please try again.",
@@ -169,7 +192,6 @@ export default function LoginPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-               <div id="recaptcha-container"></div>
               <FormField
                 control={form.control}
                 name="phone"
@@ -242,4 +264,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
