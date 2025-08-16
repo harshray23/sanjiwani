@@ -13,8 +13,8 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: 'Sanjiwani Health - Book Doctor Appointments',
-  description: 'Find doctors, book appointments, and get tokens with exclusive discounts.',
+  title: 'Sanjiwani Health - Video Consultations & Doctor Appointments',
+  description: 'Book doctor appointments and video consultations. Get e-prescriptions and discounts on medicines.',
 };
 
 export default function RootLayout({

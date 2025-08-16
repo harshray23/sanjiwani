@@ -2,9 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, MapPin, Calendar, Search, Sparkles, Phone, ArrowRight } from "lucide-react";
+import { Stethoscope, MapPin, Calendar, Search, Sparkles, Phone, ArrowRight, Video, ScrollText, CalendarCheck } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
+import Logo from "@/components/layout/Logo";
 
 export default function HomePage() {
 
@@ -13,11 +14,11 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="text-center py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-primary">
+           <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-primary">
             Find Care, Instantly.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Book doctor appointments with ease. Get priority service and discounts on medicines for a small platform fee.
+            Book doctor appointments, get online video consultations, and receive e-prescriptions with ease.
           </p>
           <div className="max-w-2xl mx-auto bg-card p-4 rounded-lg shadow-lg">
             <form action="/search" method="GET">
@@ -84,25 +85,49 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Video Section */}
-      <section id="video-tour" className="py-16">
-        <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-           <div className="text-left">
-              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-primary">
-                Discover Our Services
-              </h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                See how Sanjiwani Health is revolutionizing the way you access healthcare. Our platform is designed to be simple, transparent, and patient-focused.
-              </p>
-              <Button asChild size="lg">
-                <Link href="/search">Find a Doctor Now <ArrowRight className="ml-2 h-5 w-5"/></Link>
-              </Button>
-           </div>
-           <div className="aspect-video bg-muted rounded-lg shadow-lg flex items-center justify-center overflow-hidden">
-             {/* You can replace this with an <iframe /> from YouTube/Vimeo or a <video /> tag */}
-             <div className="w-full h-full flex items-center justify-center">
-                <p className="text-muted-foreground">Your video will be displayed here.</p>
-             </div>
+      {/* New Features Section */}
+      <section id="features" className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">
+              Comprehensive Healthcare, All in One Place
+            </h2>
+            <p className="text-lg text-muted-foreground mt-2">Access a full suite of healthcare services from anywhere.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
+                  <Video className="h-10 w-10 text-primary" />
+                </div>
+                <CardTitle className="font-headline text-xl">Online Video Consultations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Consult with top doctors remotely via secure video calls, perfect for busy schedules or remote locations.</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
+                  <ScrollText className="h-10 w-10 text-primary" />
+                </div>
+                <CardTitle className="font-headline text-xl">E-Prescriptions & Discounts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Receive digital prescriptions instantly after your consultation and get 10-15% off medicines at partner pharmacies.</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
+                  <CalendarCheck className="h-10 w-10 text-primary" />
+                </div>
+                <CardTitle className="font-headline text-xl">Smart Follow-ups</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Get automated reminders for your upcoming appointments, follow-up visits, and medicine schedules.</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
