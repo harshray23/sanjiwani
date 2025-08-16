@@ -11,7 +11,7 @@ export function Header() {
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/hospitals', label: 'Find a Hospital' },
-    { href: '/search', label: 'Find a Doctor' },
+    { href: '/search', label: 'Find a Doctor/Clinic' },
     { href: '/appointments', label: 'My Appointments' },
   ];
 
