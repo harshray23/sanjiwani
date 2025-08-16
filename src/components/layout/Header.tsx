@@ -5,10 +5,12 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Stethoscope } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
+import Logo from './Logo';
 
 export function Header() {
   const navItems = [
     { href: '/', label: 'Home' },
+    { href: '/hospitals', label: 'Find a Hospital' },
     { href: '/search', label: 'Find a Doctor' },
     { href: '/appointments', label: 'My Appointments' },
   ];
@@ -16,12 +18,12 @@ export function Header() {
   return (
     <header className="bg-card/95 backdrop-blur-sm border-b shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-primary hover:text-primary/90 transition-colors">
-          <Stethoscope className="h-8 w-8" />
-          <h1 className="text-2xl font-bold font-headline">Sanjiwani Health</h1>
+        <Link href="/" className="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
+          <Logo className="h-10 w-10" />
+          <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani Health</h1>
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-2 lg:space-x-4">
+        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
           {navItems.map((item) => (
             <Button key={item.label} variant="ghost" asChild>
               <Link href={item.href}>{item.label}</Link>

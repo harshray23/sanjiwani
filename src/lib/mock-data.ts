@@ -1,5 +1,6 @@
 
-import type { Doctor, Clinic } from './types';
+import type { Doctor, Clinic, Hospital } from './types';
+import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
   {
@@ -132,6 +133,72 @@ const clinics: Clinic[] = [
   },
 ];
 
+const hospitals: Hospital[] = [
+  {
+    id: 'hosp-1',
+    name: 'Metro General Hospital',
+    location: {
+      address: '101 Healing Ave, Metro City',
+      coordinates: { latitude: 12.9716, longitude: 77.5946 }
+    },
+    contact: '(123) 111-2222',
+    rating: 4.7,
+    specialties: ['cardiology', 'neurology', 'orthopedics', 'emergency medicine'],
+    emergencyAvailable: true,
+    beds: {
+      general: { total: 200, available: 45 },
+      icu: { total: 40, available: 5 },
+      ventilator: { total: 20, available: 2 },
+      oxygen: { total: 80, available: 15 },
+    },
+    lastUpdated: Timestamp.now(),
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'large hospital'
+  },
+  {
+    id: 'hosp-2',
+    name: 'Suburb Community Hospital',
+    location: {
+      address: '202 Care Rd, Suburbia',
+      coordinates: { latitude: 12.9545, longitude: 77.6483 }
+    },
+    contact: '(123) 333-4444',
+    rating: 4.5,
+    specialties: ['general medicine', 'pediatrics', 'gynecology'],
+    emergencyAvailable: true,
+    beds: {
+      general: { total: 100, available: 12 },
+      icu: { total: 15, available: 0 },
+      ventilator: { total: 5, available: 0 },
+      oxygen: { total: 30, available: 8 },
+    },
+    lastUpdated: Timestamp.fromMillis(Date.now() - 3600000), // 1 hour ago
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'community hospital'
+  },
+  {
+    id: 'hosp-3',
+    name: 'Lakeside Children\'s Hospital',
+    location: {
+      address: '303 Pedia Pl, Lakeside',
+      coordinates: { latitude: 13.0000, longitude: 77.6000 }
+    },
+    contact: '(123) 555-6666',
+    rating: 4.9,
+    specialties: ['pediatrics', 'neonatology', 'pediatric surgery'],
+    emergencyAvailable: false,
+    beds: {
+      general: { total: 80, available: 10 },
+      icu: { total: 20, available: 3 },
+      ventilator: { total: 10, available: 1 },
+      oxygen: { total: 40, available: 12 },
+    },
+    lastUpdated: Timestamp.fromMillis(Date.now() - 86400000), // 1 day ago
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'childrens hospital'
+  }
+];
+
 // Helper functions to simulate data fetching
 export const getClinics = async (): Promise<Clinic[]> => {
   return new Promise(resolve => setTimeout(() => resolve(clinics), 500));
@@ -161,4 +228,18 @@ export const searchClinicsAndDoctors = async (query: string): Promise<{ clinics:
   );
   
   return new Promise(resolve => setTimeout(() => resolve({ clinics: filteredClinics, doctors: filteredDoctors }), 500));
+};
+
+export const getHospitals = async (): Promise<Hospital[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(hospitals), 500));
+};
+
+export const searchHospitals = async (query: string): Promise<Hospital[]> => {
+    const lowerCaseQuery = query.toLowerCase();
+    const filteredHospitals = hospitals.filter(hospital => 
+        hospital.name.toLowerCase().includes(lowerCaseQuery) || 
+        hospital.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery)) ||
+        hospital.location.address.toLowerCase().includes(lowerCaseQuery)
+    );
+    return new Promise(resolve => setTimeout(() => resolve(filteredHospitals), 500));
 };

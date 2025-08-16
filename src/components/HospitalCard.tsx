@@ -1,20 +1,23 @@
 
+"use client";
+
 import type { Hospital } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { BedDouble, MapPin, Phone, Star, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { BedDouble, MapPin, Phone, Star, CheckCircle, AlertCircle, Zap, MapIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 interface HospitalCardProps {
   hospital: Hospital;
 }
 
 function BedInfo({ label, available, total }: { label: string; available: number; total: number }) {
-  const availabilityColor = available > 0 ? 'text-accent' : 'text-destructive';
+  const availabilityColor = available > 0 ? 'text-green-600' : 'text-red-600';
   const Icon = available > 0 ? CheckCircle : AlertCircle;
   return (
     <div className="flex items-center justify-between text-sm">
@@ -27,6 +30,7 @@ function BedInfo({ label, available, total }: { label: string; available: number
 }
 
 export function HospitalCard({ hospital }: HospitalCardProps) {
+  const { toast } = useToast();
   const totalAvailableBeds = 
     (hospital.beds?.icu?.available || 0) + 
     (hospital.beds?.oxygen?.available || 0) + 
@@ -41,12 +45,32 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
                     ? new Date(hospital.lastUpdated)
                     : hospital.lastUpdated; 
     if (date instanceof Date && !isNaN(date.valueOf())) { 
-        lastUpdatedText = format(date, "Pp");
+        lastUpdatedText = format(date, "PPp");
     }
   }
 
+  const handleViewOnMap = () => {
+    let query = '';
+    if (hospital.location?.coordinates?.latitude && hospital.location?.coordinates?.longitude) {
+      query = `${hospital.location.coordinates.latitude},${hospital.location.coordinates.longitude}`;
+    } else if (hospital.location?.address) {
+      query = encodeURIComponent(hospital.location.address);
+    }
+
+    if (query) {
+      const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+      window.open(mapUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      toast({
+        title: "Location Unavailable",
+        description: `Map location for ${hospital.name} is not available.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
+    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-card">
       <CardHeader className="p-0 relative">
         <Image
           src={hospital.imageUrl || `https://placehold.co/600x400.png`}
@@ -90,8 +114,8 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         </div>
 
         {hospital.beds && (
-          <div className="space-y-1 border-t border-b py-3 my-3">
-            <h4 className="text-sm font-semibold mb-1 text-foreground">Bed Availability:</h4>
+          <div className="space-y-1.5 border-t border-b py-3 my-3">
+            <h4 className="text-sm font-semibold mb-2 text-foreground">Bed Availability:</h4>
             <BedInfo label="ICU" available={hospital.beds.icu?.available || 0} total={hospital.beds.icu?.total || 0} />
             <BedInfo label="Oxygen" available={hospital.beds.oxygen?.available || 0} total={hospital.beds.oxygen?.total || 0} />
             <BedInfo label="Ventilator" available={hospital.beds.ventilator?.available || 0} total={hospital.beds.ventilator?.total || 0} />
@@ -100,20 +124,21 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         )}
         
          <p className="text-xs text-muted-foreground">Last Updated: {lastUpdatedText}</p>
-
-
       </CardContent>
-      <CardFooter className="p-4 bg-slate-50 dark:bg-slate-800 flex-col space-y-2">
+      <CardFooter className="p-4 bg-muted/30 dark:bg-muted/30 border-t flex flex-col items-stretch space-y-2">
         <Button 
           className="w-full" 
           asChild 
           disabled={totalAvailableBeds === 0}
           variant={totalAvailableBeds > 0 ? "default" : "secondary"}
         >
-          <Link href={`/hospital/${hospital.id}/book`}> 
+          <Link href={`/hospitals/${hospital.id}/book`}> 
             <BedDouble className="w-4 h-4 mr-2" /> 
             {totalAvailableBeds > 0 ? `Reserve a Bed (${totalAvailableBeds} available)` : 'Check Availability Details'}
           </Link>
+        </Button>
+         <Button variant="outline" className="w-full" onClick={handleViewOnMap}>
+          <MapIcon className="w-4 h-4 mr-2" /> View on Map
         </Button>
       </CardFooter>
     </Card>

@@ -41,3 +41,28 @@ export interface Appointment {
   status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
   token: string;
 }
+
+export interface Hospital {
+  id: string;
+  name: string;
+  location: {
+    address: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    }
+  };
+  contact: string;
+  rating: number;
+  specialties: string[];
+  imageUrl?: string;
+  dataAiHint?: string;
+  emergencyAvailable: boolean;
+  beds: {
+    general: { total: number; available: number };
+    icu: { total: number; available: number };
+    ventilator: { total: number; available: number };
+    oxygen: { total: number; available: number };
+  };
+  lastUpdated: any; // Can be Date or Firebase Timestamp
+}
