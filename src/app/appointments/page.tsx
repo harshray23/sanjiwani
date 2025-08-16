@@ -8,7 +8,7 @@ import { getAppointmentsForUser, updateAppointmentStatus } from '@/lib/mock-data
 import type { Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle, BellRing, Pill } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -69,19 +69,32 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
   const appointmentDate = new Date(appointment.date);
   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
 
-  const renderVerificationSection = () => {
+  const renderActionSection = () => {
     if (appointment.status === 'Completed') {
         return (
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 p-2 rounded-md bg-green-500/10">
-                <CheckCircle className="h-5 w-5" />
-                <p className="font-semibold text-sm">Cashback Processed</p>
+             <div className="space-y-4">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 p-2 rounded-md bg-green-500/10">
+                    <CheckCircle className="h-5 w-5" />
+                    <p className="font-semibold text-sm">Cashback Processed</p>
+                </div>
+                 <div>
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Pill className="h-4 w-4"/>Medicine Reminders</h4>
+                    <div className="flex gap-2">
+                        <Input placeholder="e.g., Paracetamol" className="bg-white dark:bg-card"/>
+                        <Button variant="secondary">Set Reminder</Button>
+                    </div>
+                </div>
             </div>
         )
     }
 
     if (appointment.status === 'Confirmed') {
         return (
-            <div>
+            <div className="space-y-3">
+                 <div className="flex items-center gap-2 text-primary dark:text-primary-foreground p-2 rounded-md bg-primary/10">
+                    <BellRing className="h-5 w-5" />
+                    <p className="font-semibold text-sm">You will be notified 1 hour before your appointment.</p>
+                </div>
                  <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" id={`file-upload-${appointment.id}`}/>
                  <Button 
                     variant="outline" 
@@ -143,7 +156,7 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch bg-muted/30 p-4">
-        {renderVerificationSection()}
+        {renderActionSection()}
       </CardFooter>
     </Card>
   )
@@ -238,5 +251,3 @@ export default function AppointmentsPage() {
     </div>
   );
 }
-
-    
