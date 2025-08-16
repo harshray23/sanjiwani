@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, MapPin, Calendar, Search, Sparkles, Phone, ArrowRight, Video, ScrollText, CalendarCheck } from "lucide-react";
+import { Stethoscope, MapPin, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
@@ -18,7 +18,7 @@ export default function HomePage() {
             Find Care, Instantly.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Book doctor appointments, get online video consultations, and receive e-prescriptions with ease.
+            Book doctor appointments, check hospital bed availability, and manage all your health records in one place.
           </p>
           <div className="max-w-2xl mx-auto bg-card p-4 rounded-lg shadow-lg">
             <form action="/search" method="GET">
@@ -26,7 +26,7 @@ export default function HomePage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   name="query"
-                  placeholder="Search by clinic, doctor, or specialty..."
+                  placeholder="Search hospitals, clinics, doctors, or specialties..."
                   className="w-full h-14 pl-12 pr-32 rounded-md text-lg border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md">
@@ -45,40 +45,40 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">
               A Seamless Experience
             </h2>
-             <p className="text-lg text-muted-foreground mt-2">Get from searching to seated in just 3 simple steps.</p>
+             <p className="text-lg text-muted-foreground mt-2">From finding emergency care to managing your health journey.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <Search className="h-10 w-10 text-primary" />
+                  <Hospital className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">1. Search</CardTitle>
+                <CardTitle className="font-headline text-xl">1. Find a Hospital or Doctor</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Find the right doctor or clinic for you by specialty and location.</p>
+                <p className="text-muted-foreground">Search for top hospitals and specialists. Check real-time bed availability in emergencies.</p>
               </CardContent>
             </Card>
             <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <Calendar className="h-10 w-10 text-primary" />
+                  <BedDouble className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">2. Book & Pay</CardTitle>
+                <CardTitle className="font-headline text-xl">2. Book Your Slot or Bed</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Choose a convenient slot and pay the consultation & platform fee securely.</p>
+                <p className="text-muted-foreground">Book a consultation slot or reserve a hospital bed instantly with a secure online payment.</p>
               </CardContent>
             </Card>
             <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                   <Sparkles className="h-10 w-10 text-primary" />
+                   <HeartPulse className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">3. Get Benefits</CardTitle>
+                <CardTitle className="font-headline text-xl">3. Manage Your Care</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Receive a priority token and enjoy discounts on medicines at the clinic.</p>
+                <p className="text-muted-foreground">Upload prescriptions for cashback, set medicine reminders, and manage all your records.</p>
               </CardContent>
             </Card>
           </div>
@@ -92,7 +92,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">
               Comprehensive Healthcare, All in One Place
             </h2>
-            <p className="text-lg text-muted-foreground mt-2">Access a full suite of healthcare services from anywhere.</p>
+            <p className="text-lg text-muted-foreground mt-2">Access a full suite of healthcare services from anywhere, anytime.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
@@ -100,10 +100,10 @@ export default function HomePage() {
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
                   <Video className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">Online Video Consultations</CardTitle>
+                <CardTitle className="font-headline text-xl">Video & In-Person Consults</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Consult with top doctors remotely via secure video calls, perfect for busy schedules or remote locations.</p>
+                <p className="text-muted-foreground">Connect with doctors via secure video calls or book in-person appointments at clinics and hospitals.</p>
               </CardContent>
             </Card>
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
@@ -111,10 +111,10 @@ export default function HomePage() {
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
                   <ScrollText className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">E-Prescriptions & Discounts</CardTitle>
+                <CardTitle className="font-headline text-xl">E-Prescriptions & Cashback</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Receive digital prescriptions instantly after your consultation and get 10-15% off medicines at partner pharmacies.</p>
+                <p className="text-muted-foreground">Receive digital prescriptions and upload them after your visit to earn cashback and medicine discounts.</p>
               </CardContent>
             </Card>
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
@@ -122,10 +122,10 @@ export default function HomePage() {
                 <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
                   <CalendarCheck className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-xl">Smart Follow-ups</CardTitle>
+                <CardTitle className="font-headline text-xl">Smart Health Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Get automated reminders for your upcoming appointments, follow-up visits, and medicine schedules.</p>
+                <p className="text-muted-foreground">Get automated reminders for appointments and medications. Keep all your health records in one secure place.</p>
               </CardContent>
             </Card>
           </div>
