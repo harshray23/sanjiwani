@@ -42,19 +42,28 @@ export default function LoginPage() {
     setIsLoading(true);
     setEmail(values.email);
 
+    // Construct a robust URL using the project's default hosting domain,
+    // which is guaranteed to be in the authorized domains list.
+    // This avoids all issues related to `localhost`.
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    if (!projectId) {
+      console.error("Firebase Project ID is not defined in environment variables.");
+      toast({
+        title: "Configuration Error",
+        description: "The Firebase Project ID is missing. Cannot send sign-in link.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const actionCodeSettings = {
-      // URL you want to redirect back to. The domain (www.example.com) must be
-      // in the Firebase Console's Authorized Domains list.
-      url: `${window.location.origin}/auth/callback`,
-      // This must be true.
+      url: `https://${projectId}.web.app/auth/callback`,
       handleCodeInApp: true,
     };
     
     try {
       await sendSignInLinkToEmail(auth, values.email, actionCodeSettings);
-      // The link was successfully sent. Inform the user.
-      // Save the email locally so you don't need to ask the user for it again
-      // if they open the link on the same device.
       window.localStorage.setItem('emailForSignIn', values.email);
       setEmailSent(true);
       toast({
@@ -63,9 +72,9 @@ export default function LoginPage() {
       });
     } catch (error: any) {
       console.error("Firebase Auth Error:", error);
-      toast({
+       toast({
         title: "Error Sending Link",
-        description: error.message,
+        description: "Could not send sign-in link. Please ensure your Firebase project details are correct and the domain is authorized in the Firebase console.",
         variant: "destructive",
       });
     } finally {
