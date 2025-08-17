@@ -42,9 +42,6 @@ export default function LoginPage() {
     setIsLoading(true);
     setEmail(values.email);
 
-    // Construct a robust URL using the project's default hosting domain,
-    // which is guaranteed to be in the authorized domains list.
-    // This avoids all issues related to `localhost`.
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
     if (!projectId) {
       console.error("Firebase Project ID is not defined in environment variables.");
@@ -72,11 +69,19 @@ export default function LoginPage() {
       });
     } catch (error: any) {
       console.error("Firebase Auth Error:", error);
-       toast({
-        title: "Error Sending Link",
-        description: "Could not send sign-in link. Please ensure your Firebase project details are correct and the domain is authorized in the Firebase console.",
-        variant: "destructive",
-      });
+      if (error.code === 'auth/quota-exceeded') {
+         toast({
+            title: "Daily Limit Exceeded",
+            description: "We've sent too many emails today. Please try again tomorrow.",
+            variant: "destructive",
+         });
+      } else {
+         toast({
+            title: "Error Sending Link",
+            description: "Could not send sign-in link. Please try again later.",
+            variant: "destructive",
+         });
+      }
     } finally {
       setIsLoading(false);
     }
