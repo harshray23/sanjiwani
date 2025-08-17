@@ -3,6 +3,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import type { ActionCodeSettings } from "firebase/auth";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
@@ -15,7 +16,6 @@ const firebaseConfig = {
 };
 
 // Diagnostic log: Check if the API key is being loaded.
-// This will appear in server logs during build or runtime, or browser console if this module is client-side.
 if (typeof window !== 'undefined') {
   console.log("Firebase.ts (Client-side): NEXT_PUBLIC_FIREBASE_API_KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "Loaded" : "MISSING or UNDEFINED");
 } else {
@@ -26,7 +26,6 @@ if (typeof window !== 'undefined') {
 // Initialize Firebase
 let app;
 if (!getApps().length) {
-  // Check that the config is not empty before initializing
   if (!firebaseConfig.apiKey) {
       console.error("Firebase config is missing API Key. Firebase will not be initialized.");
   } else {
@@ -36,9 +35,19 @@ if (!getApps().length) {
   app = getApp();
 }
 
-// Ensure app is initialized before getting auth and db
 const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
 
-// Export nulls if not initialized so the app doesn't crash, though functionality will be broken.
+// Action code settings for email link sign-in
+export const actionCodeSettings: ActionCodeSettings = {
+  // URL you want to redirect back to. The domain (www.example.com) for this
+  // URL must be in the authorized domains list in the Firebase Console.
+  url: typeof window !== 'undefined' ? `${window.location.origin}/finish-login` : 'http://localhost:9002/finish-login',
+  // This must be true.
+  handleCodeInApp: true,
+};
+
+
 export { app, db, auth };
+
+    
