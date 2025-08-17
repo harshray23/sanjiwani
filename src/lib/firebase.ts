@@ -27,6 +27,7 @@ let app;
 if (!getApps().length) {
   if (!firebaseConfig.apiKey) {
       console.error("Firebase config is missing API Key. Firebase will not be initialized.");
+      app = null;
   } else {
      app = initializeApp(firebaseConfig);
   }
@@ -38,8 +39,15 @@ const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
 
 // Enable this for local development with Firebase Emulator Suite
-// if (auth && process.env.NODE_ENV === 'development') {
-//   connectAuthEmulator(auth, "http://localhost:9099");
-// }
+if (auth && process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
+  // Check if not already connected
+  try {
+    // connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    // console.log("Firebase Auth emulator connected.");
+  } catch (e) {
+    // console.error("Error connecting to Firebase Auth emulator:", e);
+  }
+}
+
 
 export { app, db, auth };
