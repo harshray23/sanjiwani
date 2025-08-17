@@ -90,7 +90,6 @@ export default function LoginPage() {
             const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
             
-            // Create a user document in Firestore
             if (user && db) {
               await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
@@ -121,7 +120,6 @@ export default function LoginPage() {
       setIsLoading(true);
       try {
           await sendSignInLinkToEmail(auth, values.email, actionCodeSettings);
-          // Save the email locally to use when the user returns.
           window.localStorage.setItem('emailForSignIn', values.email);
           toast({
               title: "Check your email",
@@ -256,3 +254,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
