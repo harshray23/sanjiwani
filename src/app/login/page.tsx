@@ -16,12 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, Mail, KeyRound, Link as LinkIcon } from "lucide-react";
+import { Loader2, LogIn, Mail, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, sendSignInLinkToEmail, signInWithEmailAndPassword, AuthError } from "firebase/auth";
-import { actionCodeSettings } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, AuthError } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const passwordFormSchema = z.object({
@@ -29,27 +28,17 @@ const passwordFormSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-const emailFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-});
-
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [authMode, setAuthMode] = useState<'password' | 'passwordless'>('password');
   const [isSignUp, setIsSignUp] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
 
-  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
+  const form = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: { email: "", password: "" },
-  });
-
-  const emailForm = useForm<z.infer<typeof emailFormSchema>>({
-      resolver: zodResolver(emailFormSchema),
-      defaultValues: { email: ""},
   });
 
   const handleAuthError = (error: AuthError) => {
@@ -115,29 +104,12 @@ export default function LoginPage() {
         setIsLoading(false);
     }
   }
-
-  async function onEmailSubmit(values: z.infer<typeof emailFormSchema>) {
-      setIsLoading(true);
-      try {
-          await sendSignInLinkToEmail(auth, values.email, actionCodeSettings);
-          window.localStorage.setItem('emailForSignIn', values.email);
-          toast({
-              title: "Check your email",
-              description: `A sign-in link has been sent to ${values.email}.`,
-          });
-          emailForm.reset();
-      } catch (error) {
-          handleAuthError(error as AuthError);
-      } finally {
-          setIsLoading(false);
-      }
-  }
   
   const renderPasswordForm = () => (
-     <Form {...passwordForm}>
-        <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
+     <Form {...form}>
+        <form onSubmit={form.handleSubmit(onPasswordSubmit)} className="space-y-6">
             <FormField
-            control={passwordForm.control}
+            control={form.control}
             name="email"
             render={({ field }) => (
                 <FormItem>
@@ -153,7 +125,7 @@ export default function LoginPage() {
             )}
             />
             <FormField
-            control={passwordForm.control}
+            control={form.control}
             name="password"
             render={({ field }) => (
                 <FormItem>
@@ -173,86 +145,32 @@ export default function LoginPage() {
             </Button>
              <div className="mt-6 text-center text-sm">
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{' '}
-                <Button variant="link" className="p-0 h-auto" onClick={() => {setIsSignUp(!isSignUp); passwordForm.reset();}}>
+                <Button variant="link" className="p-0 h-auto" onClick={() => {setIsSignUp(!isSignUp); form.reset();}}>
                     {isSignUp ? "Log in here" : "Sign up here"}
-                </Button>
-            </div>
-             <div className="mt-2 text-center text-sm">
-                or{' '}
-                <Button variant="link" className="p-0 h-auto" onClick={() => setAuthMode('passwordless')}>
-                    Sign in with Email Link
                 </Button>
             </div>
         </form>
     </Form>
   );
-
-  const renderEmailForm = () => (
-      <Form {...emailForm}>
-        <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
-            <FormField
-            control={emailForm.control}
-            name="email"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                    <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input type="email" placeholder="your@email.com" {...field} className="pl-10" />
-                    </div>
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send Login Link'}
-            </Button>
-            <div className="mt-6 text-center text-sm">
-                <Button variant="link" className="p-0 h-auto" onClick={() => setAuthMode('password')}>
-                   Back to password login
-                </Button>
-            </div>
-        </form>
-    </Form>
-  )
-
-  const titles = {
-      password: {
-          login: "Welcome Back!",
-          signup: "Create an Account"
-      },
-      passwordless: "Passwordless Sign-In"
-  }
-  const descriptions = {
-      password: {
-          login: "Log in to manage your appointments.",
-          signup: "Enter your details to create a new account."
-      },
-      passwordless: "Enter your email to receive a secure sign-in link."
-  }
 
   return (
     <div className="py-12">
       <Card className="w-full max-w-md mx-auto shadow-xl">
         <CardHeader className="text-center">
           <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-            {authMode === 'password' ? <LogIn className="h-10 w-10 text-primary" /> : <LinkIcon className="h-10 w-10 text-primary" />}
+            <LogIn className="h-10 w-10 text-primary" />
           </div>
           <CardTitle className="text-3xl font-headline">
-              {authMode === 'password' ? (isSignUp ? titles.password.signup : titles.password.login) : titles.passwordless}
+              {isSignUp ? "Create an Account" : "Welcome Back!"}
           </CardTitle>
           <CardDescription>
-             {authMode === 'password' ? (isSignUp ? descriptions.password.signup : descriptions.password.login) : descriptions.passwordless}
+             {isSignUp ? "Enter your details to create a new account." : "Log in to manage your appointments."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-            {authMode === 'password' ? renderPasswordForm() : renderEmailForm()}
+            {renderPasswordForm()}
         </CardContent>
       </Card>
     </div>
   );
 }
-
-    

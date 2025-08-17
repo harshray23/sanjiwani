@@ -3,7 +3,6 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import type { ActionCodeSettings } from "firebase/auth";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
@@ -38,16 +37,4 @@ if (!getApps().length) {
 const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
 
-// Action code settings for email link sign-in
-export const actionCodeSettings: ActionCodeSettings = {
-  // URL you want to redirect back to. The domain (www.example.com) for this
-  // URL must be in the authorized domains list in the Firebase Console.
-  url: typeof window !== 'undefined' ? `${window.location.origin}/finish-login` : 'http://localhost:9002/finish-login',
-  // This must be true.
-  handleCodeInApp: true,
-};
-
-
 export { app, db, auth };
-
-    
