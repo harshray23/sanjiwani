@@ -20,7 +20,7 @@ import { Loader2, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from '@/lib/firebase';
-import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import { sendSignInLinkToEmail } from "firebase/auth";
 
 const emailFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -38,17 +38,18 @@ export default function LoginPage() {
     defaultValues: { email: "" },
   });
 
-  const actionCodeSettings = {
-    // URL you want to redirect back to. The domain (www.example.com) must be
-    // in the Firebase Console's Authorized Domains list.
-    url: `${window.location.origin}/auth/callback`,
-    // This must be true.
-    handleCodeInApp: true,
-  };
-
   async function onEmailSubmit(values: z.infer<typeof emailFormSchema>) {
     setIsLoading(true);
     setEmail(values.email);
+
+    const actionCodeSettings = {
+      // URL you want to redirect back to. The domain (www.example.com) must be
+      // in the Firebase Console's Authorized Domains list.
+      url: `${window.location.origin}/auth/callback`,
+      // This must be true.
+      handleCodeInApp: true,
+    };
+    
     try {
       await sendSignInLinkToEmail(auth, values.email, actionCodeSettings);
       // The link was successfully sent. Inform the user.
