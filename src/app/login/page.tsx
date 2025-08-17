@@ -19,9 +19,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn, Mail, KeyRound, Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { createUserWithEmailAndPassword, sendSignInLinkToEmail, signInWithEmailAndPassword, AuthError } from "firebase/auth";
 import { actionCodeSettings } from "@/lib/firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const passwordFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -86,7 +87,20 @@ export default function LoginPage() {
     
     try {
         if (isSignUp) {
-            await createUserWithEmailAndPassword(auth, values.email, values.password);
+            const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+            const user = userCredential.user;
+            
+            // Create a user document in Firestore
+            if (user && db) {
+              await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.email?.split('@')[0] || 'New User',
+                createdAt: serverTimestamp(),
+                photoURL: user.photoURL || null,
+              });
+            }
+
             toast({
                 title: "Account Created!",
                 description: "You have been successfully signed up and logged in.",
