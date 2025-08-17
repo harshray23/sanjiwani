@@ -18,8 +18,6 @@ ai.configure({
   plugins: [
     googleAI(),
   ],
-  logLevel: 'debug',
-  enableTracing: true,
 });
 
 // Define the input schema for the prescription verification flow.
@@ -84,7 +82,7 @@ const verifyPrescriptionFlow = ai.defineFlow(
   async (input) => {
     // Call the AI prompt with the input data.
     const llmResponse = await verifyPrescriptionPrompt(input);
-    const output = llmResponse.output();
+    const output = llmResponse.output;
 
     // Handle cases where the model might not return a valid output.
     if (!output) {
