@@ -8,7 +8,7 @@
  *   to send the OTP via email.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '../genkit';
 import { z } from 'zod';
 
 // Define the input schema for the send OTP flow.
