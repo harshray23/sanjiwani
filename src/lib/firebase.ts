@@ -2,7 +2,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
@@ -36,5 +36,10 @@ if (!getApps().length) {
 
 const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
+
+// Enable this for local development with Firebase Emulator Suite
+// if (auth && process.env.NODE_ENV === 'development') {
+//   connectAuthEmulator(auth, "http://localhost:9099");
+// }
 
 export { app, db, auth };
