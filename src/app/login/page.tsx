@@ -16,172 +16,97 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, Phone, KeyRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Loader2, LogIn, Mail, KeyRound } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from '@/lib/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, AuthError } from "firebase/auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const loginFormSchema = z.object({
-  phone: z.string().regex(/^\d{10}$/, { message: "Phone number must be 10 digits." }),
-  otp: z.string().min(6, { message: "OTP must be 6 digits." }).optional(),
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
-
-// This type is needed to augment the window object
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    confirmationResult?: ConfirmationResult;
-  }
-}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+
   const { toast } = useToast();
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      phone: "",
-      otp: "",
+      email: "",
+      password: "",
     },
   });
-  
-  // Set up reCAPTCHA on component mount
-  const setupRecaptcha = () => {
-    if (!auth) {
-        console.error("Firebase auth is not initialized.");
-        return;
-    }
-     // Ensure the container is empty before rendering
-    const recaptchaContainer = document.getElementById('recaptcha-container');
-    if (recaptchaContainer) {
-        recaptchaContainer.innerHTML = "";
-    }
-    
-    try {
-        // Set language for reCAPTCHA and SMS message
-        auth.useDeviceLanguage();
-        
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'normal',
-          'callback': (response: any) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
-            console.log("reCAPTCHA verified");
-            // This callback is for auto-verification, we can trigger OTP send here if we want
-          },
-          'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again.
-            console.log("reCAPTCHA expired, please try again.");
-            toast({
-                title: "reCAPTCHA Expired",
-                description: "Please try sending the OTP again.",
-                variant: "destructive"
-            })
-          }
-        });
-        // Render the reCAPTCHA
-        window.recaptchaVerifier.render();
 
-      } catch (error) {
-        console.error("reCAPTCHA rendering error:", error);
-         toast({
-            title: "reCAPTCHA Error",
-            description: "Could not initialize reCAPTCHA. Please refresh and try again.",
-            variant: "destructive"
-        });
-      }
+  const handleAuthError = (error: AuthError) => {
+    console.error("Firebase Auth Error:", error);
+    let title = "An error occurred";
+    let description = error.message;
+
+    switch (error.code) {
+        case 'auth/invalid-email':
+            title = 'Invalid Email';
+            description = 'Please enter a valid email address.';
+            break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+             title = 'Login Failed';
+             description = 'The email or password you entered is incorrect.';
+             break;
+        case 'auth/email-already-in-use':
+            title = 'Sign Up Failed';
+            description = 'An account with this email address already exists.';
+            break;
+        case 'auth/weak-password':
+            title = 'Weak Password';
+            description = 'The password must be at least 6 characters long.';
+            break;
+        default:
+            // Keep generic error for other cases
+            break;
+    }
+
+    toast({ title, description, variant: "destructive" });
   }
 
-  useEffect(() => {
-    // This effect should only run once on the client
-    if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
-      setupRecaptcha();
-    }
-  }, []);
-
-
-  const handleSendOtp = async () => {
-    const phoneValid = await form.trigger("phone");
-    if (!phoneValid) return;
-
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const phoneNumber = "+91" + form.getValues("phone");
-    const appVerifier = window.recaptchaVerifier;
-
-    if (!appVerifier) {
-        setIsLoading(false);
-        toast({
-            title: "reCAPTCHA Error",
-            description: "reCAPTCHA is not ready. Please refresh the page.",
-            variant: "destructive"
-        });
-        return;
-    }
 
     if (!auth) {
-      setIsLoading(false);
-      toast({ title: "Authentication Error", description: "Firebase Auth is not configured.", variant: "destructive"});
-      return;
-    }
-
-    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-    .then((confirmationResult) => {
-      // SMS sent. Prompt user to type the code from the message, then sign the
-      // user in with confirmationResult.confirm(code).
-      window.confirmationResult = confirmationResult;
-      setIsLoading(false);
-      setIsOtpSent(true);
-      toast({
-        title: "OTP Sent!",
-        description: `An OTP has been sent to ${phoneNumber}.`,
-      });
-    }).catch((error) => {
-      // Error; SMS not sent
-      setIsLoading(false);
-       console.error("Error sending OTP: ", error);
-       // Reset reCAPTCHA if it fails
-       window.recaptchaVerifier?.clear();
-       setupRecaptcha(); // Re-initialize
-       toast({
-        title: "Error Sending OTP",
-        description: error.message || "Could not send OTP. Please try again.",
-        variant: "destructive",
-      });
-    });
-  };
-
-  async function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    if (!values.otp) {
-        form.setError("otp", { type: "manual", message: "Please enter the OTP."});
+        setIsLoading(false);
+        toast({ title: "Authentication Error", description: "Firebase is not configured. Please contact support.", variant: "destructive"});
         return;
     }
-    setIsLoading(true);
     
     try {
-      const result = await window.confirmationResult?.confirm(values.otp);
-      if (result?.user) {
-        setIsLoading(false);
-        toast({
-          title: "Login Successful!",
-          description: "Welcome back!",
-          variant: "default",
-        });
+        if (isSignUp) {
+            // Handle Sign Up
+            await createUserWithEmailAndPassword(auth, values.email, values.password);
+            toast({
+                title: "Account Created!",
+                description: "You have been successfully signed up and logged in.",
+                variant: "default",
+            });
+        } else {
+            // Handle Login
+            await signInWithEmailAndPassword(auth, values.email, values.password);
+            toast({
+                title: "Login Successful!",
+                description: "Welcome back!",
+                variant: "default",
+            });
+        }
         router.push('/');
-      } else {
-        throw new Error("User data not found after confirmation.");
-      }
-    } catch (error: any) {
-      setIsLoading(false);
-      console.error("Error verifying OTP: ", error);
-      toast({
-        title: "Invalid OTP",
-        description: "The OTP you entered is incorrect. Please try again.",
-        variant: "destructive",
-      });
-       form.setError("otp", { type: "manual", message: "Invalid OTP." });
+    } catch (error) {
+       handleAuthError(error as AuthError);
+    } finally {
+        setIsLoading(false);
     }
   }
 
@@ -192,81 +117,59 @@ export default function LoginPage() {
           <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
             <LogIn className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-headline">Login</CardTitle>
-          <CardDescription>Enter your phone number to receive a login OTP.</CardDescription>
+          <CardTitle className="text-3xl font-headline">{isSignUp ? 'Create an Account' : 'Welcome Back!'}</CardTitle>
+          <CardDescription>{isSignUp ? 'Enter your details to create a new account.' : 'Log in to manage your appointments.'}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="phone"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                        <div className="flex items-center">
-                           <span className="inline-flex items-center px-3 h-10 rounded-l-md border border-r-0 border-input bg-background text-sm text-muted-foreground">
-                            +91
-                           </span>
-                           <Input 
-                             type="tel" 
-                             placeholder="9876543210" 
-                             {...field} 
-                             className="rounded-l-none"
-                             disabled={isOtpSent}
-                           />
-                        </div>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input type="email" placeholder="your@email.com" {...field} className="pl-10" />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <div id="recaptcha-container" className="flex justify-center"></div>
-
-              {isOtpSent && (
-                <FormField
-                  control={form.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>One-Time Password (OTP)</FormLabel>
-                      <FormControl>
-                        <Input type="text" placeholder="Enter 6-digit OTP" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            
-              {!isOtpSent ? (
-                 <Button type="button" onClick={handleSendOtp} className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Phone className="mr-2 h-4 w-4" />
-                    )}
-                    Send OTP
-                </Button>
-              ) : (
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <KeyRound className="mr-2 h-4 w-4" />
-                    )}
-                    Login with OTP
-                </Button>
-              )}
-               {isOtpSent && (
-                  <Button variant="link" size="sm" className="w-full" onClick={() => {setIsOtpSent(false); form.reset(); window.recaptchaVerifier?.clear(); setupRecaptcha();}}>
-                    Use a different number?
-                  </Button>
-               )}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                       <div className="relative">
+                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input type="password" placeholder="••••••••" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  isSignUp ? 'Sign Up' : 'Login'
+                )}
+              </Button>
             </form>
           </Form>
+           <div className="mt-6 text-center text-sm">
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}{' '}
+                <Button variant="link" className="p-0 h-auto" onClick={() => {setIsSignUp(!isSignUp); form.reset();}}>
+                    {isSignUp ? "Log in here" : "Sign up here"}
+                </Button>
+            </div>
         </CardContent>
       </Card>
     </div>

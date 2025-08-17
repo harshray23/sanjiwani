@@ -50,13 +50,18 @@ export function UserNav() {
     );
   }
 
+  const getInitials = (email: string) => {
+    const parts = email.split('@');
+    return parts[0][0].toUpperCase();
+  }
+
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
-            <AvatarFallback>{user.phoneNumber ? user.phoneNumber.slice(-2) : 'U'}</AvatarFallback>
+            <AvatarFallback>{user.email ? getInitials(user.email) : 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -65,7 +70,7 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Logged In</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.phoneNumber}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
