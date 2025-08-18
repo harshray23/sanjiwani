@@ -47,7 +47,7 @@ export default function LoginPage() {
       console.error("Firebase Project ID is not defined in environment variables.");
       toast({
         title: "Configuration Error",
-        description: "The Firebase Project ID is missing. Cannot send sign-in link.",
+        description: "The application is not configured correctly to send emails.",
         variant: "destructive"
       });
       setIsLoading(false);

@@ -1,7 +1,6 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 
 // Your web app's Firebase configuration using environment variables
@@ -14,22 +13,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Diagnostic log: Check if the API key is being loaded.
-if (typeof window !== 'undefined') {
-  console.log("Firebase.ts (Client-side): NEXT_PUBLIC_FIREBASE_API_KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "Loaded" : "MISSING or UNDEFINED");
-} else {
-  console.log("Firebase.ts (Server-side/Build): NEXT_PUBLIC_FIREBASE_API_KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "Loaded" : "MISSING or UNDEFINED");
-}
-
-
 // Initialize Firebase
 let app;
+// Check if Firebase has already been initialized
 if (!getApps().length) {
-  if (!firebaseConfig.apiKey) {
-      console.error("Firebase config is missing API Key. Firebase will not be initialized.");
-      app = null;
+  // Check if all necessary Firebase config values are present
+  if (Object.values(firebaseConfig).every(value => !!value)) {
+    app = initializeApp(firebaseConfig);
   } else {
-     app = initializeApp(firebaseConfig);
+    console.error("Firebase config is missing. App could not be initialized.");
+    app = null;
   }
 } else {
   app = getApp();
@@ -38,9 +31,9 @@ if (!getApps().length) {
 const db = app ? getFirestore(app) : null;
 const auth = app ? getAuth(app) : null;
 
-// Enable this for local development with Firebase Emulator Suite
+// Connect to emulators in development.
+// Note: You must start the emulators locally for this to work.
 if (auth && process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
-  // Check if not already connected
   try {
     // connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
     // console.log("Firebase Auth emulator connected.");
@@ -48,6 +41,5 @@ if (auth && process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
     // console.error("Error connecting to Firebase Auth emulator:", e);
   }
 }
-
 
 export { app, db, auth };
