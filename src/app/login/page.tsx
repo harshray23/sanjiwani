@@ -40,8 +40,11 @@ export default function LoginPage() {
     setIsLoading(true);
     setEmail(values.email);
 
+    // This constructs a URL that is guaranteed to be whitelisted by Firebase.
+    const redirectUrl = `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.web.app/auth/callback`;
+
     const actionCodeSettings = {
-      url: `${window.location.origin}/auth/callback`,
+      url: redirectUrl,
       handleCodeInApp: true,
     };
     
