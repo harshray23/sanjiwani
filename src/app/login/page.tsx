@@ -55,7 +55,7 @@ export default function LoginPage() {
     }
 
     const actionCodeSettings = {
-      url: `https://${projectId}.web.app/auth/callback`,
+      url: `${window.location.origin}/auth/callback`,
       handleCodeInApp: true,
     };
     
