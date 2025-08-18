@@ -40,7 +40,6 @@ export default function LoginPage() {
     setIsLoading(true);
     setEmail(values.email);
 
-    // This must be done on the client-side, which is guaranteed inside this event handler.
     const actionCodeSettings = {
       url: `${window.location.origin}/auth/callback`,
       handleCodeInApp: true,
