@@ -58,3 +58,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+    .btn-gradient {
+        @apply bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600;
+    }
+}
