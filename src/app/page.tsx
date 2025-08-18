@@ -144,7 +144,7 @@ export default function HomePage() {
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Have questions, feedback, or need assistance? Our team is ready to help. Reach out to us today!
           </p>
-          <Button asChild size="lg" variant="outline" className="bg-card">
+          <Button asChild size="lg" className="shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             <Link href="/contact">Contact Us</Link>
           </Button>
         </div>
