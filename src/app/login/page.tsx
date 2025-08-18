@@ -18,7 +18,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { auth } from '@/lib/firebase';
 import { sendSignInLinkToEmail } from "firebase/auth";
 
@@ -31,7 +30,6 @@ export default function LoginPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [email, setEmail] = useState("");
   const { toast } = useToast();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
@@ -42,18 +40,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setEmail(values.email);
 
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    if (!projectId) {
-      console.error("Firebase Project ID is not defined in environment variables.");
-      toast({
-        title: "Configuration Error",
-        description: "The application is not configured correctly to send emails.",
-        variant: "destructive"
-      });
-      setIsLoading(false);
-      return;
-    }
-
+    // This must be done on the client-side, which is guaranteed inside this event handler.
     const actionCodeSettings = {
       url: `${window.location.origin}/auth/callback`,
       handleCodeInApp: true,
@@ -73,6 +60,12 @@ export default function LoginPage() {
          toast({
             title: "Daily Limit Exceeded",
             description: "We've sent too many emails today. Please try again tomorrow.",
+            variant: "destructive",
+         });
+      } else if (error.code === 'auth/unauthorized-continue-uri') {
+           toast({
+            title: "Configuration Error",
+            description: "The domain of this app is not authorized. Please add it to the Firebase console under Authentication > Settings > Authorized domains.",
             variant: "destructive",
          });
       } else {
