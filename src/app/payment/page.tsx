@@ -19,13 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload } from "lucide-react";
+import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
 import Image from 'next/image';
 import { getDoctorById } from '@/lib/mock-data';
 import type { Doctor } from '@/lib/types';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { createAppointment } from '@/lib/mock-data';
+import { createAppointment, createVideoConsultationAppointment } from '@/lib/mock-data';
+import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -53,7 +54,7 @@ function PaymentForm() {
   
   const doctorId = searchParams.get('doctorId');
   const selectedSlot = searchParams.get('slot');
-  const consultationType = searchParams.get('type') || 'clinic'; // Default to clinic
+  const consultationType = searchParams.get('type') || 'clinic';
   
   const platformFee = 50;
   const totalFee = (doctor?.consultationFee ?? 0) + platformFee;
@@ -71,8 +72,8 @@ function PaymentForm() {
 
   useEffect(() => {
     const fetchDoctor = async () => {
-      if (!doctorId || !selectedSlot) {
-        toast({ title: "Missing Information", description: "Doctor ID or slot not provided.", variant: "destructive" });
+      if (!doctorId) {
+        toast({ title: "Missing Information", description: "Doctor ID not provided.", variant: "destructive" });
         router.push('/');
         return;
       }
@@ -80,7 +81,9 @@ function PaymentForm() {
       const doctorData = await getDoctorById(doctorId);
       if (doctorData) {
         setDoctor(doctorData);
-        setSlot(selectedSlot);
+        if (selectedSlot) {
+            setSlot(selectedSlot);
+        }
       } else {
         toast({ title: "Doctor Not Found", description: "The selected doctor could not be found.", variant: "destructive" });
         router.push('/search');
@@ -101,17 +104,30 @@ function PaymentForm() {
   });
 
   const handlePayment = async () => {
-    if (!user || !doctorId || !slot) return;
+    if (!user || !doctorId || !doctor) return;
+
+    if (consultationType === 'clinic' && !slot) {
+        toast({ title: "Booking Failed", description: "Time slot not selected for clinic visit.", variant: "destructive" });
+        return;
+    }
 
     setIsLoading(true);
     
-    // In a real app, this would talk to a payment gateway.
-    // Here we simulate the process and then create the appointment.
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment gateway
       
-      // On successful payment, create the appointment
-      const appointment = await createAppointment(user.uid, user.displayName || "Anonymous User", doctorId, slot);
+      let appointment;
+
+      if (consultationType === 'video') {
+        const videoConsultDetails = await createVideoConsultation({
+            patientName: user.displayName || 'Anonymous User',
+            doctorName: doctor.name,
+            doctorSpecialty: doctor.specialty
+        });
+        appointment = await createVideoConsultationAppointment(user.uid, user.displayName || 'Anonymous User', doctorId, videoConsultDetails);
+      } else {
+        appointment = await createAppointment(user.uid, user.displayName || "Anonymous User", doctorId, slot!);
+      }
       
       toast({
         title: "Payment Successful!",
@@ -119,7 +135,6 @@ function PaymentForm() {
         variant: "default",
       });
       
-      // Redirect to the confirmation page
       router.push(`/appointments/confirmed?id=${appointment.id}`);
 
     } catch (error) {
@@ -161,9 +176,16 @@ function PaymentForm() {
                   <span className="text-muted-foreground">Doctor:</span>
                   <span className="font-medium">{doctor?.name}</span>
                 </div>
+                 <div className="flex justify-between">
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className="font-medium capitalize flex items-center gap-2">
+                    {consultationType === 'video' && <Video className="h-4 w-4"/>}
+                    {consultationType} Consultation
+                  </span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Time Slot:</span>
-                  <span className="font-medium">{slot || 'Not Selected'}</span>
+                  <span className="font-medium">{slot || (consultationType === 'video' ? 'Flexible' : 'Not Selected')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Consultation Fee:</span>
@@ -308,5 +330,3 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
-
-    

@@ -4,22 +4,24 @@
 import { useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForUser, updateAppointmentStatus } from '@/lib/mock-data';
-import type { Appointment } from '@/lib/types';
+import { getAppointmentsForUser, updateAppointmentStatus, updateAppointmentWithVideoConsult } from '@/lib/mock-data';
+import type { Appointment, VideoConsultationDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle, BellRing, Pill } from "lucide-react";
+import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle, BellRing, Pill, Video, Copy } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { verifyPrescription, VerifyPrescriptionOutput } from '@/ai/flows/verify-prescription-flow';
+import { setMedicineReminder } from '@/ai/flows/set-reminder-flow';
 import { Input } from '@/components/ui/input';
 
-const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void }) => {
+const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void, onVideoConsultUpdate: (id:string, details: VideoConsultationDetails) => void }) => {
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<VerifyPrescriptionOutput | null>(null);
+  const [isSettingReminder, setIsSettingReminder] = useState(false);
+  const [reminderText, setReminderText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -33,9 +35,7 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
     }
 
     setIsVerifying(true);
-    setVerificationResult(null);
 
-    // Convert image to data URI
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
@@ -45,12 +45,11 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
                 photoDataUri, 
                 doctorName: appointment.doctor.name 
             });
-            setVerificationResult(result);
             if (result.isValid) {
                 onStatusChange(appointment.id, 'Completed');
-                toast({ title: "Prescription Verified!", description: "Cashback of will be processed within 24 hours.", variant: "default" });
+                toast({ title: "Prescription Verified!", description: "Cashback will be processed within 24 hours.", variant: "default" });
             } else {
-                 toast({ title: "Verification Failed", description: "Could not verify the doctor's name on the prescription. Please try again.", variant: "destructive" });
+                 toast({ title: "Verification Failed", description: result.reason, variant: "destructive" });
             }
         } catch (error) {
             console.error("Verification error:", error);
@@ -66,6 +65,29 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
     };
   };
   
+  const handleSetReminder = async () => {
+      if (!reminderText) {
+          toast({ title: "Input required", description: "Please enter a medicine name.", variant: "destructive"});
+          return;
+      }
+      setIsSettingReminder(true);
+      try {
+          const result = await setMedicineReminder({ reminderText });
+          toast({ title: "Reminder Set!", description: result.confirmationMessage });
+          setReminderText('');
+      } catch (error) {
+          console.error("Reminder error:", error);
+          toast({ title: "An Error Occurred", description: "Could not set the reminder. Please try again later.", variant: "destructive" });
+      } finally {
+        setIsSettingReminder(false);
+      }
+  }
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: "Meeting link copied to clipboard." });
+  }
+
   const appointmentDate = new Date(appointment.date);
   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
 
@@ -80,15 +102,44 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
                  <div>
                     <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Pill className="h-4 w-4"/>Medicine Reminders</h4>
                     <div className="flex gap-2">
-                        <Input placeholder="e.g., Paracetamol" className="bg-white dark:bg-card"/>
-                        <Button variant="secondary">Set Reminder</Button>
+                        <Input 
+                            placeholder="e.g., Paracetamol" 
+                            className="bg-white dark:bg-card"
+                            value={reminderText}
+                            onChange={(e) => setReminderText(e.target.value)}
+                            disabled={isSettingReminder}
+                        />
+                        <Button variant="secondary" onClick={handleSetReminder} disabled={isSettingReminder}>
+                            {isSettingReminder ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Set'}
+                        </Button>
                     </div>
                 </div>
             </div>
         )
     }
 
-    if (appointment.status === 'Confirmed') {
+    if (appointment.appointmentType === 'video' && appointment.videoConsultDetails) {
+        const { meetingLink, preliminaryAdvice } = appointment.videoConsultDetails;
+        return (
+             <div className="space-y-3">
+                <div className="space-y-1">
+                    <h4 className="font-semibold text-sm">Video Consultation Link</h4>
+                    <div className="flex gap-2">
+                        <Input value={meetingLink} readOnly className="bg-white dark:bg-card text-xs"/>
+                        <Button variant="secondary" size="icon" onClick={() => handleCopyToClipboard(meetingLink)}>
+                            <Copy className="h-4 w-4"/>
+                        </Button>
+                    </div>
+                </div>
+                <div className="text-xs text-muted-foreground p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+                    <p className="font-semibold mb-1 text-blue-700 dark:text-blue-300">Doctor's Advice:</p>
+                    <p>{preliminaryAdvice}</p>
+                </div>
+             </div>
+        )
+    }
+
+    if (appointment.status === 'Confirmed' && appointment.appointmentType === 'clinic') {
         return (
             <div className="space-y-3">
                  <div className="flex items-center gap-2 text-primary dark:text-primary-foreground p-2 rounded-md bg-primary/10">
@@ -126,12 +177,20 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
                  <CardTitle className="text-xl font-headline">Dr. {appointment.doctor.name}</CardTitle>
                  <CardDescription>{appointment.doctor.specialty}</CardDescription>
             </div>
-            <Badge 
-                variant={appointment.status === 'Completed' ? 'default' : (appointment.status === 'Confirmed' ? 'secondary' : 'destructive')}
-                className={appointment.status === 'Completed' ? 'bg-green-600 text-white' : ''}
-            >
-                {appointment.status}
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+                 <Badge 
+                    variant={appointment.status === 'Completed' ? 'default' : (appointment.status === 'Confirmed' ? 'secondary' : 'destructive')}
+                    className={appointment.status === 'Completed' ? 'bg-green-600 text-white' : ''}
+                >
+                    {appointment.status}
+                </Badge>
+                {appointment.appointmentType === 'video' && (
+                    <Badge variant="outline" className="border-primary/50 text-primary">
+                        <Video className="h-3 w-3 mr-1.5"/>
+                        Video Consult
+                    </Badge>
+                )}
+            </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
@@ -155,7 +214,7 @@ const AppointmentCard = ({ appointment, onStatusChange }: { appointment: Appoint
             <span className="font-medium">{appointment.time}</span>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col items-stretch bg-muted/30 p-4">
+      <CardFooter className="flex flex-col items-stretch bg-muted/30 p-4 min-h-[6rem]">
         {renderActionSection()}
       </CardFooter>
     </Card>
@@ -171,19 +230,21 @@ export default function AppointmentsPage() {
     setAppointments(prev => prev.map(app => app.id === id ? {...app, status} : app));
     updateAppointmentStatus(id, status); // Update in mock data
   }
+  
+  const handleVideoConsultUpdate = (id: string, details: VideoConsultationDetails) => {
+      setAppointments(prev => prev.map(app => app.id === id ? {...app, videoConsultDetails: details} : app));
+      updateAppointmentWithVideoConsult(id, details);
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // User is logged in, fetch their appointments
         const userAppointments = await getAppointmentsForUser(currentUser.uid);
         setAppointments(userAppointments);
       }
       setIsLoading(false);
     });
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -227,27 +288,39 @@ export default function AppointmentsPage() {
         );
     }
 
+    const upcomingAppointments = appointments.filter(a => a.status === 'Confirmed');
+    const pastAppointments = appointments.filter(a => a.status !== 'Confirmed');
+
     return (
-      <div className="space-y-6">
-        {appointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} />)}
+      <div className="space-y-8">
+        {upcomingAppointments.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold font-headline">Upcoming</h3>
+            {upcomingAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate}/>)}
+          </div>
+        )}
+        {pastAppointments.length > 0 && (
+            <div className="space-y-4">
+                 <h3 className="text-xl font-bold font-headline">Past</h3>
+                {pastAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} />)}
+            </div>
+        )}
       </div>
     );
   };
 
   return (
     <div className="py-12 w-full">
-      <Card className="w-full max-w-2xl mx-auto shadow-xl">
-        <CardHeader className="text-center">
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="text-center mb-8">
            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
             <Calendar className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-headline">My Appointments</CardTitle>
-          <CardDescription>View your appointments and manage cashback here.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {renderContent()}
-        </CardContent>
-      </Card>
+          <h1 className="text-3xl font-bold font-headline">My Appointments</h1>
+          <p className="text-muted-foreground">View your upcoming and past appointments.</p>
+        </div>
+        {renderContent()}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 
-import type { Doctor, Clinic, Hospital, Appointment } from './types';
+import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails } from './types';
 import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
@@ -271,6 +271,7 @@ export const createAppointment = async (
       time: slot,
       date: new Date().toISOString().split('T')[0], // Today's date
       status: 'Confirmed',
+      appointmentType: 'clinic',
       token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
       feeDetails: {
         consultationFee: doctor.consultationFee,
@@ -278,15 +279,42 @@ export const createAppointment = async (
         total: doctor.consultationFee + platformFee
       }
     };
+    appointments.push(newAppointment);
+    setTimeout(() => resolve(newAppointment), 500);
+  });
+};
 
-    // Simulate notifying doctor/clinic and saving to a database
-    console.log("--- NEW APPOINTMENT BOOKED ---");
-    console.log("PATIENT:", newAppointment.patientName);
-    console.log("DOCTOR:", newAppointment.doctor.name);
-    console.log("CLINIC:", newAppointment.clinic.name);
-    console.log("TOKEN:", newAppointment.token);
-    console.log("----------------------------");
+export const createVideoConsultationAppointment = async (
+  patientId: string, 
+  patientName: string, 
+  doctorId: string,
+  videoConsultDetails: VideoConsultationDetails
+): Promise<Appointment> => {
+  return new Promise(async (resolve, reject) => {
+    const doctor = await getDoctorById(doctorId);
+    if (!doctor) return reject("Doctor not found");
+    const clinic = await getClinicById(doctor.clinicId);
+    if (!clinic) return reject("Clinic not found");
 
+    const platformFee = 50;
+    const newAppointment: Appointment = {
+      id: `apt-${Date.now()}`,
+      patientId,
+      patientName,
+      doctor,
+      clinic,
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      date: new Date().toISOString().split('T')[0],
+      status: 'Confirmed',
+      appointmentType: 'video',
+      token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      feeDetails: {
+        consultationFee: doctor.consultationFee,
+        platformFee,
+        total: doctor.consultationFee + platformFee
+      },
+      videoConsultDetails: videoConsultDetails
+    };
     appointments.push(newAppointment);
     setTimeout(() => resolve(newAppointment), 500);
   });
@@ -295,8 +323,11 @@ export const createAppointment = async (
 export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
   return new Promise(resolve => {
     const userAppointments = appointments.filter(a => a.patientId === patientId);
-    // Sort by date descending
-    userAppointments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    userAppointments.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time.split(' ')[0]}:00`).getTime();
+        const dateB = new Date(`${b.date}T${b.time.split(' ')[0]}:00`).getTime();
+        return dateB - dateA;
+    });
     setTimeout(() => resolve(userAppointments), 500);
   });
 };
@@ -313,7 +344,15 @@ export const updateAppointmentStatus = (id: string, status: Appointment['status'
     const index = appointments.findIndex(a => a.id === id);
     if (index !== -1) {
         appointments[index].status = status;
+        if (status === 'Completed' && appointments[index].appointmentType === 'video') {
+            // For video consults, we can auto-complete them.
+        }
     }
 };
 
-    
+export const updateAppointmentWithVideoConsult = (id: string, details: VideoConsultationDetails) => {
+    const index = appointments.findIndex(a => a.id === id);
+    if (index !== -1) {
+        appointments[index].videoConsultDetails = details;
+    }
+};

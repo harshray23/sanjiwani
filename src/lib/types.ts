@@ -31,21 +31,28 @@ export interface Clinic {
   }
 }
 
+export interface VideoConsultationDetails {
+    meetingLink: string;
+    preliminaryAdvice: string;
+}
+
 export interface Appointment {
   id: string;
   patientId: string; // Corresponds to user's UID
-  patientName: string; // In a real app, this would come from a user profile
+  patientName: string; 
   doctor: Doctor;
   clinic: Clinic;
   time: string;
   date: string; // e.g., "2024-07-30"
   status: 'Confirmed' | 'Completed' | 'Cancelled';
+  appointmentType: 'clinic' | 'video';
   token: string;
   feeDetails: {
     consultationFee: number;
     platformFee: number;
     total: number;
   };
+  videoConsultDetails?: VideoConsultationDetails;
 }
 
 

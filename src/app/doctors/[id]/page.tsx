@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { getDoctorById, getClinicById } from '@/lib/mock-data';
 import type { Doctor, Clinic } from '@/lib/types';
 import Image from 'next/image';
-import { Loader2, Star, Briefcase, GraduationCap, Calendar, Clock, Sparkles, IndianRupee, Medal } from 'lucide-react';
+import { Loader2, Star, Briefcase, GraduationCap, Calendar, Clock, Sparkles, IndianRupee, Medal, Video } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,8 +52,8 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
     fetchDoctorInfo();
   }, [id]);
 
-  const handleBookAppointment = () => {
-    if (!selectedSlot) {
+  const handleBookAppointment = (type: 'clinic' | 'video') => {
+    if (!selectedSlot && type === 'clinic') {
         toast({
             title: "Select a time slot",
             description: "Please choose an available time slot to proceed.",
@@ -63,10 +63,15 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
     }
 
     if (user) {
-        // User is logged in, proceed to payment
-        router.push(`/payment?doctorId=${doctor?.id}&slot=${selectedSlot}`);
+        const queryParams = new URLSearchParams({
+            doctorId: doctor!.id,
+            type: type
+        });
+        if (selectedSlot) {
+            queryParams.set('slot', selectedSlot);
+        }
+        router.push(`/payment?${queryParams.toString()}`);
     } else {
-        // User is not logged in, redirect to login
         toast({
             title: "Login Required",
             description: "Please log in to book an appointment.",
@@ -141,7 +146,7 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
         <div className="lg:col-span-1">
           <Card className="sticky top-24 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-xl text-center">Book Appointment</CardTitle>
+              <CardTitle className="text-xl text-center">Book an Appointment</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="text-center">
@@ -160,8 +165,8 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
                 </Card>
               
               <div className="space-y-2">
-                <h4 className="font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> Select Date & Time</h4>
-                <p className="text-sm text-muted-foreground text-center font-semibold">Today</p>
+                <h4 className="font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
+                <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
                 <div className="grid grid-cols-3 gap-2">
                     {doctor.availableSlots.map(slot => (
                         <Button 
@@ -175,6 +180,29 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
                     ))}
                 </div>
               </div>
+
+               <Button 
+                onClick={() => handleBookAppointment('clinic')}
+                className="w-full" 
+                disabled={!selectedSlot || isAuthLoading}
+              >
+                  Book In-Clinic Visit
+              </Button>
+              
+              <Separator className="my-4"/>
+
+               <div className="space-y-3 text-center">
+                 <h4 className="font-semibold flex items-center justify-center gap-2"><Video className="h-5 w-5 text-primary" /> Video Consultation</h4>
+                 <p className="text-sm text-muted-foreground">Consult from the comfort of your home.</p>
+                 <Button 
+                    onClick={() => handleBookAppointment('video')}
+                    className="w-full" 
+                    variant="outline"
+                    disabled={isAuthLoading}
+                >
+                    Request Video Consultation
+                </Button>
+               </div>
               
               <Separator />
               
@@ -193,14 +221,6 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
                 </div>
               </div>
 
-              <Button 
-                onClick={handleBookAppointment}
-                className="w-full h-12 text-lg" 
-                disabled={!selectedSlot || isAuthLoading}
-              >
-                  Pay ₹{totalFee.toFixed(0)} to book
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">You will receive a unique token after payment.</p>
             </CardContent>
           </Card>
         </div>
