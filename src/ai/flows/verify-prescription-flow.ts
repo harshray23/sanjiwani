@@ -13,13 +13,6 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
-// Configure the AI plugin
-ai.configure({
-  plugins: [
-    googleAI(),
-  ],
-});
-
 // Define the input schema for the prescription verification flow.
 const VerifyPrescriptionInputSchema = z.object({
   photoDataUri: z
