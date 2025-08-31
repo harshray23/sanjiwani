@@ -17,7 +17,9 @@ export default function ComingSoonPage() {
              <CardDescription>This feature is currently under development. Please check back later.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 flex flex-col items-center">
-            <Lottie animationData={comingSoonAnimation} loop={true} className="w-64 h-64" />
+            <div className="w-64 h-64">
+                <Lottie animationData={comingSoonAnimation} loop={true} />
+            </div>
             <Button asChild className="mt-8">
                 <Link href="/">
                     <ArrowLeft className="mr-2 h-4 w-4"/>
