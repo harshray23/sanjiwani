@@ -28,6 +28,7 @@ import { auth } from '@/lib/firebase';
 import { createAppointment, createVideoConsultationAppointment } from '@/lib/mock-data';
 import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
 import comingSoonAnimation from '@/assets/animations/coming_soon.json';
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -162,7 +163,7 @@ function PaymentForm() {
   }
 
   if (isAuthLoading || isDataLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+    return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
   return (
@@ -312,10 +313,8 @@ function PaymentForm() {
 
 export default function PaymentPage() {
     return (
-        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>}>
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>}>
             <PaymentForm />
         </Suspense>
     )
 }
-
-    

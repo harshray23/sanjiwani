@@ -16,7 +16,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import Lottie from "lottie-react";
-import comingSoonAnimation from '@/assets/animations/coming_soon.json';
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 export default function DoctorDetailPage() {
   const params = useParams();
@@ -89,7 +89,7 @@ export default function DoctorDetailPage() {
   }
 
   if (isLoading || isAuthLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+    return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
   if (!doctor) {

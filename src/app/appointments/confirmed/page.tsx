@@ -11,6 +11,8 @@ import { Loader2, CheckCircle, Ticket, User, Stethoscope, Building, Calendar, Cl
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
+import Lottie from "lottie-react";
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
@@ -37,8 +39,8 @@ function ConfirmationContent() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg text-muted-foreground">Finalizing your appointment...</p>
+        <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+        <p className="text-lg text-muted-foreground mt-4">Finalizing your appointment...</p>
       </div>
     );
   }
@@ -164,8 +166,8 @@ export default function ConfirmedAppointmentPage() {
       <Card className="w-full max-w-2xl mx-auto shadow-xl">
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-lg text-muted-foreground">Loading confirmation...</p>
+            <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+            <p className="text-lg text-muted-foreground mt-4">Loading confirmation...</p>
           </div>
         }>
           <ConfirmationContent />

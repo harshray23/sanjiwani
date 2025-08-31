@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import { verifyPrescription, VerifyPrescriptionOutput } from '@/ai/flows/verify-prescription-flow';
 import { setMedicineReminder } from '@/ai/flows/set-reminder-flow';
 import { Input } from '@/components/ui/input';
+import Lottie from 'lottie-react';
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void, onVideoConsultUpdate: (id:string, details: VideoConsultationDetails) => void }) => {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -251,9 +253,9 @@ export default function AppointmentsPage() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="ml-4 text-muted-foreground">Loading your appointments...</p>
+        <div className="flex flex-col items-center justify-center p-8">
+          <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+          <p className="mt-4 text-muted-foreground">Loading your appointments...</p>
         </div>
       );
     }

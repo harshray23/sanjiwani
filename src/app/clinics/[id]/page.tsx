@@ -9,6 +9,8 @@ import { DoctorCard } from '@/components/DoctorCard';
 import { Loader2, MapPin, Phone, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useParams } from 'next/navigation';
+import Lottie from "lottie-react";
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 export default function ClinicDetailPage() {
   const params = useParams();
@@ -30,7 +32,7 @@ export default function ClinicDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>;
+    return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
   if (!clinic) {

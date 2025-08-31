@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, SearchIcon, Siren } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Lottie from "lottie-react";
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 function HospitalSearch() {
   const searchParams = useSearchParams();
@@ -64,7 +66,7 @@ function HospitalSearch() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          <Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" />
         </div>
       ) : (
         <div>
@@ -87,7 +89,7 @@ function HospitalSearch() {
 
 export default function HospitalsPage() {
     return (
-        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>}>
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>}>
             <HospitalSearch />
         </Suspense>
     );

@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, SearchIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Lottie from "lottie-react";
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -56,7 +58,7 @@ function SearchResults() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+           <Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" />
         </div>
       ) : (
         <Tabs defaultValue="clinics">
@@ -90,7 +92,7 @@ function SearchResults() {
 
 export default function SearchPage() {
     return (
-        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>}>
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>}>
             <SearchResults />
         </Suspense>
     )
