@@ -15,8 +15,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import Lottie from "lottie-react";
-import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 
 export default function DoctorDetailPage() {
   const params = useParams();
@@ -27,7 +25,6 @@ export default function DoctorDetailPage() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [showComingSoon, setShowComingSoon] = useState(false);
   
   const router = useRouter();
   const { toast } = useToast();
@@ -67,7 +64,7 @@ export default function DoctorDetailPage() {
         });
         return;
       }
-      setShowComingSoon(true);
+      router.push('/coming-soon');
       return;
     }
 
@@ -154,94 +151,81 @@ export default function DoctorDetailPage() {
         {/* Booking Panel */}
         <div className="lg:col-span-1">
           <Card className="sticky top-24 shadow-xl">
-             {showComingSoon ? (
-                 <CardContent className="p-6 flex flex-col items-center text-center">
-                    <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
-                    <h3 className="font-semibold text-lg mt-2">Coming Soon!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      This feature is currently under development and will be available shortly.
-                    </p>
-                    <Button onClick={() => setShowComingSoon(false)} className="mt-4">Go Back</Button>
-                </CardContent>
-            ) : (
-                <>
-                    <CardHeader>
-                      <CardTitle className="text-xl text-center">Book an Appointment</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                       <div className="text-center">
-                          <p className="text-sm text-muted-foreground">Consultation Fee</p>
-                          <p className="text-3xl font-bold text-primary">₹{doctor.consultationFee}</p>
-                       </div>
+            <CardHeader>
+              <CardTitle className="text-xl text-center">Book an Appointment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">Consultation Fee</p>
+                  <p className="text-3xl font-bold text-primary">₹{doctor.consultationFee}</p>
+                </div>
 
-                        <Card className="bg-primary/5 border-primary/20 p-3">
-                          <CardHeader className="p-0 text-center mb-2">
-                              <CardTitle className="text-base text-primary flex items-center justify-center gap-2"><Sparkles className="w-4 h-4"/>Exclusive Benefits</CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-0 text-sm text-primary/90 space-y-1 text-center">
-                              <p className="flex items-center justify-center gap-1"><Medal className="w-4 h-4" /> Priority Token (No long waits)</p>
-                              <p>+ 10-15% discount on medicines</p>
-                          </CardContent>
-                        </Card>
-                      
-                      <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
-                        <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {doctor.availableSlots.map(slot => (
-                                <Button 
-                                    key={slot.time}
-                                    variant={slot.isAvailable ? (selectedSlot === slot.time ? 'default' : 'outline') : 'secondary'}
-                                    disabled={!slot.isAvailable}
-                                    onClick={() => slot.isAvailable && setSelectedSlot(slot.time)}
-                                >
-                                    {slot.time}
-                                </Button>
-                            ))}
-                        </div>
-                      </div>
-
-                       <Button 
-                        onClick={() => handleBookAppointment('clinic')}
-                        className="w-full" 
-                      >
-                          Book In-Clinic Visit
-                      </Button>
-                      
-                      <Separator className="my-4"/>
-
-                       <div className="space-y-3 text-center">
-                         <h4 className="font-semibold flex items-center justify-center gap-2"><Video className="h-5 w-5 text-primary" /> Video Consultation</h4>
-                         <p className="text-sm text-muted-foreground">Consult from the comfort of your home.</p>
-                         <Button 
-                            onClick={() => handleBookAppointment('video')}
-                            className="w-full" 
-                            variant="outline"
-                            disabled={isAuthLoading}
+                <Card className="bg-primary/5 border-primary/20 p-3">
+                  <CardHeader className="p-0 text-center mb-2">
+                      <CardTitle className="text-base text-primary flex items-center justify-center gap-2"><Sparkles className="w-4 h-4"/>Exclusive Benefits</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0 text-sm text-primary/90 space-y-1 text-center">
+                      <p className="flex items-center justify-center gap-1"><Medal className="w-4 h-4" /> Priority Token (No long waits)</p>
+                      <p>+ 10-15% discount on medicines</p>
+                  </CardContent>
+                </Card>
+              
+              <div className="space-y-2">
+                <h4 className="font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
+                <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
+                <div className="grid grid-cols-3 gap-2">
+                    {doctor.availableSlots.map(slot => (
+                        <Button 
+                            key={slot.time}
+                            variant={slot.isAvailable ? (selectedSlot === slot.time ? 'default' : 'outline') : 'secondary'}
+                            disabled={!slot.isAvailable}
+                            onClick={() => slot.isAvailable && setSelectedSlot(slot.time)}
                         >
-                            Request Video Consultation
+                            {slot.time}
                         </Button>
-                       </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Consultation Fee:</span>
-                          <span>₹{doctor.consultationFee.toFixed(2)}</span>
-                        </div>
-                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Platform Fee:</span>
-                          <span>₹{platformFee.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg">
-                          <span className="text-foreground">Total Payable:</span>
-                          <span className="text-primary">₹{totalFee.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                </>
-            )}
+                    ))}
+                </div>
+              </div>
+
+                <Button 
+                onClick={() => handleBookAppointment('clinic')}
+                className="w-full" 
+              >
+                  Book In-Clinic Visit
+              </Button>
+              
+              <Separator className="my-4"/>
+
+                <div className="space-y-3 text-center">
+                  <h4 className="font-semibold flex items-center justify-center gap-2"><Video className="h-5 w-5 text-primary" /> Video Consultation</h4>
+                  <p className="text-sm text-muted-foreground">Consult from the comfort of your home.</p>
+                  <Button 
+                    onClick={() => handleBookAppointment('video')}
+                    className="w-full" 
+                    variant="outline"
+                    disabled={isAuthLoading}
+                >
+                    Request Video Consultation
+                </Button>
+                </div>
+              
+              <Separator />
+              
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Consultation Fee:</span>
+                  <span>₹{doctor.consultationFee.toFixed(2)}</span>
+                </div>
+                  <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Platform Fee:</span>
+                  <span>₹{platformFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span className="text-foreground">Total Payable:</span>
+                  <span className="text-primary">₹{totalFee.toFixed(2)}</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
