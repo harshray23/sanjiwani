@@ -29,6 +29,7 @@ import { createAppointment, createVideoConsultationAppointment } from '@/lib/moc
 import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
 import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import Link from 'next/link';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -166,17 +167,19 @@ function PaymentForm() {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
-  if (consultationType === 'video') {
+  if (consultationType === 'clinic') {
     return (
        <div className="py-12 w-full">
         <Card className="w-full max-w-lg mx-auto shadow-xl">
             <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-headline">Feature Coming Soon!</CardTitle>
-                <CardDescription>Video consultation payments are currently under development. Please check back later.</CardDescription>
+                <CardDescription>In-clinic payment processing is currently under development. Please check back later.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 flex flex-col items-center">
                 <div className="w-64 h-64">
-                    <Lottie animationData={comingSoonAnimation} loop={true} />
+                    {comingSoonAnimation ? (
+                        <Lottie animationData={comingSoonAnimation} loop={true} />
+                    ) : <p>Loading animation...</p>}
                 </div>
                 <Button asChild className="mt-8" onClick={() => router.back()}>
                     <Link href="#">
@@ -255,7 +258,9 @@ function PaymentForm() {
                 {/* UPI Tab */}
                 <TabsContent value="upi" className="pt-4">
                   <div className="flex flex-col items-center text-center">
-                    <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    {comingSoonAnimation ? (
+                        <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    ): <p>Loading animation...</p>}
                     <h3 className="font-semibold text-lg mt-2">Coming Soon!</h3>
                     <p className="text-sm text-muted-foreground">
                       UPI and QR Code payments will be available shortly.
@@ -341,3 +346,5 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
+
+    
