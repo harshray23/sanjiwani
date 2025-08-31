@@ -20,13 +20,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
-import Image from 'next/image';
+import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/mock-data';
 import type { Doctor } from '@/lib/types';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { createAppointment, createVideoConsultationAppointment } from '@/lib/mock-data';
 import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
+import comingSoonAnimation from 'public/animations/coming_soon.json';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -148,6 +149,14 @@ function PaymentForm() {
     }
   };
 
+  const handleUpiPayment = () => {
+      toast({
+          title: "Feature Coming Soon",
+          description: "UPI/QR Code payments are not yet available. Please use a card.",
+          variant: "default",
+      });
+  }
+
   const getCashbackAmount = () => {
       return consultationType === 'video' ? 40 : 25;
   }
@@ -213,7 +222,7 @@ function PaymentForm() {
 
             {/* Payment Options */}
             <div>
-              <Tabs defaultValue="upi">
+              <Tabs defaultValue="card">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/> UPI / QR Code</TabsTrigger>
                   <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/> Credit/Debit Card</TabsTrigger>
@@ -221,35 +230,13 @@ function PaymentForm() {
                 
                 {/* UPI Tab */}
                 <TabsContent value="upi" className="pt-4">
-                  <div className="flex flex-col items-center">
-                    <p className="text-sm text-muted-foreground mb-4">Scan the QR code with any UPI app</p>
-                    <Image src="https://picsum.photos/seed/qr/200/200" alt="UPI QR Code" width={200} height={200} data-ai-hint="qr code" />
-                     <div className="w-full my-4 flex items-center text-xs text-muted-foreground">
-                        <div className="flex-grow border-t"></div>
-                        <span className="flex-shrink mx-4">OR</span>
-                        <div className="flex-grow border-t"></div>
-                      </div>
-                    <Form {...upiForm}>
-                      <form onSubmit={upiForm.handleSubmit(handlePayment)} className="w-full space-y-4">
-                        <FormField
-                          control={upiForm.control}
-                          name="upiId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Enter UPI ID</FormLabel>
-                              <FormControl>
-                                <Input placeholder="yourname@bank" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Pay with UPI
-                        </Button>
-                      </form>
-                    </Form>
+                  <div className="flex flex-col items-center text-center">
+                    <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    <h3 className="font-semibold text-lg mt-2">Coming Soon!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      UPI and QR Code payments will be available shortly.
+                      Please select another payment method.
+                    </p>
                   </div>
                 </TabsContent>
 
