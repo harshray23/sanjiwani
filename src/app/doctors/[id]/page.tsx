@@ -15,6 +15,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import Lottie from "lottie-react";
+import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 
 export default function DoctorDetailPage() {
   const params = useParams();
