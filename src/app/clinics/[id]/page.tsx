@@ -6,17 +6,20 @@ import { getClinicById } from '@/lib/mock-data';
 import type { Clinic } from '@/lib/types';
 import Image from 'next/image';
 import { DoctorCard } from '@/components/DoctorCard';
-import { Loader2, MapPin, Phone, Star } from 'lucide-react';
+import { Loader2, MapPin, Phone, Star, MapIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useParams } from 'next/navigation';
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ClinicDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!id) return;
@@ -30,6 +33,21 @@ export default function ClinicDetailPage() {
     };
     fetchClinic();
   }, [id]);
+
+  const handleViewOnMap = () => {
+    if (clinic?.contact.address) {
+      const query = encodeURIComponent(clinic.contact.address);
+      const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+      window.open(mapUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      toast({
+        title: "Location Unavailable",
+        description: `Map location for ${clinic?.name} is not available.`,
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
@@ -91,14 +109,16 @@ export default function ClinicDetailPage() {
         </div>
 
         <div className="lg:col-span-1">
-            {/* Placeholder for map or other info */}
             <div className="sticky top-24">
                 <div className="bg-card p-6 rounded-lg shadow-lg">
                     <h3 className="text-xl font-bold mb-4">Location</h3>
                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                        <p className="text-muted-foreground">Map Placeholder</p>
+                        <p className="text-muted-foreground">Map will be shown here.</p>
                     </div>
                     <p className="mt-4 text-sm text-muted-foreground">{clinic.contact.address}</p>
+                    <Button variant="outline" className="w-full mt-4" onClick={handleViewOnMap}>
+                        <MapIcon className="w-4 h-4 mr-2" /> View on Map
+                    </Button>
                 </div>
             </div>
         </div>
