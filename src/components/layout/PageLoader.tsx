@@ -11,26 +11,32 @@ export function PageLoader() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // This effect handles the display of the loader.
-    // It's designed to show the loader only for client-side navigations,
-    // not on the initial server-rendered page load.
-    
-    // We use a short timeout to prevent a brief flash of the loader on very fast navigations.
-    const timer = setTimeout(() => {
-      setIsLoading(true);
-    }, 100); // Small delay to avoid flicker
+    // Don't show loader on initial page load
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
 
-    return () => clearTimeout(timer);
+    setIsLoading(true);
+
+    const timer = setTimeout(() => {
+      // This is a failsafe to hide the loader if something goes wrong
+      setIsLoading(false);
+    }, 5000); // Hide after 5 seconds regardless
+
+    return () => {
+      clearTimeout(timer);
+      setIsLoading(false);
+    };
   }, [pathname, searchParams]);
-  
-   useEffect(() => {
-    // This effect is responsible for hiding the loader once navigation is complete.
-    // By setting isLoading to false without a delay, we ensure it disappears promptly.
+
+  useEffect(() => {
+    // This effect specifically handles hiding the loader.
     setIsLoading(false);
   }, [pathname, searchParams]);
-
 
   return (
     <div
