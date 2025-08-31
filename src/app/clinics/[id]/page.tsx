@@ -8,13 +8,16 @@ import Image from 'next/image';
 import { DoctorCard } from '@/components/DoctorCard';
 import { Loader2, MapPin, Phone, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useParams } from 'next/navigation';
 
-export default function ClinicDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function ClinicDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     const fetchClinic = async () => {
       setIsLoading(true);
       const data = await getClinicById(id);

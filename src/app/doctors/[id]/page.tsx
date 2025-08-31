@@ -11,13 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
-export default function DoctorDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function DoctorDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +38,7 @@ export default function DoctorDetailPage({ params }: { params: { id: string } })
   }, []);
 
   useEffect(() => {
+    if (!id) return;
     const fetchDoctorInfo = async () => {
       setIsLoading(true);
       const doctorData = await getDoctorById(id);
