@@ -144,3 +144,4 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     </Card>
   );
 }
+
