@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -27,7 +26,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { createAppointment, createVideoConsultationAppointment } from '@/lib/mock-data';
 import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
-import comingSoonAnimation from 'public/animations/coming_soon.json';
+import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
