@@ -223,7 +223,7 @@ function PaymentForm() {
                 <TabsContent value="upi" className="pt-4">
                   <div className="flex flex-col items-center">
                     <p className="text-sm text-muted-foreground mb-4">Scan the QR code with any UPI app</p>
-                    <Image src="https://placehold.co/200x200.png" alt="UPI QR Code" width={200} height={200} data-ai-hint="qr code" />
+                    <Image src="https://picsum.photos/seed/qr/200/200" alt="UPI QR Code" width={200} height={200} data-ai-hint="qr code" />
                      <div className="w-full my-4 flex items-center text-xs text-muted-foreground">
                         <div className="flex-grow border-t"></div>
                         <span className="flex-shrink mx-4">OR</span>

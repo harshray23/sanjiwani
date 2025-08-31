@@ -73,7 +73,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-card">
       <CardHeader className="p-0 relative">
         <Image
-          src={hospital.imageUrl || `https://placehold.co/600x400.png`}
+          src={hospital.imageUrl || `https://picsum.photos/600/400`}
           alt={hospital.name}
           width={600}
           height={400}

@@ -9,7 +9,7 @@ const doctors: Doctor[] = [
     specialty: 'Cardiology',
     qualifications: ['MD', 'FACC'],
     experience: 15,
-    imageUrl: 'https://placehold.co/150x150.png',
+    imageUrl: 'https://picsum.photos/seed/doc1/150/150',
     dataAiHint: 'female doctor',
     rating: 4.9,
     reviewCount: 234,
@@ -29,7 +29,7 @@ const doctors: Doctor[] = [
     specialty: 'General Medicine',
     qualifications: ['MBBS'],
     experience: 8,
-    imageUrl: 'https://placehold.co/150x150.png',
+    imageUrl: 'https://picsum.photos/seed/doc2/150/150',
     dataAiHint: 'male doctor',
     rating: 4.7,
     reviewCount: 150,
@@ -49,7 +49,7 @@ const doctors: Doctor[] = [
     specialty: 'Dentistry',
     qualifications: ['DDS', 'MSD'],
     experience: 12,
-    imageUrl: 'https://placehold.co/150x150.png',
+    imageUrl: 'https://picsum.photos/seed/doc3/150/150',
     dataAiHint: 'female dentist',
     rating: 4.8,
     reviewCount: 312,
@@ -69,7 +69,7 @@ const doctors: Doctor[] = [
     specialty: 'Pediatrics',
     qualifications: ['MD', 'FAAP'],
     experience: 18,
-    imageUrl: 'https://placehold.co/150x150.png',
+    imageUrl: 'https://picsum.photos/seed/doc4/150/150',
     dataAiHint: 'male pediatrician',
     rating: 4.9,
     reviewCount: 450,
@@ -90,7 +90,7 @@ const clinics: Clinic[] = [
     id: 'clinic-1',
     name: 'City Central Clinic',
     location: '123 Health St, Downtown, Metro City',
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/clinic1/600/400',
     dataAiHint: 'modern clinic',
     rating: 4.8,
     specialties: ['Cardiology', 'General Medicine', 'Neurology'],
@@ -105,7 +105,7 @@ const clinics: Clinic[] = [
     id: 'clinic-2',
     name: 'Sunrise Dental Care',
     location: '456 Smile Ave, Suburbia, Metro City',
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/clinic2/600/400',
     dataAiHint: 'dental office',
     rating: 4.9,
     specialties: ['Dentistry', 'Orthodontics', 'Cosmetic Dentistry'],
@@ -120,7 +120,7 @@ const clinics: Clinic[] = [
     id: 'clinic-3',
     name: 'Wellness Pediatrics',
     location: '789 Child Way, Lakeside, Metro City',
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/clinic3/600/400',
     dataAiHint: 'childrens hospital',
     rating: 4.9,
     specialties: ['Pediatrics', 'Child Psychology', 'Adolescent Medicine'],
@@ -152,7 +152,7 @@ const hospitals: Hospital[] = [
       oxygen: { total: 80, available: 15 },
     },
     lastUpdated: Timestamp.now(),
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/hosp1/600/400',
     dataAiHint: 'large hospital'
   },
   {
@@ -173,7 +173,7 @@ const hospitals: Hospital[] = [
       oxygen: { total: 30, available: 8 },
     },
     lastUpdated: Timestamp.fromMillis(Date.now() - 3600000), // 1 hour ago
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/hosp2/600/400',
     dataAiHint: 'community hospital'
   },
   {
@@ -194,7 +194,7 @@ const hospitals: Hospital[] = [
       oxygen: { total: 40, available: 12 },
     },
     lastUpdated: Timestamp.fromMillis(Date.now() - 86400000), // 1 day ago
-    imageUrl: 'https://placehold.co/600x400.png',
+    imageUrl: 'https://picsum.photos/seed/hosp3/600/400',
     dataAiHint: 'childrens hospital'
   }
 ];
