@@ -57,16 +57,17 @@ export default function DoctorDetailPage() {
   }, [id]);
 
   const handleBookAppointment = (type: 'clinic' | 'video') => {
-    if (type === 'clinic') {
-      if (!selectedSlot) {
-        toast({
-            title: "Select a time slot",
-            description: "Please choose an available time slot to proceed.",
-            variant: "destructive"
-        });
-        return;
-      }
+    if (type === 'video') {
       router.push('/coming-soon');
+      return;
+    }
+    
+    if (type === 'clinic' && !selectedSlot) {
+      toast({
+          title: "Select a time slot",
+          description: "Please choose an available time slot to proceed.",
+          variant: "destructive"
+      });
       return;
     }
 
@@ -191,7 +192,8 @@ export default function DoctorDetailPage() {
 
                 <Button 
                 onClick={() => handleBookAppointment('clinic')}
-                className="w-full" 
+                className="w-full"
+                disabled={isAuthLoading}
               >
                   Book In-Clinic Visit
               </Button>
@@ -205,7 +207,6 @@ export default function DoctorDetailPage() {
                     onClick={() => handleBookAppointment('video')}
                     className="w-full" 
                     variant="outline"
-                    disabled={isAuthLoading}
                 >
                     Request Video Consultation
                 </Button>

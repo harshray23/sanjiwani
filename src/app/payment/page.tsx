@@ -58,7 +58,7 @@ function PaymentForm() {
   const selectedSlot = searchParams.get('slot');
   const consultationType = searchParams.get('type') || 'clinic';
   
-  const platformFee = 50;
+  const platformFee = consultationType === 'video' ? 100 : 50;
   const totalFee = (doctor?.consultationFee ?? 0) + platformFee;
 
   useEffect(() => {
@@ -164,6 +164,29 @@ function PaymentForm() {
 
   if (isAuthLoading || isDataLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
+  }
+
+  if (consultationType === 'video') {
+    return (
+       <div className="py-12 w-full">
+        <Card className="w-full max-w-lg mx-auto shadow-xl">
+            <CardHeader className="text-center">
+                <CardTitle className="text-3xl font-headline">Feature Coming Soon!</CardTitle>
+                <CardDescription>Video consultation payments are currently under development. Please check back later.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 flex flex-col items-center">
+                <div className="w-64 h-64">
+                    <Lottie animationData={comingSoonAnimation} loop={true} />
+                </div>
+                <Button asChild className="mt-8" onClick={() => router.back()}>
+                    <Link href="#">
+                        Go Back
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
+        </div>
+    )
   }
 
   return (
