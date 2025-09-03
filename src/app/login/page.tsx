@@ -27,15 +27,20 @@ import {
   AuthErrorCodes
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
+  role: roleEnum,
 });
 
 const signUpSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  role: roleEnum,
 });
 
 export default function LoginPage() {
@@ -56,6 +61,7 @@ export default function LoginPage() {
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
     try {
+      console.log("Signing in with values:", values);
       await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Signed In Successfully",
@@ -80,6 +86,7 @@ export default function LoginPage() {
   async function onSignUp(values: z.infer<typeof signUpSchema>) {
     setIsLoading(true);
     try {
+      console.log("Signing up with values:", values);
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Account Created Successfully",
@@ -177,6 +184,30 @@ export default function LoginPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={signInForm.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="customer">Customer</SelectItem>
+                            <SelectItem value="doctor">Doctor</SelectItem>
+                            <SelectItem value="clinic">Clinic</SelectItem>
+                            <SelectItem value="hospital">Hospital</SelectItem>
+                            <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
@@ -212,6 +243,30 @@ export default function LoginPage() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={signUpForm.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="customer">Customer</SelectItem>
+                            <SelectItem value="doctor">Doctor</SelectItem>
+                            <SelectItem value="clinic">Clinic</SelectItem>
+                            <SelectItem value="hospital">Hospital</SelectItem>
+                            <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
