@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
@@ -70,8 +70,68 @@ export default function HomePage() {
           </div>
       </section>
       
-       {/* Problem vs Solution Section */}
-      <section id="problem-solution" className="py-16">
+       {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 text-center animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">How It Works</h2>
+          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">A seamless experience designed to get you the right care, right when you need it. In just three simple steps.</p>
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 items-start">
+             {/* Dashed lines for desktop */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-px -translate-y-1/2">
+                <svg width="100%" height="100%" className="overflow-visible">
+                    <line x1="0" y1="0" x2="100%" y2="0" strokeWidth="2" strokeDasharray="8 8" className="stroke-primary/50" />
+                </svg>
+            </div>
+            
+            <div className="relative flex flex-col items-center">
+              <div className="bg-primary/10 text-primary rounded-full p-5 mb-4 border-4 border-background shadow-lg z-10">
+                <Search className="h-10 w-10" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 font-headline">1. Find Your Care</h3>
+              <p className="text-muted-foreground">Search for hospitals, clinics, or doctors. Filter by specialty and real-time availability.</p>
+            </div>
+             <div className="relative flex flex-col items-center">
+              <div className="bg-primary/10 text-primary rounded-full p-5 mb-4 border-4 border-background shadow-lg z-10">
+                <CalendarCheck className="h-10 w-10" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 font-headline">2. Book Instantly</h3>
+              <p className="text-muted-foreground">Select a time slot or reserve a hospital bed with a secure, one-time online payment.</p>
+            </div>
+             <div className="relative flex flex-col items-center">
+              <div className="bg-primary/10 text-primary rounded-full p-5 mb-4 border-4 border-background shadow-lg z-10">
+                <HeartPulse className="h-10 w-10" />
+              </div>
+              <h3 className="text-xl font-bold mb-2 font-headline">3. Manage & Recover</h3>
+              <p className="text-muted-foreground">Access e-prescriptions, set medicine reminders, and get cashback on your visit.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Vision Section */}
+       <section id="mission-vision" className="py-16 bg-muted rounded-lg animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+               <div className="inline-block bg-accent/10 text-accent p-3 rounded-full mb-4">
+                  <Eye className="h-8 w-8" />
+                </div>
+              <h2 className="text-3xl font-bold font-headline text-accent mb-4">Our Vision</h2>
+              <p className="text-lg text-muted-foreground">To create a transparent and accessible healthcare ecosystem where every individual has the power to find and receive the best possible care, instantly and without hassle.</p>
+            </div>
+             <div className="text-center md:text-left">
+              <div className="inline-block bg-accent/10 text-accent p-3 rounded-full mb-4">
+                  <Rocket className="h-8 w-8" />
+                </div>
+              <h2 className="text-3xl font-bold font-headline text-accent mb-4">Our Mission</h2>
+              <p className="text-lg text-muted-foreground">To bridge the critical information gap in healthcare by providing a real-time, reliable platform that connects patients with hospitals and doctors, saving lives and reducing stress.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem vs Solution Section */}
+      <section id="problem-solution" className="py-16 animate-fade-in-up">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 p-6 md:p-8 text-center md:text-left">
@@ -104,103 +164,8 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 bg-muted rounded-lg">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-accent">
-              A Seamless Experience
-            </h2>
-             <p className="text-lg text-muted-foreground mt-2">From finding emergency care to managing your health journey.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <Hospital className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="font-headline text-xl">1. Find a Hospital or Doctor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Search for top hospitals and specialists. Check real-time bed availability in emergencies.</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <BedDouble className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="font-headline text-xl">2. Book Your Slot or Bed</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Book a consultation slot or reserve a hospital bed instantly with a secure online payment.</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                   <HeartPulse className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="font-headline text-xl">3. Manage Your Care</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Upload prescriptions for cashback, set medicine reminders, and manage all your records.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* New Features Section */}
-      <section id="features" className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-accent">
-              Comprehensive Healthcare, All in One Place
-            </h2>
-            <p className="text-lg text-muted-foreground mt-2">Access a full suite of healthcare services from anywhere, anytime.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
-                  <Video className="h-10 w-10 text-accent" />
-                </div>
-                <CardTitle className="font-headline text-xl">Video & In-Person Consults</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Connect with doctors via secure video calls or book in-person appointments at clinics and hospitals.</p>
-              </CardContent>
-            </Card>
-            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
-                  <ScrollText className="h-10 w-10 text-accent" />
-                </div>
-                <CardTitle className="font-headline text-xl">E-Prescriptions & Cashback</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Receive digital prescriptions and upload them after your visit to earn cashback and medicine discounts.</p>
-              </CardContent>
-            </Card>
-            <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
-                  <CalendarCheck className="h-10 w-10 text-accent" />
-                </div>
-                <CardTitle className="font-headline text-xl">Smart Health Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Get automated reminders for appointments and medications. Keep all your health records in one secure place.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Contact Us Section */}
-      <section id="contact-us" className="py-16 text-center bg-muted rounded-lg">
+      <section id="contact-us" className="py-16 text-center bg-muted rounded-lg animate-fade-in-up">
         <div className="container mx-auto px-4">
           <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
             <Phone className="h-10 w-10 text-primary" />
@@ -209,7 +174,7 @@ export default function HomePage() {
             Get In Touch
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Have questions, feedback, or need assistance? Our team is ready to help. Reach out to us today!
+            Have questions, feedback, or need assistance? Our team is ready to help. We are also looking for pilot hospitals and partners to join us in transforming healthcare.
           </p>
           <Button asChild size="lg" className="shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             <Link href="/contact">Contact Us</Link>
@@ -219,5 +184,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    

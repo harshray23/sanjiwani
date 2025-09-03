@@ -11,20 +11,25 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from './ui/progress';
 
 interface HospitalCardProps {
   hospital: Hospital;
 }
 
 function BedInfo({ label, available, total }: { label: string; available: number; total: number }) {
-  const availabilityColor = available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-  const Icon = available > 0 ? CheckCircle : AlertCircle;
+  const percentage = total > 0 ? (available / total) * 100 : 0;
+  const isAvailable = available > 0;
+  
   return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted-foreground">{label}:</span>
-      <span className={`font-semibold ${availabilityColor} flex items-center`}>
-        <Icon className="w-4 h-4 mr-1"/> {available}/{total}
-      </span>
+    <div className="text-sm">
+        <div className="flex items-center justify-between mb-1">
+            <span className="text-muted-foreground">{label}</span>
+            <span className={`font-semibold ${isAvailable ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {available} / {total}
+            </span>
+        </div>
+        <Progress value={percentage} className={`h-2 ${!isAvailable ? '[&>div]:bg-red-500' : '[&>div]:bg-green-500'}`} />
     </div>
   );
 }
@@ -114,7 +119,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         </div>
 
         {hospital.beds && (
-          <div className="space-y-1.5 border-t border-b py-3 my-3">
+          <div className="space-y-3 border-t border-b py-3 my-3">
             <h4 className="text-sm font-semibold mb-2 text-foreground">Bed Availability:</h4>
             <BedInfo label="ICU" available={hospital.beds.icu?.available || 0} total={hospital.beds.icu?.total || 0} />
             <BedInfo label="Oxygen" available={hospital.beds.oxygen?.available || 0} total={hospital.beds.oxygen?.total || 0} />
