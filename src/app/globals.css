@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 10%;
     
-    --primary: 221 83% 53%; /* hsl(221, 83%, 53%) -> #2563eb */
+    --primary: 25 95% 53%; /* hsl(25, 95%, 53%) -> #f97316 (Orange) */
     --primary-foreground: 210 40% 98%;
     
     --secondary: 210 40% 96.1%;
@@ -31,7 +31,7 @@
     
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
+    --ring: 25 95% 53%; /* Orange ring for focus */
     
     --radius: 0.75rem;
   }
@@ -46,8 +46,8 @@
     --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 25 95% 53%; /* Orange */
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -63,7 +63,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 91.2% 59.8%;
+    --ring: 25 95% 53%;
   }
 }
  
@@ -78,7 +78,7 @@
 
 @layer utilities {
     .btn-gradient {
-        @apply bg-gradient-to-r from-primary to-green-400 text-white;
+        @apply bg-gradient-to-r from-primary to-yellow-400 text-white;
     }
     .glow-on-hover {
         @apply transition-all duration-300;
