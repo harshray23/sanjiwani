@@ -125,7 +125,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         
          <p className="text-xs text-muted-foreground">Last Updated: {lastUpdatedText}</p>
       </CardContent>
-      <CardFooter className="p-4 bg-muted/50 dark:bg-muted/50 border-t flex flex-col items-stretch space-y-2">
+      <CardFooter className="p-4 bg-muted/30 dark:bg-muted/50 border-t flex flex-col items-stretch space-y-2">
         <Button 
           className="w-full" 
           asChild 

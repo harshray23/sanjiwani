@@ -10,10 +10,10 @@ import Logo from "@/components/layout/Logo";
 export default function HomePage() {
 
   const quickLinks = [
-    { href: '/hospitals', label: 'Hospitals', icon: <Hospital /> },
-    { href: '/search', label: 'Doctors', icon: <Stethoscope /> },
-    { href: '/appointments', label: 'Appointments', icon: <CalendarCheck /> },
-    { href: '/search?query=clinic', label: 'Clinics', icon: <Building /> },
+    { href: '/hospitals', label: 'Hospitals', icon: <Hospital className="h-6 w-6"/> },
+    { href: '/search', label: 'Doctors', icon: <Stethoscope className="h-6 w-6"/> },
+    { href: '/appointments', label: 'Appointments', icon: <CalendarCheck className="h-6 w-6"/> },
+    { href: '/search?query=clinic', label: 'Clinics', icon: <Building className="h-6 w-6"/> },
   ];
 
   return (
@@ -31,11 +31,11 @@ export default function HomePage() {
            </div>
            <div className="relative h-64 md:h-96">
                 <Image
-                    src="https://picsum.photos/seed/hero/600/400"
+                    src="https://picsum.photos/seed/healthcare-illustration/600/400"
                     alt="Healthcare professional assisting a patient"
                     fill
                     className="object-contain"
-                    data-ai-hint="doctor patient illustration"
+                    data-ai-hint="healthcare doctor patient illustration"
                 />
             </div>
         </div>
