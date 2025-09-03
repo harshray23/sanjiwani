@@ -17,7 +17,7 @@ interface HospitalCardProps {
 }
 
 function BedInfo({ label, available, total }: { label: string; available: number; total: number }) {
-  const availabilityColor = available > 0 ? 'text-green-600' : 'text-red-600';
+  const availabilityColor = available > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
   const Icon = available > 0 ? CheckCircle : AlertCircle;
   return (
     <div className="flex items-center justify-between text-sm">
@@ -81,7 +81,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
           data-ai-hint={hospital.dataAiHint || (hospital.name.toLowerCase().includes("children") ? "children hospital" : "hospital building")}
         />
         {hospital.rating !== undefined && (
-          <Badge variant="default" className="absolute top-2 right-2 bg-primary/80 backdrop-blur-sm">
+          <Badge variant="secondary" className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm">
             <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" /> {hospital.rating.toFixed(1)}
           </Badge>
         )}
@@ -125,7 +125,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         
          <p className="text-xs text-muted-foreground">Last Updated: {lastUpdatedText}</p>
       </CardContent>
-      <CardFooter className="p-4 bg-muted/30 dark:bg-muted/30 border-t flex flex-col items-stretch space-y-2">
+      <CardFooter className="p-4 bg-muted/50 dark:bg-muted/50 border-t flex flex-col items-stretch space-y-2">
         <Button 
           className="w-full" 
           asChild 

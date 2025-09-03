@@ -12,12 +12,13 @@ export default function HomePage() {
   return (
     <div className="w-full space-y-24">
       {/* Hero Section */}
-      <section className="text-center py-16 md:py-24">
-        <div className="container mx-auto px-4">
-           <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-primary">
+      <section className="text-center py-16 md:py-24 relative rounded-xl overflow-hidden">
+         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-green-500 opacity-80"></div>
+        <div className="container mx-auto px-4 relative z-10">
+           <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-white">
             Find Care, Instantly.
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto">
             Book doctor appointments, check hospital bed availability, and manage all your health records in one place.
           </p>
           <div className="max-w-2xl mx-auto bg-card p-4 rounded-lg shadow-lg">
@@ -97,8 +98,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <Video className="h-10 w-10 text-primary" />
+                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
+                  <Video className="h-10 w-10 text-accent" />
                 </div>
                 <CardTitle className="font-headline text-xl">Video & In-Person Consults</CardTitle>
               </CardHeader>
@@ -108,8 +109,8 @@ export default function HomePage() {
             </Card>
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <ScrollText className="h-10 w-10 text-primary" />
+                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
+                  <ScrollText className="h-10 w-10 text-accent" />
                 </div>
                 <CardTitle className="font-headline text-xl">E-Prescriptions & Cashback</CardTitle>
               </CardHeader>
@@ -119,8 +120,8 @@ export default function HomePage() {
             </Card>
             <Card className="text-center bg-card shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <CalendarCheck className="h-10 w-10 text-primary" />
+                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
+                  <CalendarCheck className="h-10 w-10 text-accent" />
                 </div>
                 <CardTitle className="font-headline text-xl">Smart Health Management</CardTitle>
               </CardHeader>
@@ -133,7 +134,7 @@ export default function HomePage() {
       </section>
 
       {/* Contact Us Section */}
-      <section id="contact-us" className="py-16 text-center bg-primary/5 rounded-lg">
+      <section id="contact-us" className="py-16 text-center bg-muted rounded-lg">
         <div className="container mx-auto px-4">
           <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
             <Phone className="h-10 w-10 text-primary" />
