@@ -251,8 +251,8 @@ function PaymentForm() {
             <div>
               <Tabs defaultValue="card">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/> UPI / QR Code</TabsTrigger>
-                  <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/> Credit/Debit Card</TabsTrigger>
+                  <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/> UPI / QR</TabsTrigger>
+                  <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/> Card</TabsTrigger>
                 </TabsList>
                 
                 {/* UPI Tab */}

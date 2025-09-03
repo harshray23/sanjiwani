@@ -63,17 +63,18 @@ export default function ClinicDetailPage() {
         <div className="lg:col-span-2">
            <div className="bg-card p-6 rounded-lg shadow-lg">
                 <div className="flex flex-col md:flex-row gap-6">
-                    <Image
-                        src={clinic.imageUrl}
-                        alt={clinic.name}
-                        width={200}
-                        height={200}
-                        className="rounded-lg object-cover w-full md:w-1/3"
-                        data-ai-hint={clinic.dataAiHint}
-                    />
+                    <div className="w-full md:w-1/3 h-48 md:h-auto relative">
+                      <Image
+                          src={clinic.imageUrl}
+                          alt={clinic.name}
+                          fill
+                          className="rounded-lg object-cover"
+                          data-ai-hint={clinic.dataAiHint}
+                      />
+                    </div>
                     <div className="flex-1">
-                        <h1 className="text-4xl font-bold font-headline mb-2">{clinic.name}</h1>
-                        <div className="flex items-center gap-4 text-muted-foreground mb-4">
+                        <h1 className="text-2xl md:text-4xl font-bold font-headline mb-2">{clinic.name}</h1>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-muted-foreground mb-4">
                             <span className="flex items-center gap-1">
                                 <Star className="h-5 w-5 text-yellow-400 fill-yellow-400"/> {clinic.rating.toFixed(1)}
                             </span>

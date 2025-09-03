@@ -43,24 +43,24 @@ export default function HomePage() {
 
       {/* Search & Quick Links Section */}
       <section className="container mx-auto px-4 -mt-36 relative z-20">
-          <div className="max-w-3xl mx-auto bg-card p-4 rounded-full shadow-2xl">
+          <div className="max-w-3xl mx-auto bg-card p-2 md:p-4 rounded-full shadow-2xl">
             <form action="/search" method="GET">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   name="query"
-                  placeholder="Search hospitals, clinics, doctors, specialties..."
-                  className="w-full h-16 pl-14 pr-32 rounded-full text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner"
+                  placeholder="Search hospitals, doctors..."
+                  className="w-full h-12 md:h-16 pl-12 pr-28 md:pr-32 rounded-full text-base md:text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner"
                 />
-                <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-12 px-8 glow-on-hover">
-                  Find Care Now
+                <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-10 md:h-12 px-4 md:px-8 glow-on-hover">
+                  Find Care
                 </Button>
               </div>
             </form>
           </div>
            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {quickLinks.map((link) => (
-              <Button key={link.href} asChild variant="outline" size="lg" className="h-16 text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg border-primary/20">
+              <Button key={link.href} asChild variant="outline" size="lg" className="h-16 text-sm md:text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg border-primary/20">
                 <Link href={link.href} className="flex flex-col md:flex-row items-center justify-center gap-2">
                   {link.icon}
                   <span>{link.label}</span>
@@ -74,26 +74,26 @@ export default function HomePage() {
       <section id="problem-solution" className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 p-8 text-center md:text-left">
+            <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 p-6 md:p-8 text-center md:text-left">
               <CardHeader className="p-0">
-                <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+                <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
                   <Lightbulb className="h-10 w-10 text-red-500" />
                   <CardTitle className="text-2xl font-headline text-red-700 dark:text-red-400">The Problem</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <p className="text-lg text-red-800 dark:text-red-300">Patients and their families face immense stress struggling to find real-time information on hospital bed and doctor availability during emergencies.</p>
+                <p className="text-base md:text-lg text-red-800 dark:text-red-300">Patients and their families face immense stress struggling to find real-time information on hospital bed and doctor availability during emergencies.</p>
               </CardContent>
             </Card>
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 p-8 text-center md:text-left">
+            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 p-6 md:p-8 text-center md:text-left">
               <CardHeader className="p-0">
-                <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+                <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
                   <Target className="h-10 w-10 text-green-500" />
                   <CardTitle className="text-2xl font-headline text-green-700 dark:text-green-400">Our Solution</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <p className="text-lg text-green-800 dark:text-green-300">Sanjiwani Health provides a reliable, centralized platform that connects patients to hospitals instantly, showing verified availability to save precious time.</p>
+                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjiwani Health provides a reliable, centralized platform that connects patients to hospitals instantly, showing verified availability to save precious time.</p>
               </CardContent>
             </Card>
           </div>

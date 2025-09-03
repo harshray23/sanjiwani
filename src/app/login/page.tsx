@@ -141,7 +141,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="py-12">
+    <div className="py-12 w-full">
       <Card className="w-full max-w-md mx-auto shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-headline">

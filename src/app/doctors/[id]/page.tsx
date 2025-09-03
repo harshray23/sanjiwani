@@ -107,21 +107,21 @@ export default function DoctorDetailPage() {
         <div className="lg:col-span-2 space-y-8">
           {/* Doctor Profile Card */}
           <Card className="shadow-lg">
-            <CardContent className="p-6 flex flex-col sm:flex-row gap-6">
+            <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <Image
                     src={doctor.imageUrl}
                     alt={doctor.name}
                     width={150}
                     height={150}
-                    className="rounded-lg border-4 border-primary/20 object-cover"
+                    className="rounded-lg border-4 border-primary/20 object-cover w-32 h-32 sm:w-[150px] sm:h-[150px]"
                     data-ai-hint={doctor.dataAiHint}
                 />
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left">
                     <h1 className="text-3xl font-bold font-headline">{doctor.name}</h1>
                     <p className="text-lg text-primary">{doctor.specialty}</p>
                     {clinic && <Link href={`/clinics/${clinic.id}`} className="text-md text-muted-foreground hover:underline">{clinic.name}</Link>}
                     
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
                         <Badge variant="default" className="flex items-center gap-1 text-base p-2">
                             <Star className="w-4 h-4 fill-yellow-300 text-yellow-300"/> {doctor.rating}
                         </Badge>
@@ -129,11 +129,11 @@ export default function DoctorDetailPage() {
                     </div>
 
                     <div className="mt-4 text-sm text-muted-foreground space-y-2">
-                        <p className="flex items-center gap-2">
+                        <p className="flex items-center justify-center sm:justify-start gap-2">
                             <GraduationCap className="h-4 w-4 shrink-0" />
                             <span>{doctor.qualifications.join(', ')}</span>
                         </p>
-                        <p className="flex items-center gap-2">
+                        <p className="flex items-center justify-center sm:justify-start gap-2">
                             <Briefcase className="h-4 w-4 shrink-0" />
                             <span>{doctor.experience} years of experience</span>
                         </p>
