@@ -18,7 +18,7 @@ export function Header() {
   return (
     <header className="bg-card/95 backdrop-blur-sm border-b shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
+        <Link href="/" className="flex items-center gap-3 text-accent hover:text-accent/90 transition-colors">
           <Logo className="h-10 w-10" />
           <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani Health</h1>
         </Link>

@@ -41,7 +41,7 @@ function SearchResults() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-headline mb-2">Search Results</h1>
+        <h1 className="text-3xl font-bold font-headline mb-2 text-accent">Search Results</h1>
         <p className="text-muted-foreground">Find the best clinics and doctors for your needs.</p>
         <form onSubmit={handleSearch} className="mt-6 flex gap-2">
           <Input 

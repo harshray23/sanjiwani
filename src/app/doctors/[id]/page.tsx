@@ -117,7 +117,7 @@ export default function DoctorDetailPage() {
                     data-ai-hint={doctor.dataAiHint}
                 />
                 <div className="flex-1 text-center sm:text-left">
-                    <h1 className="text-3xl font-bold font-headline">{doctor.name}</h1>
+                    <h1 className="text-3xl font-bold font-headline text-accent">{doctor.name}</h1>
                     <p className="text-lg text-primary">{doctor.specialty}</p>
                     {clinic && <Link href={`/clinics/${clinic.id}`} className="text-md text-muted-foreground hover:underline">{clinic.name}</Link>}
                     
@@ -144,7 +144,7 @@ export default function DoctorDetailPage() {
           
           {/* Bio Card */}
           <Card>
-            <CardHeader><CardTitle>About Dr. {doctor.name.split(' ').pop()}</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-accent">About Dr. {doctor.name.split(' ').pop()}</CardTitle></CardHeader>
             <CardContent>
                 <p className="text-foreground/80">{doctor.bio}</p>
             </CardContent>
@@ -155,7 +155,7 @@ export default function DoctorDetailPage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-24 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-xl text-center">Book an Appointment</CardTitle>
+              <CardTitle className="text-xl text-center text-accent">Book an Appointment</CardTitle>
               <CardDescription className="text-center">Book in just 2 clicks!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -175,7 +175,7 @@ export default function DoctorDetailPage() {
                 </Card>
               
               <div className="space-y-2">
-                <h4 className="font-semibold flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
+                <h4 className="font-semibold flex items-center gap-2 text-accent"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
                 <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
                 <div className="grid grid-cols-3 gap-2">
                     {doctor.availableSlots.map(slot => (
@@ -202,7 +202,7 @@ export default function DoctorDetailPage() {
               <Separator className="my-4"/>
 
                 <div className="space-y-3 text-center">
-                  <h4 className="font-semibold flex items-center justify-center gap-2"><Video className="h-5 w-5 text-primary" /> Video Consultation</h4>
+                  <h4 className="font-semibold flex items-center justify-center gap-2 text-accent"><Video className="h-5 w-5 text-primary" /> Video Consultation</h4>
                   <p className="text-sm text-muted-foreground">Consult from the comfort of your home.</p>
                   <Button 
                     onClick={() => handleBookAppointment('video')}

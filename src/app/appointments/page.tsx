@@ -205,7 +205,7 @@ const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate, on
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                 <CardTitle className="text-xl font-headline">Dr. {appointment.doctor.name}</CardTitle>
+                 <CardTitle className="text-xl font-headline text-accent">Dr. {appointment.doctor.name}</CardTitle>
                  <CardDescription>{appointment.doctor.specialty}</CardDescription>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -332,13 +332,13 @@ export default function AppointmentsPage() {
       <div className="space-y-8">
         {upcomingAppointments.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-xl font-bold font-headline">Upcoming</h3>
+            <h3 className="text-xl font-bold font-headline text-accent">Upcoming</h3>
             {upcomingAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} onFeedbackSubmit={handleFeedbackSubmit}/>)}
           </div>
         )}
         {pastAppointments.length > 0 && (
             <div className="space-y-4">
-                 <h3 className="text-xl font-bold font-headline">Past</h3>
+                 <h3 className="text-xl font-bold font-headline text-accent">Past</h3>
                 {pastAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} onFeedbackSubmit={handleFeedbackSubmit}/>)}
             </div>
         )}
@@ -350,10 +350,10 @@ export default function AppointmentsPage() {
     <div className="py-12 w-full">
       <div className="w-full max-w-2xl mx-auto">
         <div className="text-center mb-8">
-           <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-            <Calendar className="h-10 w-10 text-primary" />
+           <div className="mx-auto bg-accent/10 p-3 rounded-full w-fit mb-4">
+            <Calendar className="h-10 w-10 text-accent" />
           </div>
-          <h1 className="text-3xl font-bold font-headline">My Appointments</h1>
+          <h1 className="text-3xl font-bold font-headline text-accent">My Appointments</h1>
           <p className="text-muted-foreground">View your upcoming and past appointments.</p>
         </div>
         {renderContent()}

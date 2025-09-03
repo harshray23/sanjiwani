@@ -59,10 +59,10 @@ export default function ContactPage() {
     <div className="py-12">
       <Card className="w-full max-w-2xl mx-auto shadow-xl">
         <CardHeader className="text-center">
-          <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-            <Mail className="h-10 w-10 text-primary" />
+          <div className="mx-auto bg-accent/10 p-3 rounded-full w-fit mb-4">
+            <Mail className="h-10 w-10 text-accent" />
           </div>
-          <CardTitle className="text-3xl font-headline">Contact Us</CardTitle>
+          <CardTitle className="text-3xl font-headline text-accent">Contact Us</CardTitle>
           <CardDescription>Have questions or feedback? Fill out the form below.</CardDescription>
         </CardHeader>
         <CardContent>

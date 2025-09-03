@@ -164,7 +164,7 @@ export default function LoginPage() {
   return (
     <div className="w-full flex-grow flex items-center justify-center p-4 bg-muted">
         <div className="w-full grid md:grid-cols-2 max-w-4xl mx-auto bg-card shadow-2xl rounded-2xl overflow-hidden">
-             <div className="hidden md:flex flex-col items-center justify-center p-8 bg-primary text-primary-foreground relative">
+             <div className="hidden md:flex flex-col items-center justify-center p-8 bg-accent/10 text-accent-foreground relative">
                 <Image
                     src="https://picsum.photos/seed/login-art/800/1200"
                     alt="Healthcare professionals"
@@ -174,16 +174,16 @@ export default function LoginPage() {
                     data-ai-hint="doctors nurses team"
                 />
                  <div className="relative z-10 text-center">
-                    <Logo className="h-24 w-24 text-white mx-auto"/>
-                    <h2 className="text-3xl font-bold font-headline mt-4">Welcome to Sanjiwani</h2>
-                    <p className="mt-2 text-center text-primary-foreground/80">Your trusted partner in health. Find doctors, book appointments, and manage your care seamlessly.</p>
+                    <Logo className="h-24 w-24 text-accent mx-auto"/>
+                    <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjiwani</h2>
+                    <p className="mt-2 text-center text-foreground/80">Your trusted partner in health. Find doctors, book appointments, and manage your care seamlessly.</p>
                 </div>
             </div>
 
             <div className="p-6 md:p-8">
                 <Card className="border-0 shadow-none">
                     <CardHeader className="text-center p-0 mb-6">
-                        <CardTitle className="text-3xl font-headline">
+                        <CardTitle className="text-3xl font-headline text-accent">
                             Get Started
                         </CardTitle>
                         <CardDescription>

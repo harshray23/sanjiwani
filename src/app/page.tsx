@@ -22,7 +22,7 @@ export default function HomePage() {
       <section className="text-center py-16 md:py-24 relative rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/50 dark:to-green-950/50">
          <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 items-center">
            <div className="text-left animate-fade-in-up">
-            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-primary">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-accent">
               Find Care, Instantly.
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-xl">
@@ -109,7 +109,7 @@ export default function HomePage() {
       <section id="how-it-works" className="py-16 bg-muted rounded-lg">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-accent">
               A Seamless Experience
             </h2>
              <p className="text-lg text-muted-foreground mt-2">From finding emergency care to managing your health journey.</p>
@@ -156,7 +156,7 @@ export default function HomePage() {
       <section id="features" className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-accent">
               Comprehensive Healthcare, All in One Place
             </h2>
             <p className="text-lg text-muted-foreground mt-2">Access a full suite of healthcare services from anywhere, anytime.</p>

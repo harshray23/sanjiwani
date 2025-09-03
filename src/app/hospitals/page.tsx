@@ -42,10 +42,10 @@ function HospitalSearch() {
     <div className="w-full max-w-7xl mx-auto py-8">
        <Card className="mb-8 shadow-lg bg-primary/5 border-primary/20">
         <CardHeader className="text-center">
-            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
-                <Siren className="h-10 w-10 text-primary" />
+            <div className="mx-auto bg-accent/10 p-3 rounded-full w-fit mb-4">
+                <Siren className="h-10 w-10 text-accent" />
             </div>
-            <CardTitle className="text-3xl font-headline">Find a Hospital</CardTitle>
+            <CardTitle className="text-3xl font-headline text-accent">Find a Hospital</CardTitle>
             <CardDescription>Search for hospitals and check real-time bed availability.</CardDescription>
         </CardHeader>
         <CardContent>
