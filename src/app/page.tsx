@@ -77,7 +77,9 @@ export default function HomePage() {
             <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 p-6 md:p-8 text-center md:text-left">
               <CardHeader className="p-0">
                 <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
-                  <Lightbulb className="h-10 w-10 text-red-500" />
+                  <div className="bg-red-100 dark:bg-red-900/50 p-3 rounded-full">
+                    <Lightbulb className="h-10 w-10 text-red-500" />
+                  </div>
                   <CardTitle className="text-2xl font-headline text-red-700 dark:text-red-400">The Problem</CardTitle>
                 </div>
               </CardHeader>
@@ -88,7 +90,9 @@ export default function HomePage() {
             <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 p-6 md:p-8 text-center md:text-left">
               <CardHeader className="p-0">
                 <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
-                  <Target className="h-10 w-10 text-green-500" />
+                   <div className="bg-green-100 dark:bg-green-900/50 p-3 rounded-full">
+                    <Target className="h-10 w-10 text-green-500" />
+                  </div>
                   <CardTitle className="text-2xl font-headline text-green-700 dark:text-green-400">Our Solution</CardTitle>
                 </div>
               </CardHeader>
