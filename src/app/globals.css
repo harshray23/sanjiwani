@@ -72,7 +72,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: hsl(var(--background));
+    background-image: linear-gradient(to right, #e0f7fa, #e8f5e9);
+  }
+
+  .dark body {
+    background-image: none;
   }
 }
 
