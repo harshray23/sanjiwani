@@ -23,10 +23,10 @@ export default function HomePage() {
          <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 items-center">
            <div className="text-left animate-fade-in-up">
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-accent">
-              Find Care, Instantly.
+              Find <span className="text-primary">Care</span>, Instantly.
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-xl">
-              Book doctor appointments, check hospital bed availability, and manage all your health records in one place.
+              Book doctor appointments, check hospital bed <span className="font-semibold text-primary">availability</span>, and manage all your health records in one place.
             </p>
            </div>
            <div className="relative h-64 md:h-96">
@@ -97,7 +97,7 @@ export default function HomePage() {
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjiwani Health provides a reliable, centralized platform that connects patients to hospitals instantly, showing verified availability to save precious time.</p>
+                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjiwani Health provides a reliable, centralized platform that connects patients to hospitals <span className="font-semibold text-green-600 dark:text-green-300">instantly</span>, showing verified availability to save precious time.</p>
               </CardContent>
             </Card>
           </div>
@@ -219,3 +219,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

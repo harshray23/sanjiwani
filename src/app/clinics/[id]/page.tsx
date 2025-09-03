@@ -73,7 +73,7 @@ export default function ClinicDetailPage() {
                       />
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-2xl md:text-4xl font-bold font-headline mb-2">{clinic.name}</h1>
+                        <h1 className="text-2xl md:text-4xl font-bold font-headline text-accent mb-2">{clinic.name}</h1>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-muted-foreground mb-4">
                             <span className="flex items-center gap-1">
                                 <Star className="h-5 w-5 text-yellow-400 fill-yellow-400"/> {clinic.rating.toFixed(1)}
@@ -96,7 +96,7 @@ export default function ClinicDetailPage() {
             </div>
 
             <div className="mt-8">
-                <h2 className="text-2xl font-bold font-headline mb-6">Doctors at {clinic.name}</h2>
+                <h2 className="text-2xl font-bold font-headline text-accent mb-6">Doctors at {clinic.name}</h2>
                 {clinic.doctors.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {clinic.doctors.map(doctor => (
@@ -112,7 +112,7 @@ export default function ClinicDetailPage() {
         <div className="lg:col-span-1">
             <div className="sticky top-24">
                 <div className="bg-card p-6 rounded-lg shadow-lg">
-                    <h3 className="text-xl font-bold mb-4">Location</h3>
+                    <h3 className="text-xl font-bold font-headline mb-4 text-accent">Location</h3>
                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
                         <p className="text-muted-foreground">Map will be shown here.</p>
                     </div>
@@ -127,3 +127,5 @@ export default function ClinicDetailPage() {
     </div>
   );
 }
+
+    

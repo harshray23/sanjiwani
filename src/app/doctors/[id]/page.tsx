@@ -144,7 +144,7 @@ export default function DoctorDetailPage() {
           
           {/* Bio Card */}
           <Card>
-            <CardHeader><CardTitle className="text-accent">About Dr. {doctor.name.split(' ').pop()}</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-xl font-headline text-accent">About Dr. {doctor.name.split(' ').pop()}</CardTitle></CardHeader>
             <CardContent>
                 <p className="text-foreground/80">{doctor.bio}</p>
             </CardContent>
@@ -155,7 +155,7 @@ export default function DoctorDetailPage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-24 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-xl text-center text-accent">Book an Appointment</CardTitle>
+              <CardTitle className="text-xl text-center font-headline text-accent">Book an Appointment</CardTitle>
               <CardDescription className="text-center">Book in just 2 clicks!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -166,7 +166,7 @@ export default function DoctorDetailPage() {
 
                 <Card className="bg-primary/5 border-primary/20 p-3">
                   <CardHeader className="p-0 text-center mb-2">
-                      <CardTitle className="text-base text-primary flex items-center justify-center gap-2"><Sparkles className="w-4 h-4"/>Exclusive Benefits</CardTitle>
+                      <CardTitle className="text-base font-headline text-primary flex items-center justify-center gap-2"><Sparkles className="w-4 h-4"/>Exclusive Benefits</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 text-sm text-primary/90 space-y-1 text-center">
                       <p className="flex items-center justify-center gap-1"><Medal className="w-4 h-4" /> Priority Token (No long waits)</p>
@@ -236,3 +236,5 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
+
+    

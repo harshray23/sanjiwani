@@ -172,7 +172,7 @@ function PaymentForm() {
        <div className="py-12 w-full">
         <Card className="w-full max-w-lg mx-auto shadow-xl">
             <CardHeader className="text-center">
-                <CardTitle className="text-3xl font-headline">Feature Coming Soon!</CardTitle>
+                <CardTitle className="text-3xl font-headline text-accent">Feature Coming Soon!</CardTitle>
                 <CardDescription>In-clinic payment processing is currently under development. Please check back later.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 flex flex-col items-center">
@@ -199,14 +199,14 @@ function PaymentForm() {
           <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-4">
             <ShieldCheck className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-headline">Complete Your Payment</CardTitle>
-          <CardDescription>Securely pay to confirm your appointment.</CardDescription>
+          <CardTitle className="text-3xl font-headline text-accent">Complete Your Payment</CardTitle>
+          <CardDescription className="text-lg text-muted-foreground">Securely pay to confirm your appointment.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Order Summary */}
             <div className="bg-muted/50 rounded-lg p-6 space-y-4">
-              <h3 className="text-lg font-bold">Booking Summary</h3>
+              <h3 className="text-lg font-bold font-headline text-accent">Booking Summary</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Doctor:</span>
@@ -261,7 +261,7 @@ function PaymentForm() {
                     {comingSoonAnimation ? (
                         <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
                     ): <p>Loading animation...</p>}
-                    <h3 className="font-semibold text-lg mt-2">Coming Soon!</h3>
+                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
                     <p className="text-sm text-muted-foreground">
                       UPI and QR Code payments will be available shortly.
                       Please select another payment method.
@@ -346,5 +346,7 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
+
+    
 
     

@@ -73,7 +73,7 @@ const AdminDashboard = () => {
   if (!user || !user.email?.startsWith('admin@')) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold text-destructive">Access Denied</h2>
+        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
         <p className="mt-2 text-muted-foreground">
           You must be logged in as an administrator to view this page.
         </p>
@@ -90,8 +90,8 @@ const AdminDashboard = () => {
   return (
     <div className="py-12 w-full max-w-7xl mx-auto">
       <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Welcome, {user.email}. Manage your platform here.</p>
+        <h1 className="text-3xl font-bold font-headline text-accent">Admin Dashboard</h1>
+        <p className="text-lg text-muted-foreground">Welcome, {user.email}. Manage your platform here.</p>
       </div>
 
        <Tabs defaultValue="doctors">
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
 
         <TabsContent value="users">
             <Card>
-                <CardHeader><CardTitle>Manage Users</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-headline">Manage Users</CardTitle></CardHeader>
                 <CardContent className="text-center py-12 text-muted-foreground">
                     <Users className="h-12 w-12 mx-auto mb-4"/>
                     <p>User management feature coming soon.</p>
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
         </TabsContent>
         <TabsContent value="doctors">
             <Card>
-                <CardHeader><CardTitle>Manage Doctors</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-headline">Manage Doctors</CardTitle></CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
@@ -149,7 +149,7 @@ const AdminDashboard = () => {
         </TabsContent>
          <TabsContent value="clinics">
              <Card>
-                <CardHeader><CardTitle>Manage Clinics</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-headline">Manage Clinics</CardTitle></CardHeader>
                 <CardContent>
                      <Table>
                         <TableHeader>
@@ -179,7 +179,7 @@ const AdminDashboard = () => {
         </TabsContent>
          <TabsContent value="hospitals">
             <Card>
-                <CardHeader><CardTitle>Manage Hospitals</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-headline">Manage Hospitals</CardTitle></CardHeader>
                 <CardContent>
                       <Table>
                         <TableHeader>
@@ -213,3 +213,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+    

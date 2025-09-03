@@ -118,7 +118,7 @@ const DoctorDashboard = () => {
   if (!user || !doctor) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold text-destructive">Access Denied</h2>
+        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
         <p className="mt-2 text-muted-foreground">
           You must be logged in as a doctor to view this page.
         </p>
@@ -132,8 +132,8 @@ const DoctorDashboard = () => {
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
       <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline">Welcome, {doctor.name}</h1>
-        <p className="text-muted-foreground">Manage your appointments, profile, and availability.</p>
+        <h1 className="text-3xl font-bold font-headline text-accent">Welcome, {doctor.name}</h1>
+        <p className="text-lg text-muted-foreground">Manage your appointments, profile, and availability.</p>
       </div>
 
       <Tabs defaultValue="appointments">
@@ -147,7 +147,7 @@ const DoctorDashboard = () => {
         <TabsContent value="appointments">
           <Card>
             <CardHeader>
-              <CardTitle>Upcoming & Past Appointments</CardTitle>
+              <CardTitle className="font-headline">Upcoming & Past Appointments</CardTitle>
             </CardHeader>
             <CardContent>
               {appointments.length > 0 ? (
@@ -178,7 +178,7 @@ const DoctorDashboard = () => {
         <TabsContent value="profile">
            <Card>
             <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
+                <CardTitle className="font-headline">Profile Settings</CardTitle>
                 <CardDescription>Update your public profile information and skills.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -234,7 +234,7 @@ const DoctorDashboard = () => {
         <TabsContent value="availability">
              <Card>
                 <CardHeader>
-                    <CardTitle>Manage Your Availability</CardTitle>
+                    <CardTitle className="font-headline">Manage Your Availability</CardTitle>
                     <CardDescription>Add or update your available time slots at different locations.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -344,3 +344,5 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
+
+    

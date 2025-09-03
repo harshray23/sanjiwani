@@ -60,7 +60,7 @@ const HospitalDashboard = () => {
   if (!user || !hospital) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold text-destructive">Access Denied</h2>
+        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
         <p className="mt-2 text-muted-foreground">
           You must be logged in as a hospital administrator to view this page.
         </p>
@@ -88,8 +88,8 @@ const HospitalDashboard = () => {
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
       <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline">Hospital Dashboard</h1>
-        <p className="text-muted-foreground">Managing {hospital.name}</p>
+        <h1 className="text-3xl font-bold font-headline text-accent">Hospital Dashboard</h1>
+        <p className="text-lg text-muted-foreground">Managing {hospital.name}</p>
       </div>
 
        <Tabs defaultValue="beds">
@@ -102,7 +102,7 @@ const HospitalDashboard = () => {
         <TabsContent value="beds">
              <Card>
                 <CardHeader>
-                    <CardTitle>Real-Time Bed Availability</CardTitle>
+                    <CardTitle className="font-headline">Real-Time Bed Availability</CardTitle>
                     <CardDescription>Update the number of available vs. total beds for each category.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -118,7 +118,7 @@ const HospitalDashboard = () => {
              <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
                     <div>
-                        <CardTitle>Manage Medical Staff</CardTitle>
+                        <CardTitle className="font-headline">Manage Medical Staff</CardTitle>
                         <CardDescription>Onboard new doctors and manage existing staff profiles.</CardDescription>
                     </div>
                      <Button><UserPlus className="mr-2"/> Add New Doctor</Button>
@@ -134,7 +134,7 @@ const HospitalDashboard = () => {
         <TabsContent value="appointments">
             <Card>
                 <CardHeader>
-                    <CardTitle>Patient Appointments</CardTitle>
+                    <CardTitle className="font-headline">Patient Appointments</CardTitle>
                     <CardDescription>View all appointments scheduled at your hospital.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -151,3 +151,5 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
+
+    

@@ -354,10 +354,12 @@ export default function AppointmentsPage() {
             <Calendar className="h-10 w-10 text-accent" />
           </div>
           <h1 className="text-3xl font-bold font-headline text-accent">My Appointments</h1>
-          <p className="text-muted-foreground">View your upcoming and past appointments.</p>
+          <p className="text-lg text-muted-foreground">View your upcoming and past appointments.</p>
         </div>
         {renderContent()}
       </div>
     </div>
   );
 }
+
+    

@@ -46,7 +46,7 @@ function HospitalSearch() {
                 <Siren className="h-10 w-10 text-accent" />
             </div>
             <CardTitle className="text-3xl font-headline text-accent">Find a Hospital</CardTitle>
-            <CardDescription>Search for hospitals and check real-time bed availability.</CardDescription>
+            <CardDescription className="text-lg text-muted-foreground">Search for hospitals and check real-time bed availability.</CardDescription>
         </CardHeader>
         <CardContent>
             <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mx-auto">
@@ -94,3 +94,5 @@ export default function HospitalsPage() {
         </Suspense>
     );
 }
+
+    

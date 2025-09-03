@@ -63,7 +63,7 @@ const ClinicDashboard = () => {
   if (!user || !clinic) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold text-destructive">Access Denied</h2>
+        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
         <p className="mt-2 text-muted-foreground">
           You must be logged in as a clinic administrator to view this page.
         </p>
@@ -80,8 +80,8 @@ const ClinicDashboard = () => {
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
       <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline">Clinic Dashboard</h1>
-        <p className="text-muted-foreground">Managing {clinic.name}</p>
+        <h1 className="text-3xl font-bold font-headline text-accent">Clinic Dashboard</h1>
+        <p className="text-lg text-muted-foreground">Managing {clinic.name}</p>
       </div>
 
        <Tabs defaultValue="appointments">
@@ -94,7 +94,7 @@ const ClinicDashboard = () => {
         <TabsContent value="appointments">
             <Card>
                 <CardHeader>
-                    <CardTitle>Patient Appointments</CardTitle>
+                    <CardTitle className="font-headline">Patient Appointments</CardTitle>
                     <CardDescription>All appointments scheduled at your clinic.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -124,7 +124,7 @@ const ClinicDashboard = () => {
              <Card>
                 <CardHeader className="flex flex-row justify-between items-center">
                     <div>
-                        <CardTitle>Manage Doctors</CardTitle>
+                        <CardTitle className="font-headline">Manage Doctors</CardTitle>
                         <CardDescription>Add, view, or remove doctors from your clinic.</CardDescription>
                     </div>
                     <Button><UserPlus className="mr-2"/> Add New Doctor</Button>
@@ -156,7 +156,7 @@ const ClinicDashboard = () => {
          <TabsContent value="profile">
             <Card>
                 <CardHeader>
-                    <CardTitle>Clinic Information</CardTitle>
+                    <CardTitle className="font-headline">Clinic Information</CardTitle>
                     <CardDescription>Update your clinic's public details.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -188,3 +188,5 @@ const ClinicDashboard = () => {
 };
 
 export default ClinicDashboard;
+
+    
