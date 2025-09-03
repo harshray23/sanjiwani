@@ -25,8 +25,11 @@ export function Header() {
 
         <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
           {navItems.map((item) => (
-            <Button key={item.label} variant="ghost" asChild>
-              <Link href={item.href}>{item.label}</Link>
+            <Button key={item.label} variant="ghost" asChild className="group">
+              <Link href={item.href}>
+                {item.label}
+                <span className="block max-w-0 group-hover:max-w-full transition-all duration-300 h-0.5 bg-primary"></span>
+              </Link>
             </Button>
           ))}
           <Suspense fallback={<Button>Login</Button>}>

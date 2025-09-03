@@ -76,8 +76,30 @@
   }
 }
 
-@layer components {
+@layer utilities {
     .btn-gradient {
-        @apply bg-gradient-to-r from-orange-400 to-yellow-500 text-white hover:from-orange-500 hover:to-yellow-600;
+        @apply bg-gradient-to-r from-orange-400 to-yellow-500 text-white;
+    }
+    .glow-on-hover {
+        @apply transition-all duration-300;
+    }
+    .glow-on-hover:hover {
+        box-shadow: 0 0 15px 5px theme('colors.yellow.400 / 40%');
+    }
+}
+
+@layer base {
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fade-in-up 0.8s ease-out forwards;
     }
 }

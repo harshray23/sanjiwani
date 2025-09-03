@@ -12,6 +12,20 @@ import { Loader2, LogOut, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
+const avatarColors = [
+  'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 
+  'bg-teal-500', 'bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500'
+];
+
+const getAvatarColor = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash % avatarColors.length);
+    return avatarColors[index];
+};
+
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +68,8 @@ export function UserNav() {
     const parts = email.split('@');
     return parts[0][0].toUpperCase();
   }
+  
+  const fallbackColor = user.email ? getAvatarColor(user.email) : 'bg-gray-500';
 
   return (
      <DropdownMenu>
@@ -61,7 +77,9 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
-            <AvatarFallback>{user.email ? getInitials(user.email) : 'U'}</AvatarFallback>
+            <AvatarFallback className={`${fallbackColor} text-white`}>
+                {user.email ? getInitials(user.email) : 'U'}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -92,4 +110,3 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
-

@@ -156,6 +156,7 @@ export default function DoctorDetailPage() {
           <Card className="sticky top-24 shadow-xl">
             <CardHeader>
               <CardTitle className="text-xl text-center">Book an Appointment</CardTitle>
+              <CardDescription className="text-center">Book in just 2 clicks!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="text-center">
