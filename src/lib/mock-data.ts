@@ -1,5 +1,5 @@
 
-import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails } from './types';
+import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback } from './types';
 import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
@@ -368,3 +368,10 @@ export const updateAppointmentWithVideoConsult = (id: string, details: VideoCons
         appointments[index].videoConsultDetails = details;
     }
 };
+
+export const submitAppointmentFeedback = (id: string, feedback: AppointmentFeedback) => {
+    const index = appointments.findIndex(a => a.id === id);
+    if (index !== -1) {
+        appointments[index].feedback = feedback;
+    }
+}

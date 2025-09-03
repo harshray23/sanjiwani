@@ -36,6 +36,13 @@ export interface VideoConsultationDetails {
     preliminaryAdvice: string;
 }
 
+export interface AppointmentFeedback {
+    doctorBehaviour: number;
+    clinicExperience: number;
+    overallService: number;
+    comments: string;
+}
+
 export interface Appointment {
   id: string;
   patientId: string; // Corresponds to user's UID
@@ -53,6 +60,7 @@ export interface Appointment {
     total: number;
   };
   videoConsultDetails?: VideoConsultationDetails;
+  feedback?: AppointmentFeedback;
 }
 
 

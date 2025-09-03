@@ -4,11 +4,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForUser, updateAppointmentStatus, updateAppointmentWithVideoConsult } from '@/lib/mock-data';
-import type { Appointment, VideoConsultationDetails } from '@/lib/types';
+import { getAppointmentsForUser, updateAppointmentStatus, updateAppointmentWithVideoConsult, submitAppointmentFeedback } from '@/lib/mock-data';
+import type { Appointment, VideoConsultationDetails, AppointmentFeedback } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle, BellRing, Pill, Video, Copy } from "lucide-react";
+import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, Upload, CheckCircle, XCircle, BellRing, Pill, Video, Copy, MessageSquarePlus } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -19,11 +19,13 @@ import { setMedicineReminder } from '@/ai/flows/set-reminder-flow';
 import { Input } from '@/components/ui/input';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { FeedbackDialog } from '@/components/FeedbackDialog';
 
-const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void, onVideoConsultUpdate: (id:string, details: VideoConsultationDetails) => void }) => {
+const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate, onFeedbackSubmit }: { appointment: Appointment, onStatusChange: (id: string, status: Appointment['status']) => void, onVideoConsultUpdate: (id:string, details: VideoConsultationDetails) => void, onFeedbackSubmit: (id: string, feedback: AppointmentFeedback) => void }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSettingReminder, setIsSettingReminder] = useState(false);
   const [reminderText, setReminderText] = useState('');
+  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -90,6 +92,14 @@ const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate }: 
     toast({ title: "Copied!", description: "Meeting link copied to clipboard." });
   }
 
+  const handleFeedbackSubmit = (feedback: AppointmentFeedback) => {
+      onFeedbackSubmit(appointment.id, feedback);
+      toast({
+          title: "Feedback Submitted!",
+          description: "Thank you for sharing your experience.",
+      })
+  }
+
   const appointmentDate = new Date(appointment.date);
   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
 
@@ -97,10 +107,29 @@ const AppointmentCard = ({ appointment, onStatusChange, onVideoConsultUpdate }: 
     if (appointment.status === 'Completed') {
         return (
              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 p-2 rounded-md bg-green-500/10">
-                    <CheckCircle className="h-5 w-5" />
-                    <p className="font-semibold text-sm">Cashback Processed</p>
-                </div>
+                {appointment.feedback ? (
+                    <div className="text-center text-sm text-muted-foreground p-2 rounded-md bg-green-500/10">
+                        <CheckCircle className="h-5 w-5 mx-auto mb-2 text-green-600"/>
+                        Feedback submitted. Thank you!
+                    </div>
+                ) : (
+                    <>
+                        <FeedbackDialog 
+                            open={isFeedbackDialogOpen}
+                            onOpenChange={setIsFeedbackDialogOpen}
+                            onSubmit={handleFeedbackSubmit}
+                        >
+                            <Button variant="outline" className="w-full" onClick={() => setIsFeedbackDialogOpen(true)}>
+                                <MessageSquarePlus className="mr-2 h-4 w-4"/>
+                                Leave Feedback
+                            </Button>
+                        </FeedbackDialog>
+                         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 p-2 rounded-md bg-green-500/10">
+                            <CheckCircle className="h-5 w-5" />
+                            <p className="font-semibold text-sm">Appointment Completed</p>
+                        </div>
+                    </>
+                )}
                  <div>
                     <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Pill className="h-4 w-4"/>Medicine Reminders</h4>
                     <div className="flex gap-2">
@@ -238,6 +267,12 @@ export default function AppointmentsPage() {
       updateAppointmentWithVideoConsult(id, details);
   }
 
+  const handleFeedbackSubmit = (id: string, feedback: AppointmentFeedback) => {
+      setAppointments(prev => prev.map(app => app.id === id ? {...app, feedback} : app));
+      submitAppointmentFeedback(id, feedback);
+  }
+
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -298,13 +333,13 @@ export default function AppointmentsPage() {
         {upcomingAppointments.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-xl font-bold font-headline">Upcoming</h3>
-            {upcomingAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate}/>)}
+            {upcomingAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} onFeedbackSubmit={handleFeedbackSubmit}/>)}
           </div>
         )}
         {pastAppointments.length > 0 && (
             <div className="space-y-4">
                  <h3 className="text-xl font-bold font-headline">Past</h3>
-                {pastAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} />)}
+                {pastAppointments.map(app => <AppointmentCard key={app.id} appointment={app} onStatusChange={handleStatusChange} onVideoConsultUpdate={handleVideoConsultUpdate} onFeedbackSubmit={handleFeedbackSubmit}/>)}
             </div>
         )}
       </div>

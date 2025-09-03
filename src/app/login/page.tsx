@@ -32,7 +32,7 @@ import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import Image from "next/image";
 
-const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
+const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -71,6 +71,9 @@ export default function LoginPage() {
         break;
       case 'hospital':
         router.push('/dashboard/hospital');
+        break;
+      case 'admin':
+        router.push('/dashboard/admin');
         break;
       default:
         router.push('/');
@@ -165,7 +168,7 @@ export default function LoginPage() {
                 <Image
                     src="https://picsum.photos/seed/login-art/800/1200"
                     alt="Healthcare professionals"
-                    layout="fill"
+                    fill
                     objectFit="cover"
                     className="opacity-20"
                     data-ai-hint="doctors nurses team"
@@ -238,6 +241,7 @@ export default function LoginPage() {
                                         <SelectItem value="clinic">Clinic</SelectItem>
                                         <SelectItem value="hospital">Hospital</SelectItem>
                                         <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
                                     </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -301,6 +305,7 @@ export default function LoginPage() {
                                         <SelectItem value="clinic">Clinic</SelectItem>
                                         <SelectItem value="hospital">Hospital</SelectItem>
                                         <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                                         <SelectItem value="admin">Admin</SelectItem>
                                     </SelectContent>
                                     </Select>
                                     <FormMessage />
