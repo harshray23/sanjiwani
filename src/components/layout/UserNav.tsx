@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Loader2, LogOut, User as UserIcon, LayoutDashboard } from 'lucide-react';
+import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -26,8 +26,18 @@ const getAvatarColor = (str: string) => {
     return avatarColors[index];
 };
 
+// A mock function to determine user role from email.
+// In a real app, this would come from a database or custom claims.
+const getRoleFromEmail = (email: string): string => {
+    if (email.startsWith('doctor@')) return 'doctor';
+    if (email.startsWith('clinic@')) return 'clinic';
+    if (email.startsWith('hospital@')) return 'hospital';
+    return 'customer';
+}
+
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState('customer');
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
@@ -36,6 +46,9 @@ export function UserNav() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if(currentUser && currentUser.email) {
+          setUserRole(getRoleFromEmail(currentUser.email));
+      }
       setIsLoading(false);
     });
     return () => unsubscribe();
@@ -53,7 +66,7 @@ export function UserNav() {
   }
 
   if (isLoading) {
-    return <Loader2 className="h-6 w-6 animate-spin" />;
+    return <div className="w-24 h-10 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
 
   if (!user) {
@@ -70,15 +83,14 @@ export function UserNav() {
   }
   
   const fallbackColor = user.email ? getAvatarColor(user.email) : 'bg-gray-500';
-  const isDoctor = user.email?.includes('dr.') || user.email === 'doctor@test.com'; // Mock check for doctor role
-
+  
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
-            <AvatarFallback className={`${fallbackColor} text-white`}>
+            <AvatarFallback className={`${fallbackColor} text-white font-bold`}>
                 {user.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
           </Avatar>
@@ -95,20 +107,38 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-             <Link href="/appointments">
-                <UserIcon className="mr-2 h-4 w-4" />
-                <span>My Appointments</span>
-            </Link>
-          </DropdownMenuItem>
-           {isDoctor && (
+         {userRole === 'customer' && (
+            <DropdownMenuItem asChild>
+                <Link href="/appointments">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>My Appointments</span>
+                </Link>
+            </DropdownMenuItem>
+         )}
+         {userRole === 'doctor' && (
              <DropdownMenuItem asChild>
                 <Link href="/dashboard/doctor">
                     <LayoutDashboard className="mr-2 h-4 w-4"/>
                     <span>Doctor Dashboard</span>
                 </Link>
              </DropdownMenuItem>
-           )}
+         )}
+         {userRole === 'clinic' && (
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard/clinic">
+                    <Building className="mr-2 h-4 w-4"/>
+                    <span>Clinic Dashboard</span>
+                </Link>
+             </DropdownMenuItem>
+         )}
+         {userRole === 'hospital' && (
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard/hospital">
+                    <Hospital className="mr-2 h-4 w-4"/>
+                    <span>Hospital Dashboard</span>
+                </Link>
+             </DropdownMenuItem>
+         )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

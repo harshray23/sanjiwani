@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, KeyRound, UserPlus, Hospital } from "lucide-react";
+import { Loader2, KeyRound, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { auth } from '@/lib/firebase';
 import { 
@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
+import Image from "next/image";
 
 const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
 
@@ -52,13 +53,30 @@ export default function LoginPage() {
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", role: "customer" },
   });
 
   const signUpForm = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", role: "customer" },
   });
+
+  const handleAuthSuccess = (role: string) => {
+    switch (role) {
+      case 'doctor':
+        router.push('/dashboard/doctor');
+        break;
+      case 'clinic':
+        router.push('/dashboard/clinic');
+        break;
+      case 'hospital':
+        router.push('/dashboard/hospital');
+        break;
+      default:
+        router.push('/');
+        break;
+    }
+  }
 
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
@@ -68,11 +86,7 @@ export default function LoginPage() {
         title: "Signed In Successfully",
         description: "Welcome back! Redirecting you now...",
       });
-      if (values.role === 'doctor') {
-        router.push('/dashboard/doctor');
-      } else {
-        router.push('/');
-      }
+      handleAuthSuccess(values.role);
     } catch (error: any) {
        let description = "An unknown error occurred. Please try again.";
        if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
@@ -94,13 +108,10 @@ export default function LoginPage() {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Account Created Successfully",
-        description: "Welcome! Redirecting you now...",
+        description: "Welcome! Please sign in to continue.",
       });
-       if (values.role === 'doctor') {
-        router.push('/dashboard/doctor');
-      } else {
-        router.push('/');
-      }
+      // Redirect to signin so they can log in with their new account
+      router.push('/login'); 
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
@@ -148,12 +159,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full flex-grow flex items-center justify-center p-4">
+    <div className="w-full flex-grow flex items-center justify-center p-4 bg-muted">
         <div className="w-full grid md:grid-cols-2 max-w-4xl mx-auto bg-card shadow-2xl rounded-2xl overflow-hidden">
-             <div className="hidden md:flex flex-col items-center justify-center p-8 bg-primary text-primary-foreground">
-                <Logo className="h-24 w-24 text-white"/>
-                <h2 className="text-3xl font-bold font-headline mt-4">Welcome to Sanjiwani</h2>
-                <p className="mt-2 text-center text-primary-foreground/80">Your trusted partner in health. Find doctors, book appointments, and manage your care seamlessly.</p>
+             <div className="hidden md:flex flex-col items-center justify-center p-8 bg-primary text-primary-foreground relative">
+                <Image
+                    src="https://picsum.photos/seed/login-art/800/1200"
+                    alt="Healthcare professionals"
+                    layout="fill"
+                    objectFit="cover"
+                    className="opacity-20"
+                    data-ai-hint="doctors nurses team"
+                />
+                 <div className="relative z-10 text-center">
+                    <Logo className="h-24 w-24 text-white mx-auto"/>
+                    <h2 className="text-3xl font-bold font-headline mt-4">Welcome to Sanjiwani</h2>
+                    <p className="mt-2 text-center text-primary-foreground/80">Your trusted partner in health. Find doctors, book appointments, and manage your care seamlessly.</p>
+                </div>
             </div>
 
             <div className="p-6 md:p-8">
