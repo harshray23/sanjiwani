@@ -63,13 +63,16 @@ export default function LoginPage() {
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
     try {
-      console.log("Signing in with values:", values);
       await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Signed In Successfully",
         description: "Welcome back! Redirecting you now...",
       });
-      router.push('/');
+      if (values.role === 'doctor') {
+        router.push('/dashboard/doctor');
+      } else {
+        router.push('/');
+      }
     } catch (error: any) {
        let description = "An unknown error occurred. Please try again.";
        if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
@@ -88,13 +91,16 @@ export default function LoginPage() {
   async function onSignUp(values: z.infer<typeof signUpSchema>) {
     setIsLoading(true);
     try {
-      console.log("Signing up with values:", values);
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Account Created Successfully",
-        description: "Welcome! Redirecting you to the homepage...",
+        description: "Welcome! Redirecting you now...",
       });
-       router.push('/');
+       if (values.role === 'doctor') {
+        router.push('/dashboard/doctor');
+      } else {
+        router.push('/');
+      }
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === AuthErrorCodes.EMAIL_EXISTS) {

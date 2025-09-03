@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Loader2, LogOut, User as UserIcon } from 'lucide-react';
+import { Loader2, LogOut, User as UserIcon, LayoutDashboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -70,6 +70,7 @@ export function UserNav() {
   }
   
   const fallbackColor = user.email ? getAvatarColor(user.email) : 'bg-gray-500';
+  const isDoctor = user.email?.includes('dr.') || user.email === 'doctor@test.com'; // Mock check for doctor role
 
   return (
      <DropdownMenu>
@@ -100,6 +101,14 @@ export function UserNav() {
                 <span>My Appointments</span>
             </Link>
           </DropdownMenuItem>
+           {isDoctor && (
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard/doctor">
+                    <LayoutDashboard className="mr-2 h-4 w-4"/>
+                    <span>Doctor Dashboard</span>
+                </Link>
+             </DropdownMenuItem>
+           )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

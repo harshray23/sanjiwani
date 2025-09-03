@@ -332,6 +332,18 @@ export const getAppointmentsForUser = async (patientId: string): Promise<Appoint
   });
 };
 
+export const getAppointmentsForDoctor = async (doctorId: string): Promise<Appointment[]> => {
+  return new Promise(resolve => {
+    const doctorAppointments = appointments.filter(a => a.doctor.id === doctorId);
+    doctorAppointments.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time.split(' ')[0]}:00`).getTime();
+        const dateB = new Date(`${b.date}T${b.time.split(' ')[0]}:00`).getTime();
+        return dateB - dateA;
+    });
+    setTimeout(() => resolve(doctorAppointments), 500);
+  });
+};
+
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
    return new Promise(resolve => {
