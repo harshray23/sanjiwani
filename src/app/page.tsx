@@ -2,42 +2,74 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, MapPin, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 
 export default function HomePage() {
 
+  const quickLinks = [
+    { href: '/hospitals', label: 'Hospitals', icon: <Hospital /> },
+    { href: '/search', label: 'Doctors', icon: <Stethoscope /> },
+    { href: '/appointments', label: 'Appointments', icon: <CalendarCheck /> },
+    { href: '/search?query=clinic', label: 'Clinics', icon: <Building /> },
+  ];
+
   return (
     <div className="w-full space-y-24">
       {/* Hero Section */}
-      <section className="text-center py-16 md:py-24 relative rounded-xl overflow-hidden">
-         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-green-500 opacity-80"></div>
-        <div className="container mx-auto px-4 relative z-10">
-           <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-white">
-            Find Care, Instantly.
-          </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto">
-            Book doctor appointments, check hospital bed availability, and manage all your health records in one place.
-          </p>
-          <div className="max-w-2xl mx-auto bg-card p-4 rounded-lg shadow-lg">
+      <section className="text-center py-16 md:py-24 relative rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/50 dark:to-green-950/50">
+         <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 items-center">
+           <div className="text-left">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-primary">
+              Find Care, Instantly.
+            </h1>
+            <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-xl">
+              Book doctor appointments, check hospital bed availability, and manage all your health records in one place.
+            </p>
+           </div>
+           <div className="relative h-64 md:h-96">
+                <Image
+                    src="https://picsum.photos/seed/hero/600/400"
+                    alt="Healthcare professional assisting a patient"
+                    fill
+                    className="object-contain"
+                    data-ai-hint="doctor patient illustration"
+                />
+            </div>
+        </div>
+      </section>
+
+      {/* Search & Quick Links Section */}
+      <section className="container mx-auto px-4 -mt-36 relative z-20">
+          <div className="max-w-3xl mx-auto bg-card p-4 rounded-2xl shadow-2xl">
             <form action="/search" method="GET">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   name="query"
-                  placeholder="Search hospitals, clinics, doctors, or specialties..."
-                  className="w-full h-14 pl-12 pr-32 rounded-md text-lg border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Search hospitals, clinics, doctors, specialties..."
+                  className="w-full h-16 pl-14 pr-32 rounded-full text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary"
                 />
-                <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md">
+                <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-12 px-8">
                   Search
                 </Button>
               </div>
             </form>
           </div>
-        </div>
+           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {quickLinks.map((link) => (
+              <Button key={link.href} asChild variant="outline" size="lg" className="h-16 text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg border-primary/20">
+                <Link href={link.href} className="flex flex-col md:flex-row items-center justify-center gap-2">
+                  {link.icon}
+                  <span>{link.label}</span>
+                </Link>
+              </Button>
+            ))}
+          </div>
       </section>
+
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 bg-muted rounded-lg">
