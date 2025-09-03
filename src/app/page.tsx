@@ -205,7 +205,7 @@ export default function HomePage() {
           <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
             <Phone className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-primary">
+          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">
             Get In Touch
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
