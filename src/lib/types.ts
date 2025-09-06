@@ -1,5 +1,11 @@
 
 
+export interface User {
+    uid: string;
+    email: string;
+    role: 'customer' | 'doctor' | 'clinic' | 'hospital' | 'diagnostics_centres' | 'admin';
+}
+
 export interface Doctor {
   id: string;
   name: string;
@@ -51,7 +57,7 @@ export interface Appointment {
   doctor: Doctor;
   clinic: Clinic;
   time: string;
-  date: string; // e.g., "2024-07-30"
+  date: string; // ISO string
   status: 'Confirmed' | 'Completed' | 'Cancelled';
   appointmentType: 'clinic' | 'video';
   token: string;

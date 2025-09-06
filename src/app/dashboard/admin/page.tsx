@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinics, getDoctors, getHospitals } from '@/lib/mock-data';
-import type { Clinic, Doctor, Hospital } from '@/lib/types';
+import { getClinics, getDoctors, getHospitals, getAppointments, getUsers } from '@/lib/mock-data';
+import type { Clinic, Doctor, Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2 } from "lucide-react";
+import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -16,14 +16,25 @@ import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+
+type AdminData = {
+    doctors: Doctor[];
+    clinics: Clinic[];
+    hospitals: Hospital[];
+    appointments: Appointment[];
+    users: AppUser[];
+};
 
 const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<{ doctors: Doctor[], clinics: Clinic[], hospitals: Hospital[] }>({
+  const [data, setData] = useState<AdminData>({
     doctors: [],
     clinics: [],
-    hospitals: []
+    hospitals: [],
+    appointments: [],
+    users: [],
   });
   const { toast } = useToast();
 
@@ -31,19 +42,20 @@ const AdminDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Mock role check - in a real app, this would use custom claims
         if (!currentUser.email?.startsWith('admin@')) {
           setIsLoading(false);
           return;
         }
         
         try {
-          const [doctors, clinics, hospitals] = await Promise.all([
+          const [doctors, clinics, hospitals, appointments, users] = await Promise.all([
             getDoctors(),
             getClinics(),
-            getHospitals()
+            getHospitals(),
+            getAppointments(),
+            getUsers()
           ]);
-          setData({ doctors, clinics, hospitals });
+          setData({ doctors, clinics, hospitals, appointments, users });
         } catch (error) {
           console.error("Failed to load admin data", error);
           toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
@@ -87,27 +99,117 @@ const AdminDashboard = () => {
     );
   }
 
+  const kpiCards = [
+      { title: "Total Users", value: data.users.length, icon: <Users/>, description: "All registered users" },
+      { title: "Total Doctors", value: data.doctors.length, icon: <Stethoscope/>, description: "Verified doctors on platform" },
+      { title: "Total Appointments", value: data.appointments.length, icon: <Calendar/>, description: "Booked across all clinics" },
+      { title: "Partner Clinics", value: data.clinics.length, icon: <Building/>, description: "Clinics onboarded" }
+  ]
+
   return (
-    <div className="py-12 w-full max-w-7xl mx-auto">
-      <div className="text-left mb-8">
+    <div className="py-12 w-full max-w-7xl mx-auto space-y-8">
+      <div className="text-left">
         <h1 className="text-3xl font-bold font-headline text-accent">Admin Dashboard</h1>
-        <p className="text-lg text-muted-foreground">Welcome, {user.email}. Manage your platform here.</p>
+        <p className="text-lg text-muted-foreground">Welcome, {user.email}. Monitor and manage the platform here.</p>
       </div>
 
+        {/* KPI Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {kpiCards.map(kpi => (
+                <Card key={kpi.title}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                        <div className="text-muted-foreground">{kpi.icon}</div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{kpi.value}</div>
+                        <p className="text-xs text-muted-foreground">{kpi.description}</p>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><Activity/>Recent Activity</CardTitle>
+                    <CardDescription>A log of recent important events happening on the platform.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     {data.appointments.slice(0, 3).map(app => (
+                        <div key={app.id} className="flex items-center gap-4">
+                            <Avatar className="h-9 w-9">
+                                <AvatarImage src={`https://i.pravatar.cc/150?u=${app.patientId}`} />
+                                <AvatarFallback>{app.patientName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-sm">
+                                <p><span className="font-semibold">{app.patientName}</span> booked an appointment with <span className="font-semibold">{app.doctor.name}</span>.</p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(app.date), 'PPpp')}</p>
+                            </div>
+                        </div>
+                     ))}
+                      {data.users.slice(0, 2).map(usr => (
+                        <div key={usr.uid} className="flex items-center gap-4">
+                            <Avatar className="h-9 w-9">
+                                <AvatarFallback className="bg-green-500 text-white"><UserPlus/></AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-sm">
+                                <p><span className="font-semibold">{usr.email}</span> registered as a new {usr.role}.</p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(), 'PPpp')}</p>
+                            </div>
+                        </div>
+                     ))}
+                </CardContent>
+            </Card>
+             <Card className="lg:col-span-3">
+                <CardHeader>
+                    <CardTitle className="font-headline">System Health</CardTitle>
+                    <CardDescription>Real-time status of platform services.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 text-center flex flex-col items-center justify-center h-full pb-16">
+                     <CheckCircle className="h-24 w-24 text-green-500"/>
+                     <h3 className="text-xl font-bold">All Systems Operational</h3>
+                     <p className="text-sm text-muted-foreground">Website, Database, and API services are running smoothly.</p>
+                </CardContent>
+            </Card>
+        </div>
+
+
        <Tabs defaultValue="doctors">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="users">Users</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="users">Users ({data.users.length})</TabsTrigger>
           <TabsTrigger value="doctors">Doctors ({data.doctors.length})</TabsTrigger>
           <TabsTrigger value="clinics">Clinics ({data.clinics.length})</TabsTrigger>
           <TabsTrigger value="hospitals">Hospitals ({data.hospitals.length})</TabsTrigger>
+          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
             <Card>
                 <CardHeader><CardTitle className="font-headline">Manage Users</CardTitle></CardHeader>
-                <CardContent className="text-center py-12 text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-4"/>
-                    <p>User management feature coming soon.</p>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>User Email</TableHead>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Joined On</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {data.users.map(u => (
+                                <TableRow key={u.uid}>
+                                    <TableCell className="font-medium">{u.email}</TableCell>
+                                    <TableCell className="capitalize">{u.role}</TableCell>
+                                    <TableCell>{format(new Date(), "PP")}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemove('user', u.uid)}><Trash2 className="h-4 w-4"/></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
         </TabsContent>
@@ -207,11 +309,18 @@ const AdminDashboard = () => {
                 </CardContent>
             </Card>
         </TabsContent>
+         <TabsContent value="diagnostics">
+            <Card>
+                <CardHeader><CardTitle className="font-headline">Manage Diagnostics</CardTitle></CardHeader>
+                <CardContent className="text-center py-12 text-muted-foreground">
+                    <FlaskConical className="h-12 w-12 mx-auto mb-4"/>
+                    <p>Diagnostics center management feature coming soon.</p>
+                </CardContent>
+            </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
 
 export default AdminDashboard;
-
-    

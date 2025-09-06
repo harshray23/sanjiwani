@@ -1,6 +1,6 @@
 
 
-import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment } from './types';
+import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment, User } from './types';
 import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
@@ -235,9 +235,23 @@ const testAppointments: TestAppointment[] = [
 ];
 
 // In a real app, this would be a database. We'll use an in-memory array for now.
-const appointments: Appointment[] = [];
+let appointments: Appointment[] = [
+    { id: 'apt-1', patientId: 'user-1', patientName: 'John Doe', doctor: doctors[0], clinic: clinics[0], time: '09:00 AM', date: '2024-07-28', status: 'Completed', appointmentType: 'clinic', token: 'ABC123', feeDetails: { consultationFee: 500, platformFee: 50, total: 550 } },
+    { id: 'apt-2', patientId: 'user-2', patientName: 'Jane Smith', doctor: doctors[2], clinic: clinics[1], time: '11:00 AM', date: '2024-07-29', status: 'Confirmed', appointmentType: 'clinic', token: 'DEF456', feeDetails: { consultationFee: 400, platformFee: 50, total: 450 } },
+];
+
+const users: User[] = [
+    { uid: 'user-1', email: 'customer@demo.com', role: 'customer' },
+    { uid: 'user-2', email: 'doctor@demo.com', role: 'doctor' },
+    { uid: 'user-3', email: 'admin@demo.com', role: 'admin' },
+    { uid: 'user-4', email: 'clinic@demo.com', role: 'clinic' },
+];
 
 // Helper functions to simulate data fetching
+export const getUsers = async (): Promise<User[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(users), 300));
+}
+
 export const getClinics = async (): Promise<Clinic[]> => {
   return new Promise(resolve => setTimeout(() => resolve(clinics), 500));
 };
@@ -277,7 +291,7 @@ export const searchHospitals = async (query: string): Promise<Hospital[]> => {
     const filteredHospitals = hospitals.filter(hospital => 
         hospital.name.toLowerCase().includes(lowerCaseQuery) || 
         hospital.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery)) ||
-        hospital.location.toLowerCase().includes(lowerCaseQuery)
+        hospital.location.address.toLowerCase().includes(lowerCaseQuery)
     );
     return new Promise(resolve => setTimeout(() => resolve(filteredHospitals), 500));
 };
@@ -299,6 +313,10 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 
 // --- Appointment Management ---
+export const getAppointments = async (): Promise<Appointment[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(appointments), 500));
+};
+
 export const createAppointment = async (
   patientId: string, 
   patientName: string, 
@@ -319,7 +337,7 @@ export const createAppointment = async (
       doctor,
       clinic,
       time: slot,
-      date: new Date().toISOString().split('T')[0], // Today's date
+      date: new Date().toISOString(),
       status: 'Confirmed',
       appointmentType: 'clinic',
       token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
@@ -354,7 +372,7 @@ export const createVideoConsultationAppointment = async (
       doctor,
       clinic,
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       status: 'Confirmed',
       appointmentType: 'video',
       token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
@@ -374,8 +392,8 @@ export const getAppointmentsForUser = async (patientId: string): Promise<Appoint
   return new Promise(resolve => {
     const userAppointments = appointments.filter(a => a.patientId === patientId);
     userAppointments.sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.time.split(' ')[0]}:00`).getTime();
-        const dateB = new Date(`${b.date}T${b.time.split(' ')[0]}:00`).getTime();
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
         return dateB - dateA;
     });
     setTimeout(() => resolve(userAppointments), 500);
@@ -386,8 +404,8 @@ export const getAppointmentsForDoctor = async (doctorId: string): Promise<Appoin
   return new Promise(resolve => {
     const doctorAppointments = appointments.filter(a => a.doctor.id === doctorId);
     doctorAppointments.sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.time.split(' ')[0]}:00`).getTime();
-        const dateB = new Date(`${b.date}T${b.time.split(' ')[0]}:00`).getTime();
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
         return dateB - dateA;
     });
     setTimeout(() => resolve(doctorAppointments), 500);
