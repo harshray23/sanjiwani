@@ -1,5 +1,6 @@
 
-import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback } from './types';
+
+import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment } from './types';
 import { Timestamp } from 'firebase/firestore';
 
 const doctors: Doctor[] = [
@@ -199,6 +200,40 @@ const hospitals: Hospital[] = [
   }
 ];
 
+// --- Diagnostics Data ---
+const diagnosticTests: DiagnosticTest[] = [
+    { id: 'test-1', name: 'Complete Blood Count (CBC)', price: 300, category: 'Hematology' },
+    { id: 'test-2', name: 'Lipid Profile', price: 600, category: 'Biochemistry' },
+    { id: 'test-3', name: 'Thyroid Function Test (TFT)', price: 750, category: 'Endocrinology' },
+    { id: 'test-4', name: 'X-Ray Chest', price: 500, category: 'Radiology' },
+    { id: 'test-5', name: 'Ultrasound Abdomen', price: 1200, category: 'Radiology' },
+];
+
+const pathologists: Pathologist[] = [
+    { id: 'path-1', name: 'Dr. Anya Sharma', qualifications: ['MD', 'Pathology'], imageUrl: 'https://picsum.photos/seed/path1/100/100' },
+    { id: 'path-2', name: 'Dr. Rohan Gupta', qualifications: ['DCP', 'MBBS'], imageUrl: 'https://picsum.photos/seed/path2/100/100' }
+];
+
+const diagnosticsCentres: DiagnosticsCentre[] = [
+    {
+        id: 'diag-1',
+        name: 'Precision Diagnostics',
+        location: '456 Lab Lane, Metro City',
+        contact: { phone: '(123) 987-6543', email: 'contact@precisiondiag.com' },
+        rating: 4.8,
+        imageUrl: 'https://picsum.photos/seed/diag1/600/400',
+        dataAiHint: 'diagnostics laboratory',
+        tests: diagnosticTests,
+        pathologists: pathologists,
+    }
+];
+
+const testAppointments: TestAppointment[] = [
+    { id: 'test-apt-1', patientId: 'user-1', patientName: 'John Doe', centreId: 'diag-1', test: diagnosticTests[0], date: '2024-08-01', time: '10:00 AM', status: 'Report Ready', reportUrl: '/path/to/mock-report-1.pdf' },
+    { id: 'test-apt-2', patientId: 'user-2', patientName: 'Jane Smith', centreId: 'diag-1', test: diagnosticTests[2], date: '2024-08-02', time: '11:30 AM', status: 'Completed' },
+    { id: 'test-apt-3', patientId: 'user-3', patientName: 'Peter Jones', centreId: 'diag-1', test: diagnosticTests[3], date: '2024-08-03', time: '02:00 PM', status: 'Scheduled' },
+];
+
 // In a real app, this would be a database. We'll use an in-memory array for now.
 const appointments: Appointment[] = [];
 
@@ -242,9 +277,24 @@ export const searchHospitals = async (query: string): Promise<Hospital[]> => {
     const filteredHospitals = hospitals.filter(hospital => 
         hospital.name.toLowerCase().includes(lowerCaseQuery) || 
         hospital.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery)) ||
-        hospital.location.address.toLowerCase().includes(lowerCaseQuery)
+        hospital.location.toLowerCase().includes(lowerCaseQuery)
     );
     return new Promise(resolve => setTimeout(() => resolve(filteredHospitals), 500));
+};
+
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(diagnosticsCentres), 500));
+};
+
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
+    return new Promise(resolve => setTimeout(() => resolve(diagnosticsCentres.find(c => c.id === id)), 500));
+};
+
+export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
+  return new Promise(resolve => {
+    const centreAppointments = testAppointments.filter(a => a.centreId === centreId);
+    setTimeout(() => resolve(centreAppointments), 500);
+  });
 };
 
 

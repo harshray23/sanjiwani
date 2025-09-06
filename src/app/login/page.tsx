@@ -24,6 +24,7 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  signOut,
   AuthErrorCodes
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -45,6 +46,17 @@ const signUpSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   role: roleEnum.refine(val => val !== undefined, { message: "Role is required" }),
 });
+
+// A mock function to determine user role from email.
+// In a real app, this would come from a database or custom claims.
+const getRoleFromEmail = (email: string): string => {
+    if (email.startsWith('doctor@')) return 'doctor';
+    if (email.startsWith('clinic@')) return 'clinic';
+    if (email.startsWith('hospital@')) return 'hospital';
+    if (email.startsWith('diagnostics@')) return 'diagnostics_centres';
+    if (email.startsWith('admin@')) return 'admin';
+    return 'customer';
+}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +84,9 @@ export default function LoginPage() {
       case 'hospital':
         router.push('/dashboard/hospital');
         break;
+       case 'diagnostics_centres':
+        router.push('/dashboard/diagnostics');
+        break;
       case 'admin':
         router.push('/dashboard/admin');
         break;
@@ -84,12 +99,25 @@ export default function LoginPage() {
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: "Signed In Successfully",
-        description: "Welcome back! Redirecting you now...",
-      });
-      handleAuthSuccess(values.role);
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+      
+      const registeredRole = getRoleFromEmail(user.email || '');
+
+      if (registeredRole !== values.role) {
+        toast({
+          title: "Access Denied",
+          description: "The role you selected does not match your registered role. Please select the correct role.",
+          variant: "destructive",
+        });
+        await signOut(auth); // Sign out the user immediately
+      } else {
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Redirecting you now...",
+        });
+        handleAuthSuccess(values.role);
+      }
     } catch (error: any) {
        let description = "An unknown error occurred. Please try again.";
        if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
@@ -108,13 +136,27 @@ export default function LoginPage() {
   async function onSignUp(values: z.infer<typeof signUpSchema>) {
     setIsLoading(true);
     try {
+      const registeredRole = getRoleFromEmail(values.email);
+       if (registeredRole !== values.role) {
+           toast({
+               title: "Sign Up Failed",
+               description: "For demo purposes, your email must match the role. E.g., 'doctor@demo.com' for the Doctor role.",
+               variant: "destructive"
+           });
+           setIsLoading(false);
+           return;
+       }
+
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       toast({
         title: "Account Created Successfully",
         description: "Welcome! Please sign in to continue.",
       });
-      // Redirect to signin so they can log in with their new account
-      router.push('/login'); 
+      
+      // Reset form and potentially switch tabs to sign-in
+      signUpForm.reset();
+      // In a real app you might auto-log-in, but here we'll just clear the form.
+
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
@@ -327,5 +369,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    

@@ -1,0 +1,268 @@
+
+"use client";
+
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/mock-data';
+import type { DiagnosticsCentre, TestAppointment, DiagnosticTest, Pathologist } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { FlaskConical, Calendar, Microscope, UserPlus, FileText, Download, Upload, PlusCircle, Pencil, Trash2 } from "lucide-react";
+import Link from 'next/link';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Lottie from 'lottie-react';
+import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { format } from 'date-fns';
+
+const DiagnosticsDashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
+  const [appointments, setAppointments] = useState<TestAppointment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Mock: Assume user's diagnostics centre is 'diag-1'
+        const centreId = 'diag-1';
+        const [centreData, appointmentData] = await Promise.all([
+          getDiagnosticsCentreById(centreId),
+          getTestAppointmentsForCentre(centreId)
+        ]);
+        
+        if (centreData) {
+          setCentre(centreData);
+        }
+        setAppointments(appointmentData);
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+  
+  const handleUploadReport = (appointmentId: string) => {
+    toast({
+        title: "Action Mocked",
+        description: `This would open a file dialog to upload a report for appointment ${appointmentId}.`,
+    });
+  }
+
+  const handleRemoveTest = (testId: string) => {
+     toast({
+        title: "Action Mocked",
+        description: `This would remove test ${testId}.`,
+    });
+  }
+
+  const getStatusBadgeVariant = (status: TestAppointment['status']) => {
+    switch (status) {
+      case 'Report Ready': return 'default';
+      case 'Completed': return 'secondary';
+      case 'Scheduled': return 'outline';
+      case 'Cancelled': return 'destructive';
+      default: return 'secondary';
+    }
+  }
+
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 h-screen">
+        <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+        <p className="mt-4 text-muted-foreground">Loading Diagnostics Dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!user || !centre) {
+    return (
+      <div className="text-center p-8">
+        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
+        <p className="mt-2 text-muted-foreground">
+          You must be logged in as a diagnostics centre administrator.
+        </p>
+        <Button asChild className="mt-6">
+          <Link href="/login">Go to Login</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-12 w-full max-w-7xl mx-auto">
+      <div className="text-left mb-8">
+        <h1 className="text-3xl font-bold font-headline text-accent">Diagnostics Dashboard</h1>
+        <p className="text-lg text-muted-foreground">Managing {centre.name}</p>
+      </div>
+
+       <Tabs defaultValue="appointments">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="tests">Available Tests ({centre.tests.length})</TabsTrigger>
+          <TabsTrigger value="reports">Test Reports</TabsTrigger>
+          <TabsTrigger value="staff">Manage Staff ({centre.pathologists.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="appointments">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Patient Appointments</CardTitle>
+                    <CardDescription>Manage all scheduled tests for your centre.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Patient</TableHead>
+                                <TableHead>Test Booked</TableHead>
+                                <TableHead>Date & Time</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {appointments.map(app => (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">{app.patientName}</TableCell>
+                                    <TableCell>{app.test.name}</TableCell>
+                                    <TableCell>{format(new Date(app.date), 'PP')} at {app.time}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+         <TabsContent value="tests">
+             <Card>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">Manage Available Tests</CardTitle>
+                        <CardDescription>Add, view, or remove diagnostic tests offered.</CardDescription>
+                    </div>
+                    <Button><PlusCircle className="mr-2"/> Add New Test</Button>
+                </CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Test Name</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {centre.tests.map(test => (
+                                <TableRow key={test.id}>
+                                    <TableCell className="font-medium">{test.name}</TableCell>
+                                    <TableCell>{test.category}</TableCell>
+                                    <TableCell>₹{test.price.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemoveTest(test.id)}><Trash2 className="h-4 w-4"/></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="reports">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Manage Test Reports</CardTitle>
+                    <CardDescription>View completed tests and upload patient reports.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Patient</TableHead>
+                                <TableHead>Test</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').map(app => (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">{app.patientName}</TableCell>
+                                    <TableCell>{app.test.name}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {app.reportUrl ? (
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={app.reportUrl} target="_blank"><Download className="mr-2 h-4 w-4"/> View Report</Link>
+                                            </Button>
+                                        ) : (
+                                            <Button variant="secondary" size="sm" onClick={() => handleUploadReport(app.id)}>
+                                                <Upload className="mr-2 h-4 w-4"/> Upload Report
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+         <TabsContent value="staff">
+            <Card>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">Manage Staff</CardTitle>
+                        <CardDescription>Add or remove pathologists and technicians.</CardDescription>
+                    </div>
+                     <Button><UserPlus className="mr-2"/> Add Staff Member</Button>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Qualifications</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {centre.pathologists.map(staff => (
+                                <TableRow key={staff.id}>
+                                    <TableCell className="font-medium flex items-center gap-3">
+                                        <Avatar className="h-9 w-9">
+                                            <AvatarImage src={staff.imageUrl}/>
+                                            <AvatarFallback>{staff.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        {staff.name}
+                                    </TableCell>
+                                    <TableCell>{staff.qualifications.join(', ')}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default DiagnosticsDashboard;

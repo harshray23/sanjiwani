@@ -1,8 +1,9 @@
 
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
@@ -12,7 +13,7 @@ export default function HomePage() {
   const quickLinks = [
     { href: '/hospitals', label: 'Hospitals', icon: <Hospital className="h-6 w-6"/> },
     { href: '/search', label: 'Doctors', icon: <Stethoscope className="h-6 w-6"/> },
-    { href: '/appointments', label: 'Appointments', icon: <CalendarCheck className="h-6 w-6"/> },
+    { href: '/diagnostics', label: 'Labs', icon: <FlaskConical className="h-6 w-6"/> },
     { href: '/search?query=clinic', label: 'Clinics', icon: <Building className="h-6 w-6"/> },
   ];
 
@@ -49,7 +50,7 @@ export default function HomePage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   name="query"
-                  placeholder="Search hospitals, doctors..."
+                  placeholder="Search hospitals, doctors, labs..."
                   className="w-full h-12 md:h-16 pl-12 pr-28 md:pr-32 rounded-full text-base md:text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner"
                 />
                 <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-10 md:h-12 px-4 md:px-8 glow-on-hover">

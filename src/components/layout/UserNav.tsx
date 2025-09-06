@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { useEffect, useState } from 'react';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield } from 'lucide-react';
+import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield, FlaskConical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -33,6 +34,7 @@ const getRoleFromEmail = (email: string): string => {
     if (email.startsWith('clinic@')) return 'clinic';
     if (email.startsWith('hospital@')) return 'hospital';
     if (email.startsWith('admin@')) return 'admin';
+    if (email.startsWith('diagnostics@')) return 'diagnostics_centres';
     return 'customer';
 }
 
@@ -137,6 +139,14 @@ export function UserNav() {
                 <Link href="/dashboard/hospital">
                     <Hospital className="mr-2 h-4 w-4"/>
                     <span>Hospital Dashboard</span>
+                </Link>
+             </DropdownMenuItem>
+         )}
+         {userRole === 'diagnostics_centres' && (
+             <DropdownMenuItem asChild>
+                <Link href="/dashboard/diagnostics">
+                    <FlaskConical className="mr-2 h-4 w-4"/>
+                    <span>Diagnostics Dashboard</span>
                 </Link>
              </DropdownMenuItem>
          )}

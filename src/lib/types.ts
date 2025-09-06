@@ -1,4 +1,5 @@
 
+
 export interface Doctor {
   id: string;
   name: string;
@@ -87,4 +88,48 @@ export interface Hospital {
     oxygen: { total: number; available: number };
   };
   lastUpdated: any; // Can be Date or Firebase Timestamp
+}
+
+
+// --- Diagnostics Types ---
+
+export interface Pathologist {
+  id: string;
+  name: string;
+  qualifications: string[];
+  imageUrl: string;
+}
+
+export interface DiagnosticTest {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
+
+export interface DiagnosticsCentre {
+  id: string;
+  name: string;
+  location: string;
+  contact: {
+    phone: string;
+    email: string;
+  },
+  rating: number;
+  imageUrl: string;
+  dataAiHint?: string;
+  tests: DiagnosticTest[];
+  pathologists: Pathologist[];
+}
+
+export interface TestAppointment {
+  id: string;
+  patientId: string;
+  patientName: string;
+  centreId: string;
+  test: DiagnosticTest;
+  date: string;
+  time: string;
+  status: 'Scheduled' | 'Completed' | 'Report Ready' | 'Cancelled';
+  reportUrl?: string; // Link to the PDF report
 }
