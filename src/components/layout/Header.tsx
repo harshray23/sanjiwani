@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Stethoscope } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
@@ -49,6 +49,10 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+              <SheetHeader className="sr-only">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription>Main navigation links for Sanjiwani Health.</SheetDescription>
+              </SheetHeader>
               <nav className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
                   <Button key={item.label} variant="ghost" className="justify-start text-lg" asChild>
