@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical, Shield, Star } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
@@ -16,11 +16,18 @@ export default function HomePage() {
     { href: '/diagnostics', label: 'Labs', icon: <FlaskConical className="h-6 w-6"/> },
     { href: '/search?query=clinic', label: 'Clinics', icon: <Building className="h-6 w-6"/> },
   ];
+  
+  const stats = [
+      { value: '5000+', label: 'Verified Doctors', icon: <Shield className="h-8 w-8 text-primary"/>},
+      { value: '200+', label: 'Partner Hospitals', icon: <Hospital className="h-8 w-8 text-primary"/>},
+      { value: '1000+', label: 'Appointments Daily', icon: <CalendarCheck className="h-8 w-8 text-primary"/>},
+      { value: '4.8/5', label: 'Patient Rating', icon: <Star className="h-8 w-8 text-primary fill-primary"/>},
+  ]
 
   return (
     <div className="w-full space-y-12">
       {/* Hero Section */}
-      <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center text-white rounded-xl overflow-hidden">
+      <section className="relative w-full h-auto md:h-[80vh] flex flex-col items-center justify-center text-center text-white rounded-xl overflow-hidden py-12 md:py-0">
         <Image
             src="/img_hospital.jpg"
             alt="A team of doctors collaborating around a futuristic medical interface"
@@ -32,39 +39,44 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 p-4 animate-fade-in-up">
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
-              Find <span className="text-orange-400">Care</span>, Instantly.
+              Your Health Journey <br/> <span className="text-orange-400">Starts Here</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Book doctor appointments, check hospital bed <span className="font-semibold text-orange-400">availability</span>, and manage all your health records in one place.
+            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+              Find trusted doctors, book appointments instantly, and get real-time hospital availability. Quality healthcare is just a click away.
             </p>
              <div className="max-w-2xl mx-auto bg-white/90 dark:bg-card/80 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-2xl">
                 <form action="/search" method="GET" className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                     name="query"
-                    placeholder="Search hospitals, doctors, labs..."
+                    placeholder="Search doctors, hospitals, or specialties..."
                     className="w-full h-12 md:h-14 pl-12 pr-28 md:pr-32 rounded-full text-base md:text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner text-foreground"
                     />
                     <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-10 md:h-12 px-4 md:px-8 glow-on-hover">
-                    Find Care
+                    Search
                     </Button>
                 </form>
             </div>
+             <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                {stats.map((stat) => (
+                <Card key={stat.label} className="bg-white/20 dark:bg-card/30 backdrop-blur-md border-white/30 text-white">
+                    <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
+                        {stat.icon}
+                        <p className="text-2xl font-bold">{stat.value}</p>
+                        <p className="text-sm font-light text-white/80">{stat.label}</p>
+                    </CardContent>
+                </Card>
+                ))}
+            </div>
+             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg" className="h-12 text-base px-10">
+                    <Link href="/search">Book Appointment</Link>
+                </Button>
+                 <Button asChild size="lg" variant="outline" className="h-12 text-base px-10 bg-white/90 text-primary border-primary hover:bg-white hover:text-primary">
+                    <Link href="/hospitals">Find Emergency Care</Link>
+                </Button>
+            </div>
         </div>
-      </section>
-
-      {/* Quick Links Section */}
-      <section className="container mx-auto px-4 -mt-8 relative z-20">
-           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {quickLinks.map((link) => (
-              <Button key={link.href} asChild variant="outline" size="lg" className="h-20 text-sm md:text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-primary/20">
-                <Link href={link.href} className="flex flex-col items-center justify-center gap-2">
-                  {link.icon}
-                  <span>{link.label}</span>
-                </Link>
-              </Button>
-            ))}
-          </div>
       </section>
       
        {/* How It Works Section */}
