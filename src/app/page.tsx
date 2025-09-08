@@ -32,11 +32,11 @@ export default function HomePage() {
            </div>
            <div className="relative h-64 md:h-96">
                 <Image
-                    src="https://picsum.photos/seed/healthcare-illustration/600/400"
-                    alt="Healthcare professional assisting a patient"
+                    src="/img_hospital.jpg"
+                    alt="Abstract spiral staircase representing the journey of healthcare"
                     fill
                     className="object-contain"
-                    data-ai-hint="healthcare doctor patient illustration"
+                    data-ai-hint="abstract architecture"
                 />
             </div>
         </div>
