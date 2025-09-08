@@ -1,0 +1,63 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Publicly readable collections
+    match /clinics/{clinicId} {
+      allow read: if true;
+      allow write: if false; // Should be managed by admins
+    }
+    match /doctors/{doctorId} {
+      allow read: if true;
+      allow write: if false; // Should be managed by admins or doctors themselves
+    }
+    match /hospitals/{hospitalId} {
+      allow read: if true;
+      allow write: if false; // Should be managed by admins
+    }
+    match /diagnostics/{diagId} {
+      allow read: if true;
+      allow write: if false; // Should be managed by admins
+      match /tests/{testId} {
+        allow read: if true;
+        allow write: if false;
+      }
+      match /pathologists/{pathoId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    // Users can only read/update their own profile
+    match /users/{userId} {
+      allow read, update: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn();
+    }
+
+    // Appointments can be created by any signed-in user.
+    // Users can only read their own appointments.
+    match /appointments/{appointmentId} {
+      allow create: if isSignedIn() && request.resource.data.patientId == request.auth.uid;
+      allow read, update: if isSignedIn() && (isOwner(request.resource.data.patientId) || get(/databases/$(database)/documents/doctors/$(request.resource.data.doctor.id)).data.uid == request.auth.uid);
+    }
+    
+    // Test appointments can be created by any signed-in user.
+    // Users can only read their own appointments.
+    match /testAppointments/{appointmentId} {
+        allow create: if isSignedIn() && request.resource.data.patientId == request.auth.uid;
+        allow read: if isSignedIn() && isOwner(request.resource.data.patientId);
+        allow update: if false; // Should be managed by diagnostics center staff
+    }
+  }
+}
