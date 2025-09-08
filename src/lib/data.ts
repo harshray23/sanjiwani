@@ -11,10 +11,13 @@ import {
   updateDoc,
   Timestamp,
   orderBy,
+  setDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment, User } from './types';
-
+import type { User as FirebaseUser } from 'firebase/auth';
+import { Role } from '@/app/login/page';
 
 // Helper to convert Firestore Timestamps to serializable strings in nested objects
 const convertTimestamps = (data: any): any => {
@@ -63,6 +66,25 @@ async function getDocumentById<T>(collectionName:string, id: string): Promise<T 
 
 export const getUsers = async (): Promise<User[]> => {
     return getCollection<User>('users');
+}
+
+export const createUserInFirestore = async (user: FirebaseUser, role: Role, details: any) => {
+    if (!db) throw new Error("Firestore not initialized");
+
+    const userRef = doc(db, "users", user.uid);
+
+    const userData: User = {
+        uid: user.uid,
+        email: user.email!,
+        role: role,
+        createdAt: serverTimestamp(),
+        fullName: details.name,
+        phone: details.phone,
+        address: details.address,
+    };
+
+    await setDoc(userRef, userData);
+    return userData;
 }
 
 export const getClinics = async (): Promise<Clinic[]> => {

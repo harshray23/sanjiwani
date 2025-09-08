@@ -1,5 +1,6 @@
 
 
+
 export interface User {
     uid: string;
     email: string;
@@ -8,6 +9,8 @@ export interface User {
     phone?: string;
     dob?: string; // ISO String
     gender?: 'male' | 'female' | 'other';
+    address?: string;
+    createdAt: any; // serverTimestamp
 }
 
 export interface Doctor {

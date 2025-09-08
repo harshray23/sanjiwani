@@ -32,9 +32,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import Image from "next/image";
+import { createUserInFirestore } from "@/lib/data";
 
 const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
-type Role = z.infer<typeof roleEnum>;
+export type Role = z.infer<typeof roleEnum>;
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -114,7 +115,7 @@ const SignUpForm = () => {
         setIsLoading(true);
         try {
             const registeredRole = getRoleFromEmail(values.email);
-            if (registeredRole !== selectedRole) {
+            if (selectedRole && registeredRole !== selectedRole) {
                 toast({
                     title: "Sign Up Failed",
                     description: `For demo purposes, your email must match the role. E.g., '${selectedRole}@demo.com' for the ${selectedRole} role.`,
@@ -124,7 +125,11 @@ const SignUpForm = () => {
                 return;
             }
 
-            await createUserWithEmailAndPassword(auth, values.email, values.password);
+            const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+            
+            // Save user details to Firestore
+            await createUserInFirestore(userCredential.user, selectedRole || 'customer', values);
+
             toast({
                 title: "Account Created Successfully",
                 description: "Welcome! Please sign in to continue.",
@@ -136,6 +141,10 @@ const SignUpForm = () => {
             let description = "An unknown error occurred. Please try again.";
             if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
                 description = "An account with this email already exists. Please sign in instead.";
+            } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
+                description = "The password is too weak. Please use at least 6 characters.";
+            } else if (error.code === 'auth/invalid-email') {
+                description = "The email address is not valid. Please check and try again.";
             }
             toast({
                 title: "Sign Up Failed",
