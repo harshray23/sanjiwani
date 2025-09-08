@@ -48,6 +48,11 @@ const DoctorDashboard = () => {
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      bio: "",
+      qualifications: "",
+      specialties: "",
+    },
   });
 
   const availabilityForm = useForm<z.infer<typeof availabilityFormSchema>>({
@@ -344,5 +349,3 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
-
-    
