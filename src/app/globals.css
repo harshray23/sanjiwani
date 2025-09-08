@@ -92,6 +92,26 @@
     .glow-on-hover:hover {
         box-shadow: 0 0 15px 5px hsl(var(--primary) / 40%);
     }
+
+    .feature-card {
+        @apply transition-all duration-300 ease-in-out;
+    }
+    .feature-card:hover {
+        @apply transform -translate-y-2 shadow-2xl;
+    }
+    .feature-card.hover-orange:hover {
+        box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.2), 0 10px 10px -5px rgba(249, 115, 22, 0.1);
+    }
+    .feature-card.hover-blue:hover {
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2), 0 10px 10px -5px rgba(59, 130, 246, 0.1);
+    }
+    .feature-card.hover-green:hover {
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2), 0 10px 10px -5px rgba(16, 185, 129, 0.1);
+    }
+    .feature-card.hover-red:hover {
+        box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.2), 0 10px 10px -5px rgba(239, 68, 68, 0.1);
+    }
+
 }
 
 @layer base {

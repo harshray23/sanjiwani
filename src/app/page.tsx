@@ -3,18 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical, Shield, Star } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical, Shield, Star, Microscope } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 
 export default function HomePage() {
 
-  const quickLinks = [
-    { href: '/hospitals', label: 'Hospitals', icon: <Hospital className="h-6 w-6"/> },
-    { href: '/search', label: 'Doctors', icon: <Stethoscope className="h-6 w-6"/> },
-    { href: '/diagnostics', label: 'Labs', icon: <FlaskConical className="h-6 w-6"/> },
-    { href: '/search?query=clinic', label: 'Clinics', icon: <Building className="h-6 w-6"/> },
+  const quickAccessLinks = [
+    { href: '/search', label: 'Find Doctors', description: 'Consult with verified specialists', icon: <Stethoscope className="h-8 w-8 text-orange-500"/>, hoverClass: 'hover-orange' },
+    { href: '/hospitals', label: 'Hospitals', description: 'Real-time bed availability', icon: <Hospital className="h-8 w-8 text-blue-500"/>, hoverClass: 'hover-blue' },
+    { href: '/diagnostics', label: 'Diagnostics', description: 'Book lab tests & health checkups', icon: <Microscope className="h-8 w-8 text-green-500"/>, hoverClass: 'hover-green' },
+    { href: '/hospitals?emergency=true', label: 'Emergency', description: '24/7 emergency services', icon: <HeartPulse className="h-8 w-8 text-red-500"/>, hoverClass: 'hover-red' },
   ];
   
   const stats = [
@@ -25,7 +25,7 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="w-full space-y-12">
+    <div className="w-full space-y-20">
       {/* Hero Section */}
       <section className="relative w-full h-auto md:h-[80vh] flex flex-col items-center justify-center text-center text-white rounded-xl overflow-hidden py-12 md:py-0">
         <Image
@@ -76,6 +76,27 @@ export default function HomePage() {
                     <Link href="/hospitals">Find Emergency Care</Link>
                 </Button>
             </div>
+        </div>
+      </section>
+
+      {/* Quick Access Section */}
+      <section id="quick-access" className="py-16 text-center animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">Quick Access to Healthcare</h2>
+          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">Everything you need for your health journey in one place.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {quickAccessLinks.map((link) => (
+              <Link href={link.href} key={link.label}>
+                <Card className={`text-left p-6 feature-card ${link.hoverClass}`}>
+                    <div className="bg-muted p-4 rounded-lg inline-block mb-4">
+                        {link.icon}
+                    </div>
+                    <h3 className="text-xl font-bold font-headline mb-2">{link.label}</h3>
+                    <p className="text-muted-foreground">{link.description}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
       
