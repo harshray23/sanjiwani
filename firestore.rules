@@ -3,69 +3,71 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // =============================================
-    // Publicly Readable Collections
-    // Allow anyone to read data for doctors, clinics, hospitals, and diagnostics centers.
-    // This is necessary for browsing and search pages.
-    // Writes are disallowed for public users.
-    // =============================================
-    
-    match /doctors/{doctorId} {
-      allow read: if true;
-      allow write: if false; // More specific rules needed for doctor/admin writes
+
+    // Helper function to check if a user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    match /clinics/{clinicId} {
-      allow read: if true;
-      allow write: if false; // More specific rules needed for clinic/admin writes
+    // Helper function to check if the requesting user is the owner of the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Allow logged-in users to create their own user document upon sign-up,
+    // and only allow them to read/update their own document afterwards.
+    match /users/{userId} {
+      allow read, update: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
     }
     
+    // Appointments can be created by any authenticated user for themselves.
+    // Only the user who created the appointment can read it.
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.patientId);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.patientId);
+      allow update, delete: if false; // Disallow updates/deletes for now
+    }
+
+    // Public collections that anyone can read
+    match /clinics/{clinicId} {
+      allow read: if true;
+      allow write: if false; // Protect public data from being changed
+      
+      match /doctors/{doctorId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    match /doctors/{doctorId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /hospitals/{hospitalId} {
       allow read: if true;
-      allow write: if false; // More specific rules needed for hospital/admin writes
+      allow write: if false;
     }
 
     match /diagnostics/{centreId} {
       allow read: if true;
-      allow write: if false; // More specific rules needed for diagnostics/admin writes
-      
-      // Allow reading subcollections of diagnostics centres
-      match /{allChildren=**} {
+      allow write: if false;
+
+      match /tests/{testId} {
         allow read: if true;
+        allow write: if false;
+      }
+      match /pathologists/{pathologistId} {
+        allow read: if true;
+        allow write: if false;
       }
     }
-
-    // =============================================
-    // User-Specific Collections
-    // These collections contain user data and require authentication.
-    // =============================================
     
-    // Users collection for profiles
-    match /users/{userId} {
-      // A user can only read or update their own profile.
-      allow read, update: if request.auth != null && request.auth.uid == userId;
-      // Allow creation of a user document if the user is creating their own.
-      allow create: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Appointments collection
-    match /appointments/{appointmentId} {
-      // Allow a user to create an appointment for themselves.
-      allow create: if request.auth != null && request.resource.data.patientId == request.auth.uid;
-
-      // Allow a user to read their own appointments.
-      // In a real app, you would also allow the relevant doctor/clinic to read this.
-      allow read: if request.auth != null && request.auth.uid == resource.data.patientId;
-      
-      // Allow a user to update their own appointment (e.g., for feedback or status change).
-      allow update: if request.auth != null && request.auth.uid == resource.data.patientId;
-    }
-
-    // Test Appointments (Diagnostics)
-    match /testAppointments/{testAppointmentId} {
-       allow create: if request.auth != null && request.resource.data.patientId == request.auth.uid;
-       allow read, update: if request.auth != null && request.auth.uid == resource.data.patientId;
+     match /testAppointments/{testAppointmentId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.patientId);
+      allow create: if isAuthenticated() && isOwner(request.resource.data.patientId);
+      allow write: if false;
     }
   }
 }
