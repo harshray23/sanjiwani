@@ -111,12 +111,20 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
          {userRole === 'customer' && (
-            <DropdownMenuItem asChild>
-                <Link href="/appointments">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>My Appointments</span>
-                </Link>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>My Profile</span>
+                  </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                  <Link href="/appointments">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>My Appointments</span>
+                  </Link>
+              </DropdownMenuItem>
+            </>
          )}
          {userRole === 'doctor' && (
              <DropdownMenuItem asChild>

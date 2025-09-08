@@ -4,6 +4,10 @@ export interface User {
     uid: string;
     email: string;
     role: 'customer' | 'doctor' | 'clinic' | 'hospital' | 'diagnostics_centres' | 'admin';
+    fullName?: string;
+    phone?: string;
+    dob?: string; // ISO String
+    gender?: 'male' | 'female' | 'other';
 }
 
 export interface Doctor {
