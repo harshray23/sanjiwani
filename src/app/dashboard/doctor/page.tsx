@@ -8,7 +8,7 @@ import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/mo
 import type { Appointment, Doctor, Clinic } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin } from "lucide-react";
+import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -32,15 +32,109 @@ const profileFormSchema = z.object({
 });
 
 const availabilityFormSchema = z.object({
-    location: z.string({
-        required_error: "You need to select a location.",
-    }),
-    newLocationName: z.string().optional(),
-    newLocationAddress: z.string().optional(),
     slots: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one time slot.",
     }),
 });
+
+const availableTimeSlots = [
+  "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+  "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"
+];
+
+const LocationCard = ({ clinic, doctor }: { clinic: Clinic, doctor: Doctor }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const { toast } = useToast();
+    
+    const form = useForm<z.infer<typeof availabilityFormSchema>>({
+        resolver: zodResolver(availabilityFormSchema),
+        defaultValues: {
+            slots: doctor.availableSlots.filter(s => s.isAvailable).map(s => s.time),
+        }
+    });
+
+    const onSubmit = (values: z.infer<typeof availabilityFormSchema>) => {
+        console.log("Updating availability for", clinic.name, values);
+        toast({
+            title: "Availability Updated!",
+            description: `Your schedule for ${clinic.name} has been updated.`,
+        });
+        setIsEditing(false);
+    }
+    
+    return (
+        <Card className="bg-muted/30">
+            <CardHeader>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="font-headline text-lg flex items-center gap-2">
+                           <Building className="h-5 w-5 text-primary"/> {clinic.name}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-2 pl-7 text-sm"><MapPin className="h-4 w-4"/> {clinic.contact.address}</CardDescription>
+                    </div>
+                    {!isEditing && (
+                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                            <Pencil className="mr-2 h-4 w-4"/> Edit
+                        </Button>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent>
+                {isEditing ? (
+                     <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                             <FormField
+                                control={form.control}
+                                name="slots"
+                                render={() => (
+                                    <FormItem>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                            {availableTimeSlots.map((item) => (
+                                                <FormField
+                                                key={item}
+                                                control={form.control}
+                                                name="slots"
+                                                render={({ field }) => (
+                                                    <FormItem key={item} className="flex items-center space-x-2 space-y-0">
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(item)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                    ? field.onChange([...(field.value ?? []), item])
+                                                                    : field.onChange(field.value?.filter((value) => value !== item))
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal text-sm">{item}</FormLabel>
+                                                    </FormItem>
+                                                )}
+                                                />
+                                            ))}
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                />
+                            <div className="flex gap-2 justify-end">
+                                <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                <Button type="submit">Save Timings</Button>
+                            </div>
+                        </form>
+                    </Form>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {doctor.availableSlots.map(slot => (
+                            <Badge key={slot.time} variant={slot.isAvailable ? 'default' : 'secondary'} className="justify-center py-1">
+                                {slot.time}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
 
 const DoctorDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -57,14 +151,6 @@ const DoctorDashboard = () => {
       qualifications: "",
       specialties: "",
     },
-  });
-
-  const availabilityForm = useForm<z.infer<typeof availabilityFormSchema>>({
-      resolver: zodResolver(availabilityFormSchema),
-      defaultValues: {
-          location: undefined,
-          slots: [],
-      }
   });
 
   useEffect(() => {
@@ -107,20 +193,6 @@ const DoctorDashboard = () => {
       console.log(values);
   };
   
-  const onAvailabilitySubmit = (values: z.infer<typeof availabilityFormSchema>) => {
-       toast({
-          title: "Availability Updated!",
-          description: "Your schedule has been updated for the selected location.",
-      });
-      console.log(values);
-      availabilityForm.reset();
-  }
-
-  const availableTimeSlots = [
-      "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-      "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"
-  ];
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
@@ -250,135 +322,20 @@ const DoctorDashboard = () => {
              <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Manage Your Availability</CardTitle>
-                    <CardDescription>Add or update your available time slots at different locations.</CardDescription>
+                    <CardDescription>View and edit your available time slots at your practice locations.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                     <Form {...availabilityForm}>
-                        <form onSubmit={availabilityForm.handleSubmit(onAvailabilitySubmit)} className="space-y-8">
-                             <FormField
-                                control={availabilityForm.control}
-                                name="location"
-                                render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                    <FormLabel className="text-base">Where are you practicing?</FormLabel>
-                                    <FormControl>
-                                        <RadioGroup
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            className="flex flex-col space-y-2"
-                                        >
-                                            {clinics.map(clinic => (
-                                                <FormItem key={clinic.id} className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
-                                                    <FormControl>
-                                                        <RadioGroupItem value={clinic.id} />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal w-full cursor-pointer">
-                                                        <div className="flex justify-between items-center">
-                                                            <div className="space-y-1">
-                                                                <p className="font-semibold flex items-center gap-2"><Building className="h-4 w-4"/> {clinic.name}</p>
-                                                                <p className="text-sm text-muted-foreground flex items-center gap-2 pl-6"><MapPin className="h-4 w-4"/> {clinic.contact.address}</p>
-                                                            </div>
-                                                        </div>
-                                                    </FormLabel>
-                                                </FormItem>
-                                            ))}
-                                            <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
-                                                <FormControl>
-                                                    <RadioGroupItem value="new" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal w-full cursor-pointer flex items-center gap-2"><PlusCircle className="h-4 w-4"/> At a New Location</FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
-                                                <FormControl>
-                                                    <RadioGroupItem value="home" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal w-full cursor-pointer flex items-center gap-2"><Home className="h-4 w-4"/> At Home (for house calls)</FormLabel>
-                                            </FormItem>
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-
-                            {availabilityForm.watch('location') === 'new' && (
-                                <div className="grid sm:grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
-                                     <FormField
-                                        control={availabilityForm.control}
-                                        name="newLocationName"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>New Clinic/Hospital Name</FormLabel>
-                                            <FormControl><Input placeholder="e.g., Wellness Clinic" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={availabilityForm.control}
-                                        name="newLocationAddress"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Address</FormLabel>
-                                            <FormControl><Input placeholder="123 Health St, City" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            )}
-
-                             <FormField
-                                control={availabilityForm.control}
-                                name="slots"
-                                render={() => (
-                                    <FormItem>
-                                        <div className="mb-4">
-                                            <FormLabel className="text-base">Select Available Time Slots</FormLabel>
-                                            <CardDescription>Choose the times you will be available at this location.</CardDescription>
-                                        </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                            {availableTimeSlots.map((item) => (
-                                                <FormField
-                                                key={item}
-                                                control={availabilityForm.control}
-                                                name="slots"
-                                                render={({ field }) => {
-                                                    return (
-                                                    <FormItem
-                                                        key={item}
-                                                        className="flex flex-row items-start space-x-3 space-y-0"
-                                                    >
-                                                        <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(item)}
-                                                            onCheckedChange={(checked) => {
-                                                            return checked
-                                                                ? field.onChange([...(field.value ?? []), item])
-                                                                : field.onChange(
-                                                                    field.value?.filter(
-                                                                    (value) => value !== item
-                                                                    )
-                                                                )
-                                                            }}
-                                                        />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal">
-                                                        {item}
-                                                        </FormLabel>
-                                                    </FormItem>
-                                                    )
-                                                }}
-                                                />
-                                            ))}
-                                        </div>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                            <Button type="submit">Update Availability</Button>
-                        </form>
-                    </Form>
+                <CardContent className="space-y-4">
+                    {clinics.map(clinic => (
+                        <LocationCard key={clinic.id} clinic={clinic} doctor={doctor} />
+                    ))}
+                     <Card className="border-dashed">
+                        <CardContent className="p-6 text-center">
+                            <Button variant="outline">
+                                <PlusCircle className="mr-2 h-4 w-4"/>
+                                Add a New Practice Location
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </CardContent>
              </Card>
         </TabsContent>
@@ -388,3 +345,6 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
+
+
+    
