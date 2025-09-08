@@ -1,18 +1,27 @@
 
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Logo from './Logo';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+
 
 export function Header() {
+  const serviceItems = [
+    { href: '/search', label: 'Find Doctors', icon: <Stethoscope/> },
+    { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital/> },
+    { href: '/search', label: 'Find Clinics', icon: <Building/> },
+    { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical/> },
+  ];
+
   const navItems = [
     { href: '/', label: 'Home' },
-    { href: '/hospitals', label: 'Find a Hospital' },
-    { href: '/search', label: 'Find a Doctor/Clinic' },
-    { href: '/diagnostics', label: 'Find Diagnostics' },
     { href: '/appointments', label: 'My Appointments' },
   ];
 
@@ -33,6 +42,27 @@ export function Header() {
               </Link>
             </Button>
           ))}
+          
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="group">
+                    Our Services
+                    <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180" />
+                    <span className="block max-w-0 group-hover:max-w-full transition-all duration-300 h-0.5 bg-primary"></span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {serviceItems.map((item) => (
+                <DropdownMenuItem key={item.label} asChild>
+                  <Link href={item.href}>
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Suspense fallback={<Button>Login</Button>}>
              <UserNav />
           </Suspense>
@@ -60,6 +90,19 @@ export function Header() {
                     <Link href={item.href}>{item.label}</Link>
                   </Button>
                 ))}
+                 <div className="border-t pt-4">
+                    <h3 className="px-3 text-sm font-semibold text-muted-foreground">Our Services</h3>
+                    <div className="mt-2 space-y-2">
+                         {serviceItems.map((item) => (
+                            <Button key={item.label} variant="ghost" className="justify-start text-lg w-full" asChild>
+                                <Link href={item.href} className="flex items-center gap-2">
+                                     {item.icon}
+                                     {item.label}
+                                </Link>
+                            </Button>
+                         ))}
+                    </div>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
