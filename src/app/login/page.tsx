@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, KeyRound, UserPlus } from "lucide-react";
+import { Loader2, KeyRound, UserPlus, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { auth } from '@/lib/firebase';
 import { 
@@ -34,6 +34,7 @@ import Logo from "@/components/layout/Logo";
 import Image from "next/image";
 
 const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
+type Role = z.infer<typeof roleEnum>;
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -41,14 +42,40 @@ const signInSchema = z.object({
   role: roleEnum.refine(val => val !== undefined, { message: "Role is required" }),
 });
 
-const signUpSchema = z.object({
+const baseSignUpSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  role: roleEnum.refine(val => val !== undefined, { message: "Role is required" }),
 });
 
-// A mock function to determine user role from email.
-// In a real app, this would come from a database or custom claims.
+const doctorSignUpSchema = baseSignUpSchema.extend({
+    name: z.string().min(2, "Name is required."),
+    address: z.string().min(5, "Address is required."),
+    phone: z.string().min(10, "A valid phone number is required."),
+    qualifications: z.string().min(2, "Qualifications are required."),
+});
+
+const clinicSignUpSchema = baseSignUpSchema.extend({
+    name: z.string().min(2, "Clinic name is required."),
+    address: z.string().min(5, "Address is required."),
+    officePhone: z.string().min(10, "A valid office phone number is required."),
+    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+});
+
+const hospitalSignUpSchema = baseSignUpSchema.extend({
+    name: z.string().min(2, "Hospital name is required."),
+    address: z.string().min(5, "Address is required."),
+    officePhone: z.string().min(10, "A valid office phone number is required."),
+    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+});
+
+const diagnosticsSignUpSchema = baseSignUpSchema.extend({
+    name: z.string().min(2, "Center name is required."),
+    address: z.string().min(5, "Address is required."),
+    officePhone: z.string().min(10, "A valid office phone number is required."),
+    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+});
+
+
 const getRoleFromEmail = (email: string): string => {
     if (email.startsWith('doctor@')) return 'doctor';
     if (email.startsWith('clinic@')) return 'clinic';
@@ -58,6 +85,164 @@ const getRoleFromEmail = (email: string): string => {
     return 'customer';
 }
 
+const SignUpForm = () => {
+    const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
+
+    const form = useForm({
+        resolver: zodResolver(
+            selectedRole === 'doctor' ? doctorSignUpSchema :
+            selectedRole === 'clinic' ? clinicSignUpSchema :
+            selectedRole === 'hospital' ? hospitalSignUpSchema :
+            selectedRole === 'diagnostics_centres' ? diagnosticsSignUpSchema :
+            baseSignUpSchema
+        ),
+        defaultValues: {
+            email: "",
+            password: "",
+            name: "",
+            address: "",
+            phone: "",
+            qualifications: "",
+            officePhone: "",
+            ownerPhone: "",
+        },
+    });
+
+    const handleSignUp = async (values: any) => {
+        setIsLoading(true);
+        try {
+            const registeredRole = getRoleFromEmail(values.email);
+            if (registeredRole !== selectedRole) {
+                toast({
+                    title: "Sign Up Failed",
+                    description: `For demo purposes, your email must match the role. E.g., '${selectedRole}@demo.com' for the ${selectedRole} role.`,
+                    variant: "destructive"
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            await createUserWithEmailAndPassword(auth, values.email, values.password);
+            toast({
+                title: "Account Created Successfully",
+                description: "Welcome! Please sign in to continue.",
+            });
+            form.reset();
+            setSelectedRole(null);
+
+        } catch (error: any) {
+            let description = "An unknown error occurred. Please try again.";
+            if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
+                description = "An account with this email already exists. Please sign in instead.";
+            }
+            toast({
+                title: "Sign Up Failed",
+                description: description,
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (!selectedRole) {
+        return (
+            <div className="space-y-4 pt-4">
+                <Select onValueChange={(value) => setSelectedRole(value as Role)}>
+                    <SelectTrigger className="h-12 text-base">
+                        <SelectValue placeholder="First, select your role..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="doctor">Doctor</SelectItem>
+                        <SelectItem value="clinic">Clinic</SelectItem>
+                        <SelectItem value="hospital">Hospital</SelectItem>
+                        <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                </Select>
+                 <p className="text-sm text-muted-foreground text-center">Select a role to see the required sign-up form.</p>
+            </div>
+        );
+    }
+    
+    const roleTitles: Record<Role, string> = {
+        customer: 'Customer',
+        doctor: 'Doctor',
+        clinic: 'Clinic',
+        hospital: 'Hospital',
+        diagnostics_centres: 'Diagnostics Centre',
+        admin: 'Admin',
+    };
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-4 pt-4">
+                <div className="flex items-center gap-2 mb-4">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedRole(null)}><ArrowLeft/></Button>
+                    <h3 className="font-semibold text-lg text-foreground">Registering as a {roleTitles[selectedRole]}</h3>
+                </div>
+                 <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl><Input type="email" placeholder="your@email.com" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                
+                {selectedRole === 'doctor' && (
+                    <>
+                         <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Dr. John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="123 Medical Lane" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="phone" render={({ field }) => (
+                            <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input placeholder="Your personal phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="qualifications" render={({ field }) => (
+                            <FormItem><FormLabel>Qualifications</FormLabel><FormControl><Input placeholder="MD, MBBS, etc." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </>
+                )}
+                
+                {(selectedRole === 'clinic' || selectedRole === 'hospital' || selectedRole === 'diagnostics_centres') && (
+                     <>
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem><FormLabel>{roleTitles[selectedRole]} Name</FormLabel><FormControl><Input placeholder={`Name of your ${roleTitles[selectedRole]}`} {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Official Address" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="officePhone" render={({ field }) => (
+                            <FormItem><FormLabel>Office Phone</FormLabel><FormControl><Input placeholder="Reception / Office number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="ownerPhone" render={({ field }) => (
+                            <FormItem><FormLabel>Owner's Phone</FormLabel><FormControl><Input placeholder="Contact person's number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Account
+                </Button>
+            </form>
+        </Form>
+    );
+};
+
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -65,11 +250,6 @@ export default function LoginPage() {
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "", role: "customer" },
-  });
-
-  const signUpForm = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
     defaultValues: { email: "", password: "", role: "customer" },
   });
 
@@ -110,7 +290,7 @@ export default function LoginPage() {
           description: "The role you selected does not match your registered role. Please select the correct role.",
           variant: "destructive",
         });
-        await signOut(auth); // Sign out the user immediately
+        await signOut(auth);
       } else {
         toast({
           title: "Signed In Successfully",
@@ -133,44 +313,6 @@ export default function LoginPage() {
     }
   }
 
-  async function onSignUp(values: z.infer<typeof signUpSchema>) {
-    setIsLoading(true);
-    try {
-      const registeredRole = getRoleFromEmail(values.email);
-       if (registeredRole !== values.role) {
-           toast({
-               title: "Sign Up Failed",
-               description: "For demo purposes, your email must match the role. E.g., 'doctor@demo.com' for the Doctor role.",
-               variant: "destructive"
-           });
-           setIsLoading(false);
-           return;
-       }
-
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: "Account Created Successfully",
-        description: "Welcome! Please sign in to continue.",
-      });
-      
-      // Reset form and potentially switch tabs to sign-in
-      signUpForm.reset();
-      // In a real app you might auto-log-in, but here we'll just clear the form.
-
-    } catch (error: any) {
-        let description = "An unknown error occurred. Please try again.";
-        if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
-            description = "An account with this email already exists. Please sign in instead.";
-        }
-        toast({
-          title: "Sign Up Failed",
-          description: description,
-          variant: "destructive",
-       });
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   const handleForgotPassword = async () => {
     const email = signInForm.getValues("email");
@@ -239,7 +381,6 @@ export default function LoginPage() {
                         <TabsTrigger value="signup"><UserPlus className="mr-2 h-4 w-4"/> Sign Up</TabsTrigger>
                         </TabsList>
                         
-                        {/* Sign In Tab */}
                         <TabsContent value="signin" className="pt-4">
                         <Form {...signInForm}>
                             <form onSubmit={signInForm.handleSubmit(onSignIn)} className="space-y-4">
@@ -303,63 +444,8 @@ export default function LoginPage() {
                         </Form>
                         </TabsContent>
 
-                        {/* Sign Up Tab */}
-                        <TabsContent value="signup" className="pt-4">
-                        <Form {...signUpForm}>
-                            <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-4">
-                            <FormField
-                                control={signUpForm.control}
-                                name="email"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <FormControl><Input type="email" placeholder="your@email.com" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={signUpForm.control}
-                                name="password"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={signUpForm.control}
-                                name="role"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Sign up as</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="customer">Customer</SelectItem>
-                                        <SelectItem value="doctor">Doctor</SelectItem>
-                                        <SelectItem value="clinic">Clinic</SelectItem>
-                                        <SelectItem value="hospital">Hospital</SelectItem>
-                                        <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
-                                         <SelectItem value="admin">Admin</SelectItem>
-                                    </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Create Account
-                            </Button>
-                            </form>
-                        </Form>
+                        <TabsContent value="signup">
+                            <SignUpForm />
                         </TabsContent>
                     </Tabs>
                     </CardContent>
