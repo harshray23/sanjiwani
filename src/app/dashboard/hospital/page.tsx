@@ -8,13 +8,14 @@ import { searchHospitals, getAppointmentsForDoctor } from '@/lib/mock-data'; // 
 import type { Hospital, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Hospital as HospitalIcon, BedDouble, Loader2, UserPlus, Users, LogIn } from "lucide-react";
+import { Hospital as HospitalIcon, BedDouble, Loader2, UserPlus, Users, LogIn, Trash2, Pencil } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 const HospitalDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -46,6 +47,13 @@ const HospitalDashboard = () => {
           title: "Bed Availability Updated",
           description: "The real-time bed counts have been saved.",
       });
+  }
+
+   const handleAction = (action: string, entity: string, id: string) => {
+    toast({
+        title: "Action Mocked",
+        description: `This would ${action} the ${entity} with ID: ${id}.`,
+    });
   }
 
   if (isLoading) {
@@ -92,13 +100,42 @@ const HospitalDashboard = () => {
         <p className="text-lg text-muted-foreground">Managing {hospital.name}</p>
       </div>
 
-       <Tabs defaultValue="beds">
-        <TabsList className="grid w-full grid-cols-3">
+       <Tabs defaultValue="profile">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="profile">Hospital Profile</TabsTrigger>
           <TabsTrigger value="beds">Bed Management</TabsTrigger>
-          <TabsTrigger value="staff">Staff Doctors</TabsTrigger>
+          <TabsTrigger value="staff">Staff & Doctors</TabsTrigger>
           <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
         </TabsList>
         
+         <TabsContent value="profile">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Hospital Profile</CardTitle>
+                    <CardDescription>Update your hospital's public information and facilities.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <label className="font-semibold">Hospital Name</label>
+                        <Input defaultValue={hospital.name} />
+                    </div>
+                     <div className="space-y-2">
+                        <label className="font-semibold">Contact Number</label>
+                        <Input defaultValue={hospital.contact} />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="font-semibold">Specialties (comma-separated)</label>
+                        <Input defaultValue={hospital.specialties.join(', ')} />
+                    </div>
+                     <div className="space-y-2">
+                        <label className="font-semibold">Facilities (comma-separated)</label>
+                        <Textarea placeholder="e.g., 24/7 Pharmacy, In-house Lab, Canteen..." />
+                    </div>
+                    <Button onClick={() => toast({title: "Profile Saved!"})}>Save Changes</Button>
+                </CardContent>
+            </Card>
+        </TabsContent>
+
         <TabsContent value="beds">
              <Card>
                 <CardHeader>
@@ -121,12 +158,13 @@ const HospitalDashboard = () => {
                         <CardTitle className="font-headline">Manage Medical Staff</CardTitle>
                         <CardDescription>Onboard new doctors and manage existing staff profiles.</CardDescription>
                     </div>
-                     <Button><UserPlus className="mr-2"/> Add New Doctor</Button>
+                     <Button onClick={() => handleAction('add', 'doctor', '')}><UserPlus className="mr-2"/> Add New Doctor</Button>
                 </CardHeader>
                 <CardContent>
                     <div className="text-center py-12 text-muted-foreground">
                         <Users className="mx-auto h-12 w-12 mb-4"/>
                         <p>Doctor management feature is coming soon.</p>
+                         <p className="text-xs mt-2">Here you would list doctors with options to edit or remove them from the hospital staff.</p>
                     </div>
                 </CardContent>
             </Card>
@@ -151,5 +189,3 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
-
-    

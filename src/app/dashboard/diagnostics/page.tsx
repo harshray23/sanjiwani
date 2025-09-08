@@ -47,17 +47,10 @@ const DiagnosticsDashboard = () => {
     return () => unsubscribe();
   }, []);
   
-  const handleUploadReport = (appointmentId: string) => {
+  const handleAction = (action: string, entity: string, id: string) => {
     toast({
         title: "Action Mocked",
-        description: `This would open a file dialog to upload a report for appointment ${appointmentId}.`,
-    });
-  }
-
-  const handleRemoveTest = (testId: string) => {
-     toast({
-        title: "Action Mocked",
-        description: `This would remove test ${testId}.`,
+        description: `This would ${action} the ${entity} with ID: ${id}.`,
     });
   }
 
@@ -149,7 +142,7 @@ const DiagnosticsDashboard = () => {
                         <CardTitle className="font-headline">Manage Available Tests</CardTitle>
                         <CardDescription>Add, view, or remove diagnostic tests offered.</CardDescription>
                     </div>
-                    <Button><PlusCircle className="mr-2"/> Add New Test</Button>
+                    <Button onClick={() => handleAction('add', 'test', '')}><PlusCircle className="mr-2"/> Add New Test</Button>
                 </CardHeader>
                 <CardContent>
                      <Table>
@@ -168,8 +161,8 @@ const DiagnosticsDashboard = () => {
                                     <TableCell>{test.category}</TableCell>
                                     <TableCell>₹{test.price.toFixed(2)}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemoveTest(test.id)}><Trash2 className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'test', test.id)}><Pencil className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'test', test.id)}><Trash2 className="h-4 w-4"/></Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -208,7 +201,7 @@ const DiagnosticsDashboard = () => {
                                                 <Link href={app.reportUrl} target="_blank"><Download className="mr-2 h-4 w-4"/> View Report</Link>
                                             </Button>
                                         ) : (
-                                            <Button variant="secondary" size="sm" onClick={() => handleUploadReport(app.id)}>
+                                            <Button variant="secondary" size="sm" onClick={() => handleAction('upload report for', 'appointment', app.id)}>
                                                 <Upload className="mr-2 h-4 w-4"/> Upload Report
                                             </Button>
                                         )}
@@ -227,7 +220,7 @@ const DiagnosticsDashboard = () => {
                         <CardTitle className="font-headline">Manage Staff</CardTitle>
                         <CardDescription>Add or remove pathologists and technicians.</CardDescription>
                     </div>
-                     <Button><UserPlus className="mr-2"/> Add Staff Member</Button>
+                     <Button onClick={() => handleAction('add', 'staff member', '')}><UserPlus className="mr-2"/> Add Staff Member</Button>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -250,8 +243,8 @@ const DiagnosticsDashboard = () => {
                                     </TableCell>
                                     <TableCell>{staff.qualifications.join(', ')}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'staff', staff.id)}><Pencil className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'staff', staff.id)}><Trash2 className="h-4 w-4"/></Button>
                                     </TableCell>
                                 </TableRow>
                             ))}

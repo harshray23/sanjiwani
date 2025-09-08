@@ -8,7 +8,7 @@ import { getClinicById, getAppointmentsForDoctor } from '@/lib/mock-data';
 import type { Clinic, Doctor, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Building, Calendar, Clock, Loader2, UserPlus, Users, Pencil, LogIn, Hourglass } from "lucide-react";
+import { Building, Calendar, Clock, Loader2, UserPlus, Users, Pencil, LogIn, Hourglass, Trash2 } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -16,6 +16,8 @@ import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 const ClinicDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -50,6 +52,14 @@ const ClinicDashboard = () => {
           description: "Your clinic hours have been successfully updated.",
       });
   }
+  
+   const handleAction = (action: string, entity: string, id: string) => {
+    toast({
+        title: "Action Mocked",
+        description: `This would ${action} the ${entity} with ID: ${id}.`,
+    });
+  }
+
 
   if (isLoading) {
     return (
@@ -127,7 +137,7 @@ const ClinicDashboard = () => {
                         <CardTitle className="font-headline">Manage Doctors</CardTitle>
                         <CardDescription>Add, view, or remove doctors from your clinic.</CardDescription>
                     </div>
-                    <Button><UserPlus className="mr-2"/> Add New Doctor</Button>
+                    <Button onClick={() => handleAction('add', 'doctor', '')}><UserPlus className="mr-2"/> Add New Doctor</Button>
                 </CardHeader>
                 <CardContent>
                      <div className="space-y-4">
@@ -144,8 +154,8 @@ const ClinicDashboard = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <Button variant="outline" size="sm" className="mr-2"><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
-                                    <Button variant="destructive" size="sm">Remove</Button>
+                                    <Button variant="outline" size="sm" className="mr-2" onClick={() => handleAction('edit', 'doctor', doc.id)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
+                                    <Button variant="destructive" size="sm" onClick={() => handleAction('remove', 'doctor', doc.id)}><Trash2 className="mr-2 h-4 w-4"/>Remove</Button>
                                 </div>
                             </Card>
                         ))}
@@ -162,23 +172,23 @@ const ClinicDashboard = () => {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <label className="font-semibold">Clinic Name</label>
-                        <p className="p-2 border rounded-md bg-muted">{clinic.name}</p>
+                        <Input defaultValue={clinic.name} />
                     </div>
                      <div className="space-y-2">
                         <label className="font-semibold">About Section</label>
-                        <p className="p-2 border rounded-md bg-muted text-sm">{clinic.about}</p>
+                        <Textarea defaultValue={clinic.about} rows={5}/>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                          <div className="space-y-2">
                             <label className="font-semibold flex items-center gap-2"><Hourglass/>Opening Time</label>
-                            <input type="time" defaultValue="09:00" className="p-2 w-full border rounded-md bg-background"/>
+                            <Input type="time" defaultValue="09:00" />
                         </div>
                         <div className="space-y-2">
                             <label className="font-semibold flex items-center gap-2"><Hourglass/>Closing Time</label>
-                            <input type="time" defaultValue="18:00" className="p-2 w-full border rounded-md bg-background"/>
+                            <Input type="time" defaultValue="18:00" />
                         </div>
                     </div>
-                    <Button onClick={handleUpdateTimings}>Update Timings</Button>
+                    <Button onClick={handleUpdateTimings}>Update Information</Button>
                 </CardContent>
             </Card>
         </TabsContent>
@@ -188,5 +198,3 @@ const ClinicDashboard = () => {
 };
 
 export default ClinicDashboard;
-
-    
