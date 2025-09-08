@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Logo from './Logo';
@@ -12,6 +12,7 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/hospitals', label: 'Find a Hospital' },
     { href: '/search', label: 'Find a Doctor/Clinic' },
+    { href: '/diagnostics', label: 'Find Diagnostics' },
     { href: '/appointments', label: 'My Appointments' },
   ];
 
