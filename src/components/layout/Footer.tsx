@@ -10,7 +10,7 @@ export function Footer() {
     { name: "Book Appointments", href: "/search" },
     { name: "Hospital Directory", href: "/hospitals" },
     { name: "Diagnostic Centers", href: "/diagnostics" },
-    { name: "Emergency Services", href: "/hospitals?emergency=true" },
+    { name: "Emergency Services", href: "/hospitals?query=emergency" },
   ];
 
   const forProviders = [
