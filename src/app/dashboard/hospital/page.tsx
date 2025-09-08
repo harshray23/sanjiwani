@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { searchHospitals, getAppointmentsForDoctor } from '@/lib/mock-data'; // Using search to get one
+import { searchHospitals } from '@/lib/data'; // Using search to get one
 import type { Hospital, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';

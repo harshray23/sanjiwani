@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinicById, getAppointmentsForDoctor } from '@/lib/mock-data';
+import { getClinicById, getAppointmentsForClinic } from '@/lib/data';
 import type { Clinic, Doctor, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -35,10 +35,8 @@ const ClinicDashboard = () => {
         const clinicData = await getClinicById(clinicId);
         if (clinicData) {
           setClinic(clinicData);
-          const allAppointments = await Promise.all(
-            clinicData.doctors.map(doc => getAppointmentsForDoctor(doc.id))
-          );
-          setAppointments(allAppointments.flat());
+          const appointmentData = await getAppointmentsForClinic(clinicId);
+          setAppointments(appointmentData);
         }
       }
       setIsLoading(false);

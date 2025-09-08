@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getDoctorById, getClinicById } from '@/lib/mock-data';
+import { getDoctorById, getClinicById } from '@/lib/data';
 import type { Doctor, Clinic } from '@/lib/types';
 import Image from 'next/image';
 import { Loader2, Star, Briefcase, GraduationCap, Calendar, Clock, Sparkles, IndianRupee, Medal, Video } from 'lucide-react';

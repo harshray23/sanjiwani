@@ -45,10 +45,13 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
   let lastUpdatedText = "N/A";
   if (hospital.lastUpdated) {
     const date = hospital.lastUpdated instanceof Timestamp 
-                  ? hospital.lastUpdated.toDate() 
+                  ? hospital.lastUpdated.toDate()
                   : typeof hospital.lastUpdated === 'string' 
                     ? new Date(hospital.lastUpdated)
-                    : hospital.lastUpdated; 
+                    // This handles the case where it might be a Firestore-like object but not a Timestamp instance
+                    : (hospital.lastUpdated as any).toDate ? (hospital.lastUpdated as any).toDate()
+                    : new Date(hospital.lastUpdated);
+
     if (date instanceof Date && !isNaN(date.valueOf())) { 
         lastUpdatedText = format(date, "PPp");
     }

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/mock-data';
+import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/data';
 import type { DiagnosticsCentre, TestAppointment, DiagnosticTest, Pathologist } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getClinicById } from '@/lib/mock-data';
+import { getClinicById } from '@/lib/data';
 import type { Clinic } from '@/lib/types';
 import Image from 'next/image';
 import { DoctorCard } from '@/components/DoctorCard';

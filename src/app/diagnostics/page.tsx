@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getDiagnosticsCentres } from '@/lib/mock-data';
+import { getDiagnosticsCentres } from '@/lib/data';
 import type { DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

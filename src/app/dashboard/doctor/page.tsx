@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/mock-data';
+import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/data';
 import type { Appointment, Doctor, Clinic } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -161,10 +161,12 @@ const DoctorDashboard = () => {
         // For mock, we'll assume the doctor is the first one with a matching email pattern.
         const mockDoctorId = 'doc-1'; // Hardcoding for demo
         const doctorProfile = await getDoctorById(mockDoctorId);
-        const doctorAppointments = await getAppointmentsForDoctor(mockDoctorId);
-
+        
         if (doctorProfile) {
             setDoctor(doctorProfile);
+            const doctorAppointments = await getAppointmentsForDoctor(mockDoctorId);
+            setAppointments(doctorAppointments);
+
             profileForm.reset({
                 bio: doctorProfile.bio,
                 qualifications: doctorProfile.qualifications.join(', '),
@@ -177,8 +179,6 @@ const DoctorDashboard = () => {
                 setClinics([clinicData]);
             }
         }
-        setAppointments(doctorAppointments);
-
       }
       setIsLoading(false);
     });
@@ -345,4 +345,3 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
-

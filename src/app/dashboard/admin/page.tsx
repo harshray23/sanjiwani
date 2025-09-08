@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres } from '@/lib/mock-data';
+import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres } from '@/lib/data';
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';

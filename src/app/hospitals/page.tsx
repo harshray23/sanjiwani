@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchHospitals, getHospitals } from '@/lib/mock-data';
+import { searchHospitals, getHospitals } from '@/lib/data';
 import type { Hospital } from '@/lib/types';
 import { HospitalCard } from '@/components/HospitalCard';
 import { Input } from '@/components/ui/input';

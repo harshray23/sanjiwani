@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForUser, updateAppointmentStatus, updateAppointmentWithVideoConsult, submitAppointmentFeedback } from '@/lib/mock-data';
+import { getAppointmentsForUser, updateAppointmentStatus, updateAppointmentWithVideoConsult, submitAppointmentFeedback } from '@/lib/data';
 import type { Appointment, VideoConsultationDetails, AppointmentFeedback } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';

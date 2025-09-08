@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getDiagnosticsCentreById } from '@/lib/mock-data';
+import { getDiagnosticsCentreById } from '@/lib/data';
 import type { DiagnosticsCentre, DiagnosticTest } from '@/lib/types';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';

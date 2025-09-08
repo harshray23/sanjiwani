@@ -1,0 +1,324 @@
+
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  updateDoc,
+  Timestamp,
+  orderBy,
+} from 'firebase/firestore';
+import { db } from './firebase';
+import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment, User } from './types';
+
+
+// Helper to convert Firestore Timestamps to serializable strings in nested objects
+const convertTimestamps = (data: any): any => {
+    if (data instanceof Timestamp) {
+        return data.toDate().toISOString();
+    }
+    if (Array.isArray(data)) {
+        return data.map(convertTimestamps);
+    }
+    if (data !== null && typeof data === 'object') {
+        const newData: { [key: string]: any } = {};
+        for (const key in data) {
+            newData[key] = convertTimestamps(data[key]);
+        }
+        return newData;
+    }
+    return data;
+};
+
+
+// Generic function to get documents from a collection
+async function getCollection<T>(collectionName: string): Promise<T[]> {
+    if (!db) {
+        console.error("Firestore not initialized");
+        return [];
+    }
+    const querySnapshot = await getDocs(collection(db, collectionName));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+}
+
+// Generic function to get a document by ID
+async function getDocumentById<T>(collectionName:string, id: string): Promise<T | undefined> {
+     if (!db) {
+        console.error("Firestore not initialized");
+        return undefined;
+    }
+    const docRef = doc(db, collectionName, id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        const data = { id: docSnap.id, ...docSnap.data() } as T;
+        return convertTimestamps(data);
+    }
+    return undefined;
+}
+
+
+export const getUsers = async (): Promise<User[]> => {
+    return getCollection<User>('users');
+}
+
+export const getClinics = async (): Promise<Clinic[]> => {
+    return getCollection<Clinic>('clinics');
+};
+
+export const getClinicById = async (id: string): Promise<Clinic | undefined> => {
+    const clinic = await getDocumentById<Clinic>('clinics', id);
+    if(clinic) {
+        // Fetch doctors for this clinic
+        const q = query(collection(db!, 'doctors'), where('clinicId', '==', id));
+        const doctorsSnapshot = await getDocs(q);
+        clinic.doctors = doctorsSnapshot.docs.map(d => ({id: d.id, ...d.data()} as Doctor));
+    }
+    return clinic;
+};
+
+export const getDoctors = async (): Promise<Doctor[]> => {
+    return getCollection<Doctor>('doctors');
+};
+
+export const getDoctorById = async (id: string): Promise<Doctor | undefined> => {
+    return getDocumentById<Doctor>('doctors', id);
+};
+
+export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: Clinic[], doctors: Doctor[] }> => {
+    if (!db) {
+        console.error("Firestore not initialized");
+        return { clinics: [], doctors: [] };
+    }
+    const lowerCaseQuery = queryText.toLowerCase();
+    
+    const [allClinics, allDoctors] = await Promise.all([getClinics(), getDoctors()]);
+    
+    const filteredClinics = allClinics.filter(clinic =>
+        clinic.name.toLowerCase().includes(lowerCaseQuery) ||
+        clinic.location.toLowerCase().includes(lowerCaseQuery) ||
+        clinic.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery))
+    );
+
+    const filteredDoctors = allDoctors.filter(doctor =>
+        doctor.name.toLowerCase().includes(lowerCaseQuery) ||
+        doctor.specialty.toLowerCase().includes(lowerCaseQuery)
+    );
+
+    return { clinics: filteredClinics, doctors: filteredDoctors };
+};
+
+export const getHospitals = async (): Promise<Hospital[]> => {
+    return getCollection<Hospital>('hospitals');
+};
+
+export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
+    if (!db) return [];
+    const allHospitals = await getHospitals();
+    const lowerCaseQuery = queryText.toLowerCase();
+    
+    return allHospitals.filter(hospital => 
+        hospital.name.toLowerCase().includes(lowerCaseQuery) || 
+        hospital.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery)) ||
+        hospital.location.address.toLowerCase().includes(lowerCaseQuery)
+    );
+};
+
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+    const centres = await getCollection<DiagnosticsCentre>('diagnostics');
+    for(const centre of centres) {
+        centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${centre.id}/tests`);
+        centre.pathologists = await getCollection<Pathologist>(`diagnostics/${centre.id}/pathologists`);
+    }
+    return centres;
+};
+
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
+    const centre = await getDocumentById<DiagnosticsCentre>('diagnostics', id);
+    if(centre) {
+        centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${id}/tests`);
+        centre.pathologists = await getCollection<Pathologist>(`diagnostics/${id}/pathologists`);
+    }
+    return centre;
+};
+
+export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
+  if (!db) return [];
+  const q = query(collection(db, 'testAppointments'), where('centreId', '==', centreId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() }) as TestAppointment);
+};
+
+
+// --- Appointment Management ---
+export const getAppointments = async (): Promise<Appointment[]> => {
+    const appointments = await getCollection<Appointment>('appointments');
+    return convertTimestamps(appointments);
+};
+
+export const createAppointment = async (
+  patientId: string, 
+  patientName: string, 
+  doctorId: string, 
+  slot: string
+): Promise<Appointment> => {
+    if (!db) throw new Error("Firestore not initialized");
+
+    const doctor = await getDoctorById(doctorId);
+    if (!doctor) throw new Error("Doctor not found");
+    const clinic = await getClinicById(doctor.clinicId);
+    if (!clinic) throw new Error("Clinic not found");
+
+    const platformFee = 50;
+    const newAppointmentData = {
+      patientId,
+      patientName,
+      doctor: doc(db, 'doctors', doctorId), // Store as reference
+      clinic: doc(db, 'clinics', doctor.clinicId), // Store as reference
+      time: slot,
+      date: Timestamp.now(),
+      status: 'Confirmed',
+      appointmentType: 'clinic',
+      token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      feeDetails: {
+        consultationFee: doctor.consultationFee,
+        platformFee,
+        total: doctor.consultationFee + platformFee
+      }
+    };
+    
+    const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
+    
+    return {
+        id: docRef.id,
+        ...newAppointmentData,
+        doctor: doctor, // Return full object for immediate use
+        clinic: clinic, // Return full object for immediate use
+        date: newAppointmentData.date.toDate().toISOString(), // Convert to string
+    } as Appointment;
+};
+
+export const createVideoConsultationAppointment = async (
+  patientId: string, 
+  patientName: string, 
+  doctorId: string,
+  videoConsultDetails: VideoConsultationDetails
+): Promise<Appointment> => {
+  if (!db) throw new Error("Firestore not initialized");
+
+  const doctor = await getDoctorById(doctorId);
+  if (!doctor) throw new Error("Doctor not found");
+  const clinic = await getClinicById(doctor.clinicId);
+  if (!clinic) throw new Error("Clinic not found");
+
+  const platformFee = 100;
+  const newAppointmentData = {
+      patientId,
+      patientName,
+      doctor: doc(db, 'doctors', doctorId),
+      clinic: doc(db, 'clinics', doctor.clinicId),
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      date: Timestamp.now(),
+      status: 'Confirmed',
+      appointmentType: 'video',
+      token: `TKN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      feeDetails: {
+        consultationFee: doctor.consultationFee,
+        platformFee,
+        total: doctor.consultationFee + platformFee
+      },
+      videoConsultDetails: videoConsultDetails
+  };
+
+  const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
+  
+  return {
+      id: docRef.id,
+      ...newAppointmentData,
+      doctor: doctor,
+      clinic: clinic,
+      date: newAppointmentData.date.toDate().toISOString(),
+  } as Appointment;
+};
+
+const resolveAppointmentRefs = async (appointment: any): Promise<Appointment> => {
+    if (appointment.doctor && typeof appointment.doctor.get === 'function') {
+        const doctorSnap = await getDoc(appointment.doctor);
+        appointment.doctor = { id: doctorSnap.id, ...doctorSnap.data() } as Doctor;
+    }
+     if (appointment.clinic && typeof appointment.clinic.get === 'function') {
+        const clinicSnap = await getDoc(appointment.clinic);
+        appointment.clinic = { id: clinicSnap.id, ...clinicSnap.data() } as Clinic;
+    }
+    return convertTimestamps(appointment);
+}
+
+export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
+  if (!db) return [];
+  const q = query(
+      collection(db, 'appointments'), 
+      where('patientId', '==', patientId),
+      orderBy('date', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  // Resolve doctor and clinic references
+  return Promise.all(appointments.map(resolveAppointmentRefs));
+};
+
+export const getAppointmentsForDoctor = async (doctorId: string): Promise<Appointment[]> => {
+  if (!db) return [];
+  const q = query(
+      collection(db, 'appointments'), 
+      where('doctor', '==', doc(db, 'doctors', doctorId)),
+      orderBy('date', 'desc')
+    );
+  const querySnapshot = await getDocs(q);
+  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+  return Promise.all(appointments.map(resolveAppointmentRefs));
+};
+
+
+export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
+   const appointment = await getDocumentById<any>('appointments', id);
+   if(appointment) {
+       return resolveAppointmentRefs(appointment);
+   }
+   return undefined;
+};
+
+export const updateAppointmentStatus = async (id: string, status: Appointment['status']) => {
+    if (!db) return;
+    const appDoc = doc(db, 'appointments', id);
+    await updateDoc(appDoc, { status });
+};
+
+export const updateAppointmentWithVideoConsult = async (id: string, details: VideoConsultationDetails) => {
+    if (!db) return;
+    const appDoc = doc(db, 'appointments', id);
+    await updateDoc(appDoc, { videoConsultDetails: details });
+};
+
+export const submitAppointmentFeedback = async (id: string, feedback: AppointmentFeedback) => {
+    if (!db) return;
+    const appDoc = doc(db, 'appointments', id);
+    await updateDoc(appDoc, { feedback });
+}
+
+export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
+    if (!db) return [];
+    const q = query(
+        collection(db, 'appointments'),
+        where('clinic', '==', doc(db, 'clinics', clinicId)),
+        orderBy('date', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return Promise.all(appointments.map(resolveAppointmentRefs));
+};
