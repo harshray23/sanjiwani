@@ -1,63 +1,72 @@
-
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions to check user authentication and roles
-    function isUserAuthenticated() {
+    // Helper function to check if a user is authenticated
+    function isAuthenticated() {
       return request.auth != null;
     }
+
+    // Helper function to check if the requesting user's ID matches the document ID
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Public collections are readable by anyone, but writable only by authenticated users (for now).
-    // In a real app, you'd want more granular admin/owner roles for writing.
-    match /clinics/{clinicId} {
-      allow read: if true;
-      allow write: if isUserAuthenticated(); // Should be admin/owner role
+    // Users can only read and update their own profile information.
+    // New users are created via Firebase Authentication, not direct writes.
+    match /users/{userId} {
+      allow read, update: if isOwner(userId);
     }
-
+    
+    // Public collections: Allow anyone to read data from these collections.
+    // This is necessary for visitors who are not logged in to see doctors, clinics, etc.
+    // Writes are disallowed for now to prevent unauthorized data modification.
     match /doctors/{doctorId} {
       allow read: if true;
-      allow write: if isUserAuthenticated(); // Should be admin/owner role
+      allow write: if false; // Should be managed by admins
+    }
+
+    match /clinics/{clinicId} {
+      allow read: if true;
+      allow write: if false; // Should be managed by admins/clinic owners
     }
 
     match /hospitals/{hospitalId} {
       allow read: if true;
-      allow write: if isUserAuthenticated(); // Should be admin/owner role
+      allow write: if false; // Should be managed by admins/hospital owners
     }
-    
+
+    // Diagnostics collections and subcollections should be readable by the public
     match /diagnostics/{centreId} {
       allow read: if true;
-      allow write: if isUserAuthenticated();
-    }
-    
-    match /diagnostics/{centreId}/{subcollection}/{testId} {
-       allow read: if true;
-       allow write: if isUserAuthenticated();
-    }
-
-
-    // Users can read/update their own profile, and anyone can create a new user profile during sign-up.
-    match /users/{userId} {
-      allow read, update: if isOwner(userId);
-      allow create: if true;
+      allow write: if false; // Should be managed by admins/centre owners
+      
+      match /tests/{testId} {
+        allow read: if true;
+        allow write: if false;
+      }
+      
+      match /pathologists/{pathologistId} {
+         allow read: if true;
+         allow write: if false;
+      }
     }
 
-    // Authenticated users can create appointments.
-    // Only the user who owns the appointment can read it.
+    // Appointments:
+    // Users can create their own appointments.
+    // Users can read only their own appointments.
+    // No updates or deletes for now to preserve record integrity.
     match /appointments/{appointmentId} {
-      allow read: if isOwner(get(/databases/$(database)/documents/appointments/$(appointmentId)).data.patientId);
-      allow create: if isUserAuthenticated();
-      // Only owner can update (e.g. for feedback), or an admin role in a real app
-      allow update: if isOwner(get(/databases/$(database)/documents/appointments/$(appointmentId)).data.patientId);
+      allow create: if isAuthenticated() && request.resource.data.patientId == request.auth.uid;
+      allow read: if isOwner(request.resource.data.patientId);
+      allow update, delete: if false; // More complex logic needed for status updates, etc.
     }
     
-    match /testAppointments/{appointmentId} {
-      allow read: if isOwner(get(/databases/$(database)/documents/testAppointments/$(appointmentId)).data.patientId);
-      allow create: if isUserAuthenticated();
-      allow update: if isUserAuthenticated(); // Should be center admin role
+     match /testAppointments/{appointmentId} {
+      allow create: if isAuthenticated() && request.resource.data.patientId == request.auth.uid;
+      allow read: if isOwner(request.resource.data.patientId);
+      allow update, delete: if false;
     }
   }
 }
