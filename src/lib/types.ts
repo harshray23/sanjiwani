@@ -20,6 +20,7 @@ export interface Doctor {
   bio: string;
   consultationFee: number;
   availableSlots: { time: string, isAvailable: boolean }[];
+  address?: string; // For house calls
 }
 
 export interface Clinic {

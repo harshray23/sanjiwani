@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForDoctor, getDoctorById } from '@/lib/mock-data';
-import type { Appointment, Doctor } from '@/lib/types';
+import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/mock-data';
+import type { Appointment, Doctor, Clinic } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home } from "lucide-react";
+import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const profileFormSchema = z.object({
   bio: z.string().min(10, "Bio must be at least 10 characters.").max(500, "Bio cannot exceed 500 characters."),
@@ -31,9 +32,11 @@ const profileFormSchema = z.object({
 });
 
 const availabilityFormSchema = z.object({
-    locationType: z.enum(["existing", "new", "home"]),
-    locationName: z.string().optional(),
-    address: z.string().optional(),
+    location: z.string({
+        required_error: "You need to select a location.",
+    }),
+    newLocationName: z.string().optional(),
+    newLocationAddress: z.string().optional(),
     slots: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "You have to select at least one time slot.",
     }),
@@ -42,6 +45,7 @@ const availabilityFormSchema = z.object({
 const DoctorDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [clinics, setClinics] = useState<Clinic[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -58,7 +62,7 @@ const DoctorDashboard = () => {
   const availabilityForm = useForm<z.infer<typeof availabilityFormSchema>>({
       resolver: zodResolver(availabilityFormSchema),
       defaultValues: {
-          locationType: "existing",
+          location: undefined,
           slots: [],
       }
   });
@@ -80,6 +84,12 @@ const DoctorDashboard = () => {
                 qualifications: doctorProfile.qualifications.join(', '),
                 specialties: doctorProfile.specialty
             });
+
+            // Fetch associated clinics
+            const clinicData = await getClinicById(doctorProfile.clinicId);
+            if (clinicData) {
+                setClinics([clinicData]);
+            }
         }
         setAppointments(doctorAppointments);
 
@@ -244,29 +254,58 @@ const DoctorDashboard = () => {
                 </CardHeader>
                 <CardContent>
                      <Form {...availabilityForm}>
-                        <form onSubmit={availabilityForm.handleSubmit(onAvailabilitySubmit)} className="space-y-6">
+                        <form onSubmit={availabilityForm.handleSubmit(onAvailabilitySubmit)} className="space-y-8">
                              <FormField
                                 control={availabilityForm.control}
-                                name="locationType"
+                                name="location"
                                 render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                    <FormLabel>Where are you practicing?</FormLabel>
-                                    {/* Radix RadioGroup can be used here for better semantics */}
-                                    <div className="flex flex-col sm:flex-row gap-4">
-                                        <Button type="button" variant={field.value === 'existing' ? 'default' : 'outline'} onClick={() => field.onChange('existing')} className="flex-1 justify-start gap-2"><Building className="h-4 w-4"/> At an Existing Clinic/Hospital</Button>
-                                        <Button type="button" variant={field.value === 'new' ? 'default' : 'outline'} onClick={() => field.onChange('new')} className="flex-1 justify-start gap-2"><PlusCircle className="h-4 w-4"/> At a New Location</Button>
-                                        <Button type="button" variant={field.value === 'home' ? 'default' : 'outline'} onClick={() => field.onChange('home')} className="flex-1 justify-start gap-2"><Home className="h-4 w-4"/> At Home (for house calls)</Button>
-                                    </div>
+                                    <FormLabel className="text-base">Where are you practicing?</FormLabel>
+                                    <FormControl>
+                                        <RadioGroup
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            className="flex flex-col space-y-2"
+                                        >
+                                            {clinics.map(clinic => (
+                                                <FormItem key={clinic.id} className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
+                                                    <FormControl>
+                                                        <RadioGroupItem value={clinic.id} />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal w-full cursor-pointer">
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="space-y-1">
+                                                                <p className="font-semibold flex items-center gap-2"><Building className="h-4 w-4"/> {clinic.name}</p>
+                                                                <p className="text-sm text-muted-foreground flex items-center gap-2 pl-6"><MapPin className="h-4 w-4"/> {clinic.contact.address}</p>
+                                                            </div>
+                                                        </div>
+                                                    </FormLabel>
+                                                </FormItem>
+                                            ))}
+                                            <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
+                                                <FormControl>
+                                                    <RadioGroupItem value="new" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal w-full cursor-pointer flex items-center gap-2"><PlusCircle className="h-4 w-4"/> At a New Location</FormLabel>
+                                            </FormItem>
+                                            <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
+                                                <FormControl>
+                                                    <RadioGroupItem value="home" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal w-full cursor-pointer flex items-center gap-2"><Home className="h-4 w-4"/> At Home (for house calls)</FormLabel>
+                                            </FormItem>
+                                        </RadioGroup>
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                                 )}
                             />
 
-                            {availabilityForm.watch('locationType') === 'new' && (
-                                <div className="grid sm:grid-cols-2 gap-4 p-4 border rounded-md">
+                            {availabilityForm.watch('location') === 'new' && (
+                                <div className="grid sm:grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
                                      <FormField
                                         control={availabilityForm.control}
-                                        name="locationName"
+                                        name="newLocationName"
                                         render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>New Clinic/Hospital Name</FormLabel>
@@ -277,7 +316,7 @@ const DoctorDashboard = () => {
                                     />
                                     <FormField
                                         control={availabilityForm.control}
-                                        name="address"
+                                        name="newLocationAddress"
                                         render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Address</FormLabel>
