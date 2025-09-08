@@ -8,7 +8,7 @@ import { getClinics, getDoctors, getHospitals, getAppointments, getUsers } from 
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity } from "lucide-react";
+import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -324,3 +324,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+    
