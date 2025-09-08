@@ -13,27 +13,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-let app;
-// Check if Firebase has already been initialized
-if (!getApps().length) {
-  // Check if all necessary Firebase config values are present
-  if (Object.values(firebaseConfig).every(value => !!value)) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    console.error("Firebase config is missing. App could not be initialized.");
-    app = null;
-  }
-} else {
-  app = getApp();
+// Check if all necessary Firebase config values are present
+const isFirebaseConfigValid = Object.values(firebaseConfig).every(value => !!value);
+
+if (!isFirebaseConfigValid) {
+  console.error("Firebase config is missing or incomplete. Check your environment variables.");
 }
 
-const db = app ? getFirestore(app) : null;
-const auth = app ? getAuth(app) : null;
+// Initialize Firebase
+// This guard prevents re-initialization on hot reloads
+const app = !getApps().length && isFirebaseConfigValid ? initializeApp(firebaseConfig) : getApp();
+
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 
 // Connect to emulators in development.
 // Note: You must start the emulators locally for this to work.
-if (auth && process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
+if (process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
   try {
     // connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
     // console.log("Firebase Auth emulator connected.");
