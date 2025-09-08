@@ -31,7 +31,7 @@ export default function RootLayout({
           <PageLoader />
         </Suspense>
         <Header />
-        <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8">
+        <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
           {children}
         </main>
         <Footer />

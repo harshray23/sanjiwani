@@ -18,51 +18,47 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="w-full space-y-24">
+    <div className="w-full space-y-12">
       {/* Hero Section */}
-      <section className="text-center py-16 md:py-24 relative rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/50 dark:to-green-950/50">
-         <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 items-center">
-           <div className="text-left animate-fade-in-up">
-            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-accent">
-              Find <span className="text-primary">Care</span>, Instantly.
+      <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center text-white rounded-xl overflow-hidden">
+        <Image
+            src="/img_hospital.jpg"
+            alt="A team of doctors collaborating around a futuristic medical interface"
+            fill
+            className="object-cover"
+            priority
+            data-ai-hint="doctors team technology"
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 p-4 animate-fade-in-up">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
+              Find <span className="text-orange-400">Care</span>, Instantly.
             </h1>
-            <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-xl">
-              Book doctor appointments, check hospital bed <span className="font-semibold text-primary">availability</span>, and manage all your health records in one place.
+            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Book doctor appointments, check hospital bed <span className="font-semibold text-orange-400">availability</span>, and manage all your health records in one place.
             </p>
-           </div>
-           <div className="relative h-64 md:h-96">
-                <Image
-                    src="/img_hospital.jpg"
-                    alt="Abstract spiral staircase representing the journey of healthcare"
-                    fill
-                    className="object-contain"
-                    data-ai-hint="abstract architecture"
-                />
+             <div className="max-w-2xl mx-auto bg-white/90 dark:bg-card/80 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-2xl">
+                <form action="/search" method="GET" className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                    name="query"
+                    placeholder="Search hospitals, doctors, labs..."
+                    className="w-full h-12 md:h-14 pl-12 pr-28 md:pr-32 rounded-full text-base md:text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner text-foreground"
+                    />
+                    <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-10 md:h-12 px-4 md:px-8 glow-on-hover">
+                    Find Care
+                    </Button>
+                </form>
             </div>
         </div>
       </section>
 
-      {/* Search & Quick Links Section */}
-      <section className="container mx-auto px-4 -mt-36 relative z-20">
-          <div className="max-w-3xl mx-auto bg-card p-2 md:p-4 rounded-full shadow-2xl">
-            <form action="/search" method="GET">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  name="query"
-                  placeholder="Search hospitals, doctors, labs..."
-                  className="w-full h-12 md:h-16 pl-12 pr-28 md:pr-32 rounded-full text-base md:text-lg border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 hover:shadow-inner"
-                />
-                <Button type="submit" size="lg" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full h-10 md:h-12 px-4 md:px-8 glow-on-hover">
-                  Find Care
-                </Button>
-              </div>
-            </form>
-          </div>
+      {/* Quick Links Section */}
+      <section className="container mx-auto px-4 -mt-8 relative z-20">
            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {quickLinks.map((link) => (
-              <Button key={link.href} asChild variant="outline" size="lg" className="h-16 text-sm md:text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg border-primary/20">
-                <Link href={link.href} className="flex flex-col md:flex-row items-center justify-center gap-2">
+              <Button key={link.href} asChild variant="outline" size="lg" className="h-20 text-sm md:text-base bg-card hover:bg-muted transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-primary/20">
+                <Link href={link.href} className="flex flex-col items-center justify-center gap-2">
                   {link.icon}
                   <span>{link.label}</span>
                 </Link>
