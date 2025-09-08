@@ -4,8 +4,8 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinics, getDoctors, getHospitals, getAppointments, getUsers } from '@/lib/mock-data';
-import type { Clinic, Doctor, Hospital, Appointment, User as AppUser } from '@/lib/types';
+import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres } from '@/lib/mock-data';
+import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical } from "lucide-react";
@@ -24,6 +24,7 @@ type AdminData = {
     hospitals: Hospital[];
     appointments: Appointment[];
     users: AppUser[];
+    diagnosticsCentres: DiagnosticsCentre[];
 };
 
 const AdminDashboard = () => {
@@ -35,6 +36,7 @@ const AdminDashboard = () => {
     hospitals: [],
     appointments: [],
     users: [],
+    diagnosticsCentres: []
   });
   const { toast } = useToast();
 
@@ -48,14 +50,15 @@ const AdminDashboard = () => {
         }
         
         try {
-          const [doctors, clinics, hospitals, appointments, users] = await Promise.all([
+          const [doctors, clinics, hospitals, appointments, users, diagnosticsCentres] = await Promise.all([
             getDoctors(),
             getClinics(),
             getHospitals(),
             getAppointments(),
-            getUsers()
+            getUsers(),
+            getDiagnosticsCentres()
           ]);
-          setData({ doctors, clinics, hospitals, appointments, users });
+          setData({ doctors, clinics, hospitals, appointments, users, diagnosticsCentres });
         } catch (error) {
           console.error("Failed to load admin data", error);
           toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
@@ -181,7 +184,7 @@ const AdminDashboard = () => {
           <TabsTrigger value="doctors">Doctors ({data.doctors.length})</TabsTrigger>
           <TabsTrigger value="clinics">Clinics ({data.clinics.length})</TabsTrigger>
           <TabsTrigger value="hospitals">Hospitals ({data.hospitals.length})</TabsTrigger>
-          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+          <TabsTrigger value="diagnostics">Diagnostics ({data.diagnosticsCentres.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -311,10 +314,33 @@ const AdminDashboard = () => {
         </TabsContent>
          <TabsContent value="diagnostics">
             <Card>
-                <CardHeader><CardTitle className="font-headline">Manage Diagnostics</CardTitle></CardHeader>
-                <CardContent className="text-center py-12 text-muted-foreground">
-                    <FlaskConical className="h-12 w-12 mx-auto mb-4"/>
-                    <p>Diagnostics center management feature coming soon.</p>
+                <CardHeader><CardTitle className="font-headline">Manage Diagnostics Centers</CardTitle></CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Center Name</TableHead>
+                                <TableHead>Location</TableHead>
+                                <TableHead>Tests Offered</TableHead>
+                                <TableHead>Pathologists</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {data.diagnosticsCentres.map(centre => (
+                                <TableRow key={centre.id}>
+                                    <TableCell className="font-medium">{centre.name}</TableCell>
+                                    <TableCell>{centre.location}</TableCell>
+                                    <TableCell>{centre.tests.length}</TableCell>
+                                    <TableCell>{centre.pathologists.length}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemove('diagnostics center', centre.id)}><Trash2 className="h-4 w-4"/></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
         </TabsContent>
@@ -324,5 +350,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-    
