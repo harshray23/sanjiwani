@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { searchClinicsAndDoctors } from '@/lib/data';
 import type { Clinic, Doctor } from '@/lib/types';
@@ -9,10 +9,11 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { DoctorCard } from '@/components/DoctorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, SearchIcon } from 'lucide-react';
+import { Loader2, SearchIcon, Filter } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { Badge } from '@/components/ui/badge';
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -21,6 +22,7 @@ function SearchResults() {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<{ clinics: Clinic[]; doctors: Doctor[] }>({ clinics: [], doctors: [] });
   const [searchQuery, setSearchQuery] = useState(query);
+  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -37,6 +39,19 @@ function SearchResults() {
      // This will update the URL and trigger the useEffect
      window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
   }
+
+  const uniqueSpecialties = useMemo(() => {
+    const specialties = new Set<string>();
+    results.doctors.forEach(doctor => specialties.add(doctor.specialty));
+    return Array.from(specialties);
+  }, [results.doctors]);
+
+  const filteredDoctors = useMemo(() => {
+    if (!activeSpecialty) {
+      return results.doctors;
+    }
+    return results.doctors.filter(doctor => doctor.specialty === activeSpecialty);
+  }, [results.doctors, activeSpecialty]);
 
   return (
     <div className="container mx-auto py-8">
@@ -61,7 +76,7 @@ function SearchResults() {
            <Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" />
         </div>
       ) : (
-        <Tabs defaultValue="clinics">
+        <Tabs defaultValue="doctors">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="clinics">Clinics ({results.clinics.length})</TabsTrigger>
             <TabsTrigger value="doctors">Doctors ({results.doctors.length})</TabsTrigger>
@@ -76,12 +91,42 @@ function SearchResults() {
             )}
           </TabsContent>
           <TabsContent value="doctors">
-             {results.doctors.length > 0 ? (
+            <div className="my-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="h-5 w-5 text-primary"/>
+                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        variant={!activeSpecialty ? 'default' : 'outline'}
+                        onClick={() => setActiveSpecialty(null)}
+                        size="sm"
+                    >
+                        All
+                    </Button>
+                    {uniqueSpecialties.map(specialty => (
+                        <Button
+                            key={specialty}
+                            variant={activeSpecialty === specialty ? 'default' : 'outline'}
+                            onClick={() => setActiveSpecialty(specialty)}
+                            size="sm"
+                        >
+                            {specialty}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+             {filteredDoctors.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {results.doctors.map(doctor => <DoctorCard key={doctor.id} doctor={doctor} />)}
+                {filteredDoctors.map(doctor => <DoctorCard key={doctor.id} doctor={doctor} />)}
               </div>
             ) : (
-              <p className="text-center py-12 text-muted-foreground">No doctors found matching your search.</p>
+              <p className="text-center py-12 text-muted-foreground">
+                {activeSpecialty 
+                    ? `No doctors found for the specialization "${activeSpecialty}".`
+                    : "No doctors found matching your search."
+                }
+              </p>
             )}
           </TabsContent>
         </Tabs>
@@ -97,5 +142,3 @@ export default function SearchPage() {
         </Suspense>
     )
 }
-
-    
