@@ -182,16 +182,16 @@ const DoctorDashboard = () => {
                         specialties: doctorProfile.specialty
                     });
                 } else {
-                    setDoctor(null);
+                    setDoctor(null); // Explicitly set to null if not found
                 }
             }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
             toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
-            setUserProfile(null);
+            setUserProfile(null); // Set to null on error
         }
       } else {
-        setUserProfile(null);
+        setUserProfile(null); // No user logged in
       }
       setIsLoading(false);
     });
@@ -215,7 +215,7 @@ const DoctorDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'doctor' || !doctor) {
+  if (!userProfile || userProfile.role !== 'doctor') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -234,6 +234,16 @@ const DoctorDashboard = () => {
       </div>
     );
   }
+  
+  if (!doctor) {
+      return (
+         <div className="flex flex-col items-center justify-center p-8 h-screen">
+            <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+            <p className="mt-4 text-muted-foreground">Finalizing your profile...</p>
+        </div>
+      )
+  }
+
 
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
