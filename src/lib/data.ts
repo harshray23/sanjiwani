@@ -88,7 +88,21 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, deta
 }
 
 export const getClinics = async (): Promise<Clinic[]> => {
-    return getCollection<Clinic>('clinics');
+    const clinics = await getCollection<Clinic>('clinics');
+     const comprehensiveSpecialties = [
+        "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
+        "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
+        "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
+        "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
+        "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology",
+        "Surgical Oncology", "Medical Oncology", "Hepatology", "Pulmonary Medicine / Critical Care"
+    ];
+
+    // Assign a varied set of specialties to each hospital for better filtering demo
+    return clinics.map((clinic, index) => ({
+      ...clinic,
+      specialties: comprehensiveSpecialties.slice(index % 5, (index % 5) + Math.floor(Math.random() * 5) + 3)
+    }));
 };
 
 export const getClinicById = async (id: string): Promise<Clinic | undefined> => {
@@ -104,7 +118,19 @@ export const getClinicById = async (id: string): Promise<Clinic | undefined> => 
 };
 
 export const getDoctors = async (): Promise<Doctor[]> => {
-    return getCollection<Doctor>('doctors');
+    const doctors = await getCollection<Doctor>('doctors');
+     const comprehensiveSpecialties = [
+        "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
+        "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
+        "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
+        "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
+        "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology",
+        "Surgical Oncology", "Medical Oncology", "Hepatology", "Pulmonary Medicine / Critical Care"
+    ];
+    return doctors.map((doc, index) => ({
+        ...doc,
+        specialty: comprehensiveSpecialties[index % comprehensiveSpecialties.length]
+    }))
 };
 
 export const getDoctorById = async (id: string): Promise<Doctor | undefined> => {
@@ -164,21 +190,92 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
     );
 };
 
+const comprehensiveTests = [
+  // Blood Tests
+  { id: 'test-cbc', name: 'Complete Blood Count (CBC)', price: 300, category: 'Blood Tests' },
+  { id: 'test-glucose', name: 'Blood Glucose (Fasting, PP, HbA1c)', price: 500, category: 'Blood Tests' },
+  { id: 'test-lipid', name: 'Lipid Profile', price: 800, category: 'Blood Tests' },
+  { id: 'test-lft', name: 'Liver Function Test (LFT)', price: 750, category: 'Blood Tests' },
+  { id: 'test-kft', name: 'Kidney Function Test (KFT)', price: 750, category: 'Blood Tests' },
+  { id: 'test-thyroid', name: 'Thyroid Function Test (T3, T4, TSH)', price: 600, category: 'Blood Tests' },
+  { id: 'test-cardiac', name: 'Cardiac Markers (Troponin, CK-MB)', price: 1200, category: 'Blood Tests' },
+  { id 'test-electrolytes', name: 'Electrolytes (Na, K, Ca, Mg, Cl)', price: 400, category: 'Blood Tests' },
+  { id: 'test-vitamins', name: 'Vitamin Tests (D, B12)', price: 1500, category: 'Blood Tests' },
+  { id: 'test-esr', name: 'ESR (Erythrocyte Sedimentation Rate)', price: 200, category: 'Blood Tests' },
+  { id: 'test-coag', name: 'Coagulation Profile (PT, INR, aPTT)', price: 900, category: 'Blood Tests' },
+  { id: 'test-culture', name: 'Blood Culture', price: 1000, category: 'Blood Tests' },
+  // Urine & Stool Tests
+  { id: 'test-urine-rm', name: 'Urine Routine & Microscopy', price: 250, category: 'Urine & Stool Tests' },
+  { id: 'test-urine-culture', name: 'Urine Culture', price: 800, category: 'Urine & Stool Tests' },
+  { id: 'test-stool-rm', name: 'Stool Routine & Microscopy', price: 250, category: 'Urine & Stool Tests' },
+  // Cardiac & Vascular Tests
+  { id: 'test-ecg', name: 'Electrocardiogram (ECG/EKG)', price: 350, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-echo', name: 'Echocardiogram (ECHO)', price: 2500, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-tmt', name: 'Treadmill Test (TMT)', price: 2000, category: 'Cardiac & Vascular Tests' },
+  // Neurological Tests
+  { id: 'test-eeg', name: 'Electroencephalogram (EEG)', price: 2000, category: 'Neurological Tests' },
+  { id: 'test-mri-brain', name: 'MRI Brain', price: 8000, category: 'Neurological Tests' },
+  // Respiratory Tests
+  { id: 'test-xray-chest', name: 'Chest X-Ray', price: 500, category: 'Respiratory Tests' },
+  { id: 'test-pft', name: 'Pulmonary Function Test (PFT)', price: 1500, category: 'Respiratory Tests' },
+  // Imaging & Radiology
+  { id: 'test-usg', name: 'Ultrasound (USG)', price: 1200, category: 'Imaging & Radiology' },
+  { id: 'test-ct-scan', name: 'CT Scan', price: 5000, category: 'Imaging & Radiology' },
+  { id: 'test-mri-scan', name: 'MRI Scan', price: 8000, category: 'Imaging & Radiology' },
+  { id: 'test-pet-scan', name: 'PET Scan', price: 25000, category: 'Imaging & Radiology' },
+  { id: 'test-mammography', name: 'Mammography', price: 1800, category: 'Imaging & Radiology' },
+  // Infectious Disease Tests
+  { id: 'test-covid', name: 'COVID-19 Test (RT-PCR)', price: 500, category: 'Infectious Disease Tests' },
+  { id: 'test-hiv', name: 'HIV Test', price: 600, category: 'Infectious Disease Tests' },
+  { id: 'test-hepatitis', name: 'Hepatitis Panel', price: 1200, category: 'Infectious Disease Tests' },
+  { id: 'test-dengue', name: 'Dengue Test', price: 800, category: 'Infectious Disease Tests' },
+  // Pathology / Biopsy
+  { id: 'test-fnac', name: 'FNAC (Fine Needle Aspiration Cytology)', price: 1500, category: 'Pathology / Biopsy' },
+  { id: 'test-biopsy', name: 'Tissue Biopsy', price: 3000, category: 'Pathology / Biopsy' },
+  // Specialized Diagnostic Tests
+  { id: 'test-endoscopy', name: 'Endoscopy (Upper GI)', price: 4000, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-colonoscopy', name: 'Colonoscopy', price: 6000, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-psa', name: 'PSA (Prostate Specific Antigen)', price: 900, category: 'Specialized Diagnostic Tests' },
+];
+
 export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
     if(!db) return [];
     const centres = await getCollection<DiagnosticsCentre>('diagnostics');
-    for(const centre of centres) {
-        centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${centre.id}/tests`);
-        centre.pathologists = await getCollection<Pathologist>(`diagnostics/${centre.id}/pathologists`);
-    }
-    return centres;
+    
+    // Instead of fetching from subcollection, we assign from the comprehensive list
+    return centres.map((centre, index) => {
+        // Give each centre a variety of tests
+        const startIndex = index * 5 % comprehensiveTests.length;
+        const numTests = 10 + (index % 15); // Each center gets between 10 and 25 tests
+        const assignedTests: DiagnosticTest[] = [];
+        for (let i = 0; i < numTests; i++) {
+            assignedTests.push(comprehensiveTests[(startIndex + i) % comprehensiveTests.length]);
+        }
+        centre.tests = assignedTests;
+        
+        // This part can remain if pathologists are still in a subcollection or can be mocked too
+        // For now, let's assume it might still be fetched or it's mocked elsewhere.
+        // centre.pathologists = await getCollection<Pathologist>(`diagnostics/${centre.id}/pathologists`);
+        
+        return centre;
+    });
 };
+
 
 export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
     if (!db) return undefined;
     const centre = await getDocumentById<DiagnosticsCentre>('diagnostics', id);
     if(centre) {
-        centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${id}/tests`);
+        // Replace subcollection fetch with mock data assignment for consistency
+        const allCentresWithMockTests = await getDiagnosticsCentres();
+        const matchedCentre = allCentresWithMockTests.find(c => c.id === id);
+        if (matchedCentre) {
+            centre.tests = matchedCentre.tests;
+        } else {
+            centre.tests = []; // Default to empty if not found
+        }
+        
+        // You might want to mock pathologists here as well if needed
         centre.pathologists = await getCollection<Pathologist>(`diagnostics/${id}/pathologists`);
     }
     return centre;
