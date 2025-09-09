@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
@@ -16,27 +16,27 @@ const firebaseConfig = {
 // Check if all necessary Firebase config values are present
 const isFirebaseConfigValid = Object.values(firebaseConfig).every(value => !!value);
 
-if (!isFirebaseConfigValid) {
-  console.error("Firebase config is missing or incomplete. Check your environment variables.");
+if (!isFirebaseConfigValid && process.env.NODE_ENV !== 'test') {
+  console.error("Firebase config is missing or incomplete. Please check your .env file.");
 }
 
 // Initialize Firebase
 // This guard prevents re-initialization on hot reloads
-const app = !getApps().length && isFirebaseConfigValid ? initializeApp(firebaseConfig) : getApp();
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 
-// Connect to emulators in development.
-// Note: You must start the emulators locally for this to work.
-if (process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
-  try {
-    // connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
-    // console.log("Firebase Auth emulator connected.");
-  } catch (e) {
-    // console.error("Error connecting to Firebase Auth emulator:", e);
-  }
-}
+// In a real app, you might connect to emulators in development.
+// if (process.env.NODE_ENV === 'development') {
+//   try {
+//     connectAuthEmulator(auth, "http://localhost:9099");
+//     connectFirestoreEmulator(db, 'localhost', 8080);
+//     console.log("Firebase emulators connected.");
+//   } catch (e) {
+//     console.error("Error connecting to Firebase emulators:", e);
+//   }
+// }
 
 export { app, db, auth };

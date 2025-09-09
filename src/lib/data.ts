@@ -1,5 +1,4 @@
 
-
 import {
   collection,
   addDoc,
@@ -17,7 +16,7 @@ import {
 import { db } from './firebase';
 import type { Doctor, Clinic, Hospital, Appointment, VideoConsultationDetails, AppointmentFeedback, DiagnosticsCentre, DiagnosticTest, Pathologist, TestAppointment, User } from './types';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { Role } from '@/app/login/page';
+import type { Role } from '@/app/login/page';
 
 // Helper to convert Firestore Timestamps to serializable strings in nested objects
 const convertTimestamps = (data: any): any => {
@@ -92,6 +91,7 @@ export const getClinics = async (): Promise<Clinic[]> => {
 };
 
 export const getClinicById = async (id: string): Promise<Clinic | undefined> => {
+    if (!db) return undefined;
     const clinic = await getDocumentById<Clinic>('clinics', id);
     if(clinic) {
         // Fetch doctors for this clinic
@@ -150,6 +150,7 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
 };
 
 export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+    if(!db) return [];
     const centres = await getCollection<DiagnosticsCentre>('diagnostics');
     for(const centre of centres) {
         centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${centre.id}/tests`);
@@ -159,6 +160,7 @@ export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
 };
 
 export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
+    if (!db) return undefined;
     const centre = await getDocumentById<DiagnosticsCentre>('diagnostics', id);
     if(centre) {
         centre.tests = await getCollection<DiagnosticTest>(`diagnostics/${id}/tests`);
@@ -178,7 +180,7 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 // --- Appointment Management ---
 export const getAppointments = async (): Promise<Appointment[]> => {
     const appointments = await getCollection<Appointment>('appointments');
-    return convertTimestamps(appointments);
+    return Promise.all(appointments.map(resolveAppointmentRefs));
 };
 
 export const createAppointment = async (
@@ -214,13 +216,16 @@ export const createAppointment = async (
     
     const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
     
-    return {
+    // Construct the object to return, resolving references for immediate use
+    const returnedAppointment = {
         id: docRef.id,
         ...newAppointmentData,
-        doctor: doctor, // Return full object for immediate use
-        clinic: clinic, // Return full object for immediate use
-        date: newAppointmentData.date.toDate().toISOString(), // Convert to string
-    } as Appointment;
+        doctor: doctor, 
+        clinic: clinic,
+        date: newAppointmentData.date.toDate().toISOString(),
+    } as unknown as Appointment;
+
+    return returnedAppointment;
 };
 
 export const createVideoConsultationAppointment = async (
@@ -257,13 +262,15 @@ export const createVideoConsultationAppointment = async (
 
   const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
   
-  return {
+  const returnedAppointment = {
       id: docRef.id,
       ...newAppointmentData,
       doctor: doctor,
       clinic: clinic,
       date: newAppointmentData.date.toDate().toISOString(),
-  } as Appointment;
+  } as unknown as Appointment;
+
+  return returnedAppointment;
 };
 
 const resolveAppointmentRefs = async (appointment: any): Promise<Appointment> => {
@@ -307,6 +314,7 @@ export const getAppointmentsForDoctor = async (doctorId: string): Promise<Appoin
 
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
+   if(!db) return undefined;
    const appointment = await getDocumentById<any>('appointments', id);
    if(appointment) {
        return resolveAppointmentRefs(appointment);
@@ -344,3 +352,4 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 
     return Promise.all(appointments.map(resolveAppointmentRefs));
 };
+
