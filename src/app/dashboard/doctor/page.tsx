@@ -156,7 +156,7 @@ const DoctorDashboard = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      setIsAuthLoading(false);
+      setIsAuthLoading(false); // Auth check is complete
       if (currentUser) {
         // Mock: Assume this user is always doc-1 for demo purposes
         const mockDoctorId = 'doc-1'; 
