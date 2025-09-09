@@ -32,7 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import Image from "next/image";
-import { createUserInFirestore } from "@/lib/data";
+import { createUserInFirestore, getUserProfile } from "@/lib/data";
 
 const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
 export type Role = z.infer<typeof roleEnum>;
@@ -40,7 +40,6 @@ export type Role = z.infer<typeof roleEnum>;
 const signInSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
-  role: roleEnum.refine(val => val !== undefined, { message: "Role is required" }),
 });
 
 const baseSignUpSchema = z.object({
@@ -73,18 +72,9 @@ const diagnosticsSignUpSchema = baseSignUpSchema.extend({
     name: z.string().min(2, "Center name is required."),
     address: z.string().min(5, "Address is required."),
     officePhone: z.string().min(10, "A valid office phone number is required."),
-    ownerPhone: z.string().min(10, "A valid office phone number is required."),
+    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
 });
 
-
-const getRoleFromEmail = (email: string): string => {
-    if (email.startsWith('doctor@')) return 'doctor';
-    if (email.startsWith('clinic@')) return 'clinic';
-    if (email.startsWith('hospital@')) return 'hospital';
-    if (email.startsWith('diagnostics@')) return 'diagnostics_centres';
-    if (email.startsWith('admin@')) return 'admin';
-    return 'customer';
-}
 
 const SignUpForm = () => {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -114,11 +104,10 @@ const SignUpForm = () => {
     const handleSignUp = async (values: any) => {
         setIsLoading(true);
         try {
-            const registeredRole = getRoleFromEmail(values.email);
-            if (selectedRole && registeredRole !== selectedRole) {
+            if (!selectedRole) {
                 toast({
                     title: "Sign Up Failed",
-                    description: `For demo purposes, your email must match the role. E.g., '${selectedRole}@demo.com' for the ${selectedRole} role.`,
+                    description: "A role must be selected.",
                     variant: "destructive"
                 });
                 setIsLoading(false);
@@ -128,7 +117,7 @@ const SignUpForm = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
             
             // Save user details to Firestore
-            await createUserInFirestore(userCredential.user, selectedRole || 'customer', values);
+            await createUserInFirestore(userCredential.user, selectedRole, values);
 
             toast({
                 title: "Account Created Successfully",
@@ -259,7 +248,7 @@ export default function LoginPage() {
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "", role: "customer" },
+    defaultValues: { email: "", password: ""},
   });
 
   useEffect(() => {
@@ -303,22 +292,25 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      const registeredRole = getRoleFromEmail(user.email || '');
+      const profile = await getUserProfile(user.uid);
 
-      if (registeredRole !== values.role) {
+      if (!profile) {
         toast({
-          title: "Access Denied",
-          description: "The role you selected does not match your registered role. Please select the correct role.",
+          title: "Sign In Failed",
+          description: "Could not find a user profile for this account. Please sign up or contact support.",
           variant: "destructive",
         });
         await signOut(auth);
-      } else {
-        toast({
-          title: "Signed In Successfully",
-          description: "Welcome back! Redirecting you now...",
-        });
-        handleAuthSuccess(values.role);
+        setIsLoading(false);
+        return;
       }
+      
+      toast({
+        title: "Signed In Successfully",
+        description: "Welcome back! Redirecting you now...",
+      });
+      handleAuthSuccess(profile.role);
+      
     } catch (error: any) {
        let description = "An unknown error occurred. Please try again.";
        if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
@@ -427,31 +419,7 @@ export default function LoginPage() {
                                 </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={signInForm.control}
-                                name="role"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Sign in as</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="customer">Customer</SelectItem>
-                                        <SelectItem value="doctor">Doctor</SelectItem>
-                                        <SelectItem value="clinic">Clinic</SelectItem>
-                                        <SelectItem value="hospital">Hospital</SelectItem>
-                                        <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                    </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
+                            
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Sign In
@@ -476,5 +444,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
 
     

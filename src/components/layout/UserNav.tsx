@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield, FlaskConical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { getUserProfile } from '@/lib/data';
 
 const avatarColors = [
   'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 
@@ -27,30 +28,23 @@ const getAvatarColor = (str: string) => {
     return avatarColors[index];
 };
 
-// A mock function to determine user role from email.
-// In a real app, this would come from a database or custom claims.
-const getRoleFromEmail = (email: string): string => {
-    if (email.startsWith('doctor@')) return 'doctor';
-    if (email.startsWith('clinic@')) return 'clinic';
-    if (email.startsWith('hospital@')) return 'hospital';
-    if (email.startsWith('admin@')) return 'admin';
-    if (email.startsWith('diagnostics@')) return 'diagnostics_centres';
-    return 'customer';
-}
 
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState('customer');
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      if(currentUser && currentUser.email) {
-          setUserRole(getRoleFromEmail(currentUser.email));
+      if(currentUser) {
+          const profile = await getUserProfile(currentUser.uid);
+          setUserRole(profile?.role || 'customer');
+      } else {
+          setUserRole(null);
       }
       setIsLoading(false);
     });
@@ -176,3 +170,5 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
+
+    
