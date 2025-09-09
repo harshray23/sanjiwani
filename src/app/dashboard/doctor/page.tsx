@@ -139,9 +139,8 @@ const LocationCard = ({ clinic, doctor }: { clinic: Clinic, doctor: Doctor }) =>
 const DoctorDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [doctor, setDoctor] = useState<Doctor | null | undefined>(undefined);
-  const [clinics, setClinics] = useState<Clinic[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [clinics, setClinics] = useState<Clinic[] | undefined>(undefined);
+  const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -157,43 +156,50 @@ const DoctorDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-            const profile = await getUserProfile(currentUser.uid);
-            setUserProfile(profile);
+          const profile = await getUserProfile(currentUser.uid);
+          setUserProfile(profile);
 
-            if (profile?.role === 'doctor') {
-                const mockDoctorId = 'doc-1';
-                const doctorProfile = await getDoctorById(mockDoctorId);
-                
-                if (doctorProfile) {
-                    setDoctor(doctorProfile);
-                    const [doctorAppointments, clinicData] = await Promise.all([
-                        getAppointmentsForDoctor(mockDoctorId),
-                        getClinicById(doctorProfile.clinicId)
-                    ]);
-                    
-                    setAppointments(doctorAppointments);
-                    if (clinicData) {
-                        setClinics([clinicData]);
-                    }
+          if (profile?.role === 'doctor') {
+            const mockDoctorId = 'doc-1'; 
+            
+            // Fetch all doctor-related data in parallel
+            const [doctorProfile, doctorAppointments, clinicData] = await Promise.all([
+                getDoctorById(mockDoctorId),
+                getAppointmentsForDoctor(mockDoctorId),
+                // This assumes a doctor is tied to one primary clinic. This could be expanded.
+                getClinicById('clinic-1') 
+            ]);
 
-                    profileForm.reset({
-                        bio: doctorProfile.bio,
-                        qualifications: doctorProfile.qualifications.join(', '),
-                        specialties: doctorProfile.specialty
-                    });
+            if (doctorProfile) {
+                setDoctor(doctorProfile);
+                setAppointments(doctorAppointments);
+                if (clinicData) {
+                    setClinics([clinicData]);
                 } else {
-                    setDoctor(null); // Explicitly set to null if not found
+                    setClinics([]);
                 }
+                profileForm.reset({
+                    bio: doctorProfile.bio,
+                    qualifications: doctorProfile.qualifications.join(', '),
+                    specialties: doctorProfile.specialty
+                });
+            } else {
+                // If the doctor's specific profile isn't found, set to null
+                setDoctor(null);
+                setAppointments([]);
+                setClinics([]);
             }
+          }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
             toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
-            setUserProfile(null); // Set to null on error
+            setUserProfile(null); 
+            setDoctor(null);
         }
       } else {
-        setUserProfile(null); // No user logged in
+        setUserProfile(null);
+        setDoctor(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [profileForm, toast]);
@@ -206,7 +212,7 @@ const DoctorDashboard = () => {
       console.log(values);
   };
   
-  if (isLoading || userProfile === undefined) {
+  if (userProfile === undefined || doctor === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -237,9 +243,11 @@ const DoctorDashboard = () => {
   
   if (!doctor) {
       return (
-         <div className="flex flex-col items-center justify-center p-8 h-screen">
-            <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
-            <p className="mt-4 text-muted-foreground">Finalizing your profile...</p>
+         <div className="text-center p-8">
+            <Card className="max-w-md mx-auto p-8">
+                <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
+                <p className="mt-2 text-muted-foreground">We couldn't find a doctor profile associated with your account.</p>
+            </Card>
         </div>
       )
   }
@@ -254,7 +262,7 @@ const DoctorDashboard = () => {
 
       <Tabs defaultValue="appointments">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="appointments">My Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="appointments">My Appointments ({appointments?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="profile">Profile & Skills</TabsTrigger>
           <TabsTrigger value="availability">Availability & Locations</TabsTrigger>
         </TabsList>
@@ -266,7 +274,7 @@ const DoctorDashboard = () => {
               <CardTitle className="font-headline">Upcoming & Past Appointments</CardTitle>
             </CardHeader>
             <CardContent>
-              {appointments.length > 0 ? (
+              {appointments && appointments.length > 0 ? (
                 <div className="space-y-4">
                   {appointments.map(app => (
                     <Card key={app.id} className="p-4 flex justify-between items-center">
@@ -374,7 +382,7 @@ const DoctorDashboard = () => {
                     <CardDescription>View and edit your available time slots at your practice locations.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {clinics.map(clinic => (
+                    {clinics && clinics.map(clinic => (
                         <LocationCard key={clinic.id} clinic={clinic} doctor={doctor} />
                     ))}
                      <Card className="border-dashed">
@@ -394,3 +402,5 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
+
+    

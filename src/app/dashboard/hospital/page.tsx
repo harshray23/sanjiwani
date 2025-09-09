@@ -21,8 +21,7 @@ import Image from 'next/image';
 const HospitalDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,23 +32,30 @@ const HospitalDashboard = () => {
             setUserProfile(profile);
 
             if (profile?.role === 'hospital') {
-                const hospitalResults = await searchHospitals('Metro General Hospital'); // Mock fetch
+                // In a real app, you'd fetch the hospital associated with this user
+                const [hospitalResults, appointmentData] = await Promise.all([
+                    searchHospitals('Metro General Hospital'), // Mock fetch
+                    Promise.resolve([]) // Mock appointments fetch
+                ]);
+
                 if (hospitalResults.length > 0) {
                   setHospital(hospitalResults[0]);
-                  setAppointments([]); // Mock appointments
+                  setAppointments(appointmentData); 
                 } else {
                   setHospital(null);
+                  setAppointments([]);
                 }
             }
         } catch (error) {
             console.error("Error fetching hospital data:", error);
             toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
             setUserProfile(null);
+            setHospital(null);
         }
       } else {
         setUserProfile(null);
+        setHospital(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -68,7 +74,7 @@ const HospitalDashboard = () => {
     });
   }
 
-  if (isLoading || userProfile === undefined) {
+  if (userProfile === undefined || hospital === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -77,7 +83,7 @@ const HospitalDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'hospital' || !hospital) {
+  if (!userProfile || userProfile.role !== 'hospital') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -95,6 +101,17 @@ const HospitalDashboard = () => {
         </Card>
       </div>
     );
+  }
+
+  if (!hospital) {
+     return (
+         <div className="text-center p-8">
+            <Card className="max-w-md mx-auto p-8">
+                <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
+                <p className="mt-2 text-muted-foreground">We couldn't find a hospital profile associated with your account.</p>
+            </Card>
+        </div>
+    )
   }
   
   const BedInput = ({ label, available, total }: { label: string, available: number, total: number }) => (
@@ -120,7 +137,7 @@ const HospitalDashboard = () => {
           <TabsTrigger value="profile">Hospital Profile</TabsTrigger>
           <TabsTrigger value="beds">Bed Management</TabsTrigger>
           <TabsTrigger value="staff">Staff & Doctors</TabsTrigger>
-          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments ({appointments?.length ?? 0})</TabsTrigger>
         </TabsList>
         
          <TabsContent value="profile">
@@ -222,3 +239,5 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
+
+    

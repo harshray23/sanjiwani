@@ -29,27 +29,21 @@ type AdminData = {
 
 const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<AdminData>({
-    doctors: [],
-    clinics: [],
-    hospitals: [],
-    appointments: [],
-    users: [],
-    diagnosticsCentres: []
-  });
+  const [data, setData] = useState<AdminData | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        // In a real app, you'd check a custom claim or a secure user role document
         if (!currentUser.email?.startsWith('admin@')) {
-          setIsLoading(false);
+          setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
           return;
         }
         
         try {
+          // Fetch all admin data in parallel for faster loading
           const [doctors, clinics, hospitals, appointments, users, diagnosticsCentres] = await Promise.all([
             getDoctors(),
             getClinics(),
@@ -62,9 +56,11 @@ const AdminDashboard = () => {
         } catch (error) {
           console.error("Failed to load admin data", error);
           toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
+          setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
         }
+      } else {
+        setData(undefined);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -76,7 +72,7 @@ const AdminDashboard = () => {
     });
   }
 
-  if (isLoading) {
+  if (data === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -350,3 +346,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+    

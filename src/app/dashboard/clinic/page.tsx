@@ -23,8 +23,7 @@ import Image from 'next/image';
 const ClinicDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [clinic, setClinic] = useState<Clinic | null | undefined>(undefined);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,24 +35,30 @@ const ClinicDashboard = () => {
 
             if (profile?.role === 'clinic') {
                 const clinicId = 'clinic-1'; // Mock: Assume this user's clinic is always 'clinic-1'
-                const clinicData = await getClinicById(clinicId);
+                
+                const [clinicData, appointmentData] = await Promise.all([
+                    getClinicById(clinicId),
+                    getAppointmentsForClinic(clinicId)
+                ]);
+
                 if (clinicData) {
                   setClinic(clinicData);
-                  const appointmentData = await getAppointmentsForClinic(clinicId);
                   setAppointments(appointmentData);
                 } else {
                   setClinic(null);
+                  setAppointments([]);
                 }
             }
         } catch (error) {
             console.error("Error fetching clinic data:", error);
             toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
             setUserProfile(null);
+            setClinic(null);
         }
       } else {
         setUserProfile(null);
+        setClinic(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -73,7 +78,7 @@ const ClinicDashboard = () => {
   }
 
 
-  if (isLoading || userProfile === undefined) {
+  if (userProfile === undefined || clinic === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -82,7 +87,7 @@ const ClinicDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'clinic' || !clinic) {
+  if (!userProfile || userProfile.role !== 'clinic') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -102,6 +107,17 @@ const ClinicDashboard = () => {
     );
   }
 
+  if (!clinic) {
+    return (
+         <div className="text-center p-8">
+            <Card className="max-w-md mx-auto p-8">
+                <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
+                <p className="mt-2 text-muted-foreground">We couldn't find a clinic profile associated with your account.</p>
+            </Card>
+        </div>
+    )
+  }
+
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
       <div className="text-left mb-8">
@@ -111,7 +127,7 @@ const ClinicDashboard = () => {
 
        <Tabs defaultValue="appointments">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments ({appointments?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="doctors">Doctors ({clinic.doctors.length})</TabsTrigger>
           <TabsTrigger value="profile">Clinic Profile</TabsTrigger>
         </TabsList>
@@ -123,7 +139,7 @@ const ClinicDashboard = () => {
                     <CardDescription>All appointments scheduled at your clinic.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {appointments.length > 0 ? (
+                    {appointments && appointments.length > 0 ? (
                         <div className="space-y-4">
                         {appointments.map(app => (
                             <Card key={app.id} className="p-4 flex justify-between items-center">
@@ -231,3 +247,5 @@ const ClinicDashboard = () => {
 };
 
 export default ClinicDashboard;
+
+    

@@ -24,8 +24,7 @@ import { Input } from '@/components/ui/input';
 const DiagnosticsDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [centre, setCentre] = useState<DiagnosticsCentre | null | undefined>(undefined);
-  const [appointments, setAppointments] = useState<TestAppointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appointments, setAppointments] = useState<TestAppointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,20 +43,22 @@ const DiagnosticsDashboard = () => {
                 
                 if (centreData) {
                   setCentre(centreData);
+                  setAppointments(appointmentData);
                 } else {
                   setCentre(null);
+                  setAppointments([]);
                 }
-                setAppointments(appointmentData);
             }
         } catch(error) {
             console.error("Error fetching diagnostics data:", error);
             toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
             setUserProfile(null);
+            setCentre(null);
         }
       } else {
         setUserProfile(null);
+        setCentre(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -80,7 +81,7 @@ const DiagnosticsDashboard = () => {
   }
 
 
-  if (isLoading || userProfile === undefined) {
+  if (userProfile === undefined || centre === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -89,7 +90,7 @@ const DiagnosticsDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'diagnostics_centres' || !centre) {
+  if (!userProfile || userProfile.role !== 'diagnostics_centres') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -106,6 +107,17 @@ const DiagnosticsDashboard = () => {
     );
   }
 
+  if (!centre) {
+     return (
+         <div className="text-center p-8">
+            <Card className="max-w-md mx-auto p-8">
+                <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
+                <p className="mt-2 text-muted-foreground">We couldn't find a diagnostics centre profile associated with your account.</p>
+            </Card>
+        </div>
+    )
+  }
+
   return (
     <div className="py-12 w-full max-w-7xl mx-auto">
       <div className="text-left mb-8">
@@ -115,7 +127,7 @@ const DiagnosticsDashboard = () => {
 
        <Tabs defaultValue="appointments">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments ({appointments?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="tests">Available Tests ({centre.tests.length})</TabsTrigger>
           <TabsTrigger value="reports">Test Reports</TabsTrigger>
           <TabsTrigger value="staff">Manage Staff ({centre.pathologists.length})</TabsTrigger>
@@ -139,7 +151,7 @@ const DiagnosticsDashboard = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {appointments.map(app => (
+                            {appointments && appointments.map(app => (
                                 <TableRow key={app.id}>
                                     <TableCell className="font-medium">{app.patientName}</TableCell>
                                     <TableCell>{app.test.name}</TableCell>
@@ -207,7 +219,7 @@ const DiagnosticsDashboard = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').map(app => (
+                            {appointments && appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').map(app => (
                                 <TableRow key={app.id}>
                                     <TableCell className="font-medium">{app.patientName}</TableCell>
                                     <TableCell>{app.test.name}</TableCell>
@@ -319,3 +331,5 @@ const DiagnosticsDashboard = () => {
 };
 
 export default DiagnosticsDashboard;
+
+    
