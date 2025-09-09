@@ -88,12 +88,18 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, deta
 }
 
 export const comprehensiveSpecialties = [
-    "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
-    "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
-    "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
-    "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
-    "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology",
-    "Surgical Oncology", "Medical Oncology", "Hepatology", "Pulmonary Medicine / Critical Care"
+    // Clinical Specialties
+    "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
+    "Emergency Medicine", "Nuclear Medicine", "Sports Medicine", "Family Medicine", "Community Medicine",
+    // Surgical Specialties
+    "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
+    "Neurosurgery", "Urology", "Cardiothoracic & Vascular Surgery", "Plastic Surgery", 
+    "Pediatric Surgery", "Surgical Oncology",
+    // Super-Specialties
+    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Medical Oncology", "Gastroenterology", 
+    "Hepatology", "Pulmonary Medicine / Critical Care", "Rheumatology",
+    // Non-Clinical Specialties
+    "Anatomy", "Physiology", "Biochemistry", "Pharmacology", "Pathology", "Microbiology", "Forensic Medicine"
 ];
 
 export const getClinics = async (): Promise<Clinic[]> => {
@@ -478,3 +484,5 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 
     return Promise.all(appointments.map(resolveAppointmentRefs));
 };
+
+    
