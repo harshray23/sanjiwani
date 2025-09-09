@@ -137,11 +137,12 @@ export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clin
 export const getHospitals = async (): Promise<Hospital[]> => {
     const hospitals = await getCollection<Hospital>('hospitals');
     const comprehensiveSpecialties = [
-      "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
-      "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
-      "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
-      "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
-      "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology"
+        "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
+        "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
+        "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
+        "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
+        "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology",
+        "Surgical Oncology", "Medical Oncology", "Hepatology", "Pulmonary Medicine / Critical Care"
     ];
 
     // Assign a varied set of specialties to each hospital for better filtering demo
