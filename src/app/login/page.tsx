@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, KeyRound, UserPlus, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from '@/lib/firebase';
 import { 
   createUserWithEmailAndPassword, 
@@ -73,7 +73,7 @@ const diagnosticsSignUpSchema = baseSignUpSchema.extend({
     name: z.string().min(2, "Center name is required."),
     address: z.string().min(5, "Address is required."),
     officePhone: z.string().min(10, "A valid office phone number is required."),
-    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+    ownerPhone: z.string().min(10, "A valid office phone number is required."),
 });
 
 
@@ -261,6 +261,18 @@ export default function LoginPage() {
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "", role: "customer" },
   });
+
+  useEffect(() => {
+    // If a user is already logged in when they visit this page, log them out.
+    if (auth.currentUser) {
+      signOut(auth).then(() => {
+        toast({
+          title: "You Have Been Logged Out",
+          description: "Please log in again to continue.",
+        });
+      });
+    }
+  }, [toast]);
 
   const handleAuthSuccess = (role: string) => {
     switch (role) {
@@ -464,3 +476,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
