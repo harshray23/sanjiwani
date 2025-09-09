@@ -199,7 +199,7 @@ const comprehensiveTests = [
   { id: 'test-kft', name: 'Kidney Function Test (KFT)', price: 750, category: 'Blood Tests' },
   { id: 'test-thyroid', name: 'Thyroid Function Test (T3, T4, TSH)', price: 600, category: 'Blood Tests' },
   { id: 'test-cardiac', name: 'Cardiac Markers (Troponin, CK-MB)', price: 1200, category: 'Blood Tests' },
-  { id 'test-electrolytes', name: 'Electrolytes (Na, K, Ca, Mg, Cl)', price: 400, category: 'Blood Tests' },
+  { id: 'test-electrolytes', name: 'Electrolytes (Na, K, Ca, Mg, Cl)', price: 400, category: 'Blood Tests' },
   { id: 'test-vitamins', name: 'Vitamin Tests (D, B12)', price: 1500, category: 'Blood Tests' },
   { id: 'test-esr', name: 'ESR (Erythrocyte Sedimentation Rate)', price: 200, category: 'Blood Tests' },
   { id: 'test-coag', name: 'Coagulation Profile (PT, INR, aPTT)', price: 900, category: 'Blood Tests' },
