@@ -31,7 +31,7 @@ export function Footer() {
   const socialLinks = [
     { name: "Facebook", icon: <Facebook className="h-5 w-5" />, href: "https://www.facebook.com/share/14R1RFfq246/"},
     { name: "Twitter", icon: <Twitter className="h-5 w-5" />, href: "#"},
-    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, href: "#"},
+    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, href: "https://www.instagram.com/sanjiwanihealth_official?igsh=eXhqaDA4bzJwNHBi"},
     { name: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, href: "#"},
   ];
 
