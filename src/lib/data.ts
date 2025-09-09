@@ -1,4 +1,5 @@
 
+
 import {
   collection,
   addDoc,
@@ -134,7 +135,20 @@ export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clin
 };
 
 export const getHospitals = async (): Promise<Hospital[]> => {
-    return getCollection<Hospital>('hospitals');
+    const hospitals = await getCollection<Hospital>('hospitals');
+    const comprehensiveSpecialties = [
+      "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
+      "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
+      "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
+      "Psychiatry", "Anesthesiology", "Radiology", "General Surgery", 
+      "Plastic Surgery", "Vascular Surgery", "Infectious Disease", "Rheumatology"
+    ];
+
+    // Assign a varied set of specialties to each hospital for better filtering demo
+    return hospitals.map((hospital, index) => ({
+      ...hospital,
+      specialties: comprehensiveSpecialties.slice(index % 5, (index % 5) + Math.floor(Math.random() * 5) + 3)
+    }));
 };
 
 export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
@@ -353,3 +367,4 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
     return Promise.all(appointments.map(resolveAppointmentRefs));
 };
 
+    
