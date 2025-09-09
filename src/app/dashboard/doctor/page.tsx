@@ -8,7 +8,7 @@ import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/da
 import type { Appointment, Doctor, Clinic } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload } from "lucide-react";
+import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload, LogIn } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -155,8 +155,8 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
+        setUser(currentUser);
         // In a real app, you'd fetch the doctor profile linked to the UID
         // For mock, we'll assume the doctor is the first one with a matching email pattern.
         const mockDoctorId = 'doc-1'; // Hardcoding for demo
@@ -179,6 +179,8 @@ const DoctorDashboard = () => {
                 setClinics([clinicData]);
             }
         }
+      } else {
+        setUser(null);
       }
       setIsLoading(false);
     });
@@ -210,7 +212,10 @@ const DoctorDashboard = () => {
           You must be logged in as a doctor to view this page.
         </p>
         <Button asChild className="mt-6">
-          <Link href="/login">Go to Login</Link>
+          <Link href="/login">
+            <LogIn className="mr-2 h-4 w-4"/>
+            Go to Login
+          </Link>
         </Button>
       </div>
     );
@@ -365,3 +370,5 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
+
+    
