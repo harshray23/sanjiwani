@@ -25,26 +25,54 @@ function HospitalSearch() {
   useEffect(() => {
     const fetchResults = async () => {
       setIsLoading(true);
-      const data = initialQuery ? await searchHospitals(initialQuery) : await getHospitals();
-      setHospitals(data);
+      // Fetch all hospitals initially to calculate counts correctly
+      const allHospitals = await getHospitals();
+      setHospitals(allHospitals);
       setIsLoading(false);
     };
     fetchResults();
-  }, [initialQuery]);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Use window.location to trigger a page reload with new search params,
-    // which re-runs the useEffect hook.
-    window.location.href = `/hospitals?query=${encodeURIComponent(searchQuery)}`;
+    setIsLoading(true);
+    searchHospitals(searchQuery).then(data => {
+        setHospitals(data);
+        setIsLoading(false);
+    });
   };
   
+  const specialtyCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
+    hospitals.forEach(hospital => {
+      hospital.specialties.forEach(spec => {
+        if (counts[spec] !== undefined) {
+          counts[spec]++;
+        }
+      });
+    });
+    return counts;
+  }, [hospitals]);
+  
   const filteredHospitals = useMemo(() => {
-    if (!activeSpecialty) {
-        return hospitals;
+    let results = hospitals;
+    
+    // This logic needs to be careful. The search query should filter from ALL hospitals,
+    // not just the base set. Re-fetching on search is better.
+    // For now, we'll filter the already loaded set.
+    if(searchQuery) {
+        results = results.filter(h => 
+            h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            h.location.address.toLowerCase().includes(searchQuery.toLowerCase())
+        );
     }
-    return hospitals.filter(hospital => hospital.specialties.includes(activeSpecialty));
-  }, [hospitals, activeSpecialty]);
+    
+    if (activeSpecialty) {
+        results = results.filter(hospital => hospital.specialties.includes(activeSpecialty));
+    }
+    return results;
+  }, [hospitals, activeSpecialty, searchQuery]);
 
 
   return (
@@ -90,7 +118,7 @@ function HospitalSearch() {
                         onClick={() => setActiveSpecialty(null)}
                         size="sm"
                     >
-                        All
+                        All ({hospitals.length})
                     </Button>
                     {comprehensiveSpecialties.map(specialty => (
                         <Button
@@ -99,7 +127,7 @@ function HospitalSearch() {
                             onClick={() => setActiveSpecialty(specialty)}
                             size="sm"
                         >
-                            {specialty}
+                            {specialty} ({specialtyCounts[specialty] || 0})
                         </Button>
                     ))}
                 </div>

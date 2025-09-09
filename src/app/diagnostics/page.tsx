@@ -74,6 +74,20 @@ export default function DiagnosticsPage() {
         return Array.from(categories);
     }, []);
 
+    const testCategoryCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        uniqueTestCategories.forEach(cat => counts[cat] = 0);
+        centres.forEach(centre => {
+            const centreCategories = new Set(centre.tests.map(t => t.category));
+            centreCategories.forEach(cat => {
+                if (counts[cat] !== undefined) {
+                    counts[cat]++;
+                }
+            });
+        });
+        return counts;
+    }, [centres, uniqueTestCategories]);
+
     const filteredCentres = useMemo(() => {
         if (!activeTestCategory) {
             return centres;
@@ -124,7 +138,7 @@ export default function DiagnosticsPage() {
                                 onClick={() => setActiveTestCategory(null)}
                                 size="sm"
                             >
-                                All
+                                All ({centres.length})
                             </Button>
                             {uniqueTestCategories.map(category => (
                                 <Button
@@ -133,7 +147,7 @@ export default function DiagnosticsPage() {
                                     onClick={() => setActiveTestCategory(category)}
                                     size="sm"
                                 >
-                                    {category}
+                                    {category} ({testCategoryCounts[category] || 0})
                                 </Button>
                             ))}
                         </div>

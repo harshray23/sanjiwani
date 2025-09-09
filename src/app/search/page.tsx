@@ -13,7 +13,6 @@ import { Loader2, SearchIcon, Filter } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
-import { Badge } from '@/components/ui/badge';
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -37,7 +36,6 @@ function SearchResults() {
   
   const handleSearch = (e: React.FormEvent) => {
      e.preventDefault();
-     // This will update the URL and trigger the useEffect
      window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
   }
 
@@ -54,6 +52,30 @@ function SearchResults() {
     }
     return results.clinics.filter(clinic => clinic.specialties.includes(activeClinicSpecialty));
   }, [results.clinics, activeClinicSpecialty]);
+
+  const doctorSpecialtyCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
+    results.doctors.forEach(doctor => {
+        if (counts[doctor.specialty] !== undefined) {
+            counts[doctor.specialty]++;
+        }
+    });
+    return counts;
+  }, [results.doctors]);
+
+  const clinicSpecialtyCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
+    results.clinics.forEach(clinic => {
+        clinic.specialties.forEach(spec => {
+            if (counts[spec] !== undefined) {
+                counts[spec]++;
+            }
+        });
+    });
+    return counts;
+  }, [results.clinics]);
 
 
   return (
@@ -96,7 +118,7 @@ function SearchResults() {
                         onClick={() => setActiveClinicSpecialty(null)}
                         size="sm"
                     >
-                        All
+                        All ({results.clinics.length})
                     </Button>
                     {comprehensiveSpecialties.map(specialty => (
                         <Button
@@ -105,7 +127,7 @@ function SearchResults() {
                             onClick={() => setActiveClinicSpecialty(specialty)}
                             size="sm"
                         >
-                            {specialty}
+                            {specialty} ({clinicSpecialtyCounts[specialty] || 0})
                         </Button>
                     ))}
                 </div>
@@ -135,7 +157,7 @@ function SearchResults() {
                         onClick={() => setActiveDoctorSpecialty(null)}
                         size="sm"
                     >
-                        All
+                        All ({results.doctors.length})
                     </Button>
                     {comprehensiveSpecialties.map(specialty => (
                         <Button
@@ -144,7 +166,7 @@ function SearchResults() {
                             onClick={() => setActiveDoctorSpecialty(specialty)}
                             size="sm"
                         >
-                            {specialty}
+                            {specialty} ({doctorSpecialtyCounts[specialty] || 0})
                         </Button>
                     ))}
                 </div>
