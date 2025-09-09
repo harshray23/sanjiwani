@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getDiagnosticsCentres } from '@/lib/data';
 import type { DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FlaskConical, MapPin, Search, Star } from 'lucide-react';
+import { FlaskConical, MapPin, Search, Star, Filter } from 'lucide-react';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import Link from 'next/link';
@@ -56,6 +56,7 @@ const CentreCard = ({ centre }: { centre: DiagnosticsCentre }) => (
 export default function DiagnosticsPage() {
     const [centres, setCentres] = useState<DiagnosticsCentre[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTestCategory, setActiveTestCategory] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCentres = async () => {
@@ -66,6 +67,24 @@ export default function DiagnosticsPage() {
         };
         fetchCentres();
     }, []);
+
+    const uniqueTestCategories = useMemo(() => {
+        const categories = new Set<string>();
+        centres.forEach(centre => {
+            centre.tests.forEach(test => categories.add(test.category));
+        });
+        return Array.from(categories);
+    }, [centres]);
+
+    const filteredCentres = useMemo(() => {
+        if (!activeTestCategory) {
+            return centres;
+        }
+        return centres.filter(centre => 
+            centre.tests.some(test => test.category === activeTestCategory)
+        );
+    }, [centres, activeTestCategory]);
+
 
     return (
         <div className="w-full max-w-7xl mx-auto py-8">
@@ -96,15 +115,44 @@ export default function DiagnosticsPage() {
                 </div>
             ) : (
                 <div>
-                    {centres.length > 0 ? (
+                    <div className="my-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Filter className="h-5 w-5 text-primary"/>
+                            <h3 className="text-md font-semibold text-accent">Filter by Test Category</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                variant={!activeTestCategory ? 'default' : 'outline'}
+                                onClick={() => setActiveTestCategory(null)}
+                                size="sm"
+                            >
+                                All
+                            </Button>
+                            {uniqueTestCategories.map(category => (
+                                <Button
+                                    key={category}
+                                    variant={activeTestCategory === category ? 'default' : 'outline'}
+                                    onClick={() => setActiveTestCategory(category)}
+                                    size="sm"
+                                >
+                                    {category}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {filteredCentres.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {centres.map(centre => (
+                            {filteredCentres.map(centre => (
                                 <CentreCard key={centre.id} centre={centre} />
                             ))}
                         </div>
                     ) : (
                         <p className="text-center py-16 text-muted-foreground bg-card rounded-lg shadow-md">
-                            No diagnostics centres found.
+                            {activeTestCategory
+                                ? `No diagnostics centres found for the category "${activeTestCategory}".`
+                                : "No diagnostics centres found."
+                            }
                         </p>
                     )}
                 </div>
