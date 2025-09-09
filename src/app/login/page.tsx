@@ -119,6 +119,9 @@ const SignUpForm = () => {
             // Save user details to Firestore
             await createUserInFirestore(userCredential.user, selectedRole, values);
 
+            // Sign the user out immediately after creation so they have to log in.
+            await signOut(auth);
+
             toast({
                 title: "Account Created Successfully",
                 description: "Welcome! Please sign in to continue.",
