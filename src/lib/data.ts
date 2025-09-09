@@ -87,7 +87,7 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, deta
     return userData;
 }
 
-const comprehensiveSpecialties = [
+export const comprehensiveSpecialties = [
     "Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", 
     "Orthopedics", "Gastroenterology", "Endocrinology", "Pulmonology", 
     "Nephrology", "Urology", "Gynecology", "Ophthalmology", "ENT",
@@ -173,7 +173,7 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
     );
 };
 
-const comprehensiveTests: DiagnosticTest[] = [
+export const comprehensiveTests: DiagnosticTest[] = [
   // Blood Tests
   { id: 'test-cbc', name: 'Complete Blood Count (CBC)', price: 300, category: 'Blood Tests' },
   { id: 'test-glucose', name: 'Blood Glucose (Fasting, PP, HbA1c)', price: 500, category: 'Blood Tests' },
@@ -478,5 +478,3 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 
     return Promise.all(appointments.map(resolveAppointmentRefs));
 };
-
-    

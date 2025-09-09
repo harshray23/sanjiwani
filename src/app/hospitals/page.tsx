@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchHospitals, getHospitals } from '@/lib/data';
+import { searchHospitals, getHospitals, comprehensiveSpecialties } from '@/lib/data';
 import type { Hospital } from '@/lib/types';
 import { HospitalCard } from '@/components/HospitalCard';
 import { Input } from '@/components/ui/input';
@@ -38,14 +38,6 @@ function HospitalSearch() {
     // which re-runs the useEffect hook.
     window.location.href = `/hospitals?query=${encodeURIComponent(searchQuery)}`;
   };
-  
-  const uniqueSpecialties = useMemo(() => {
-    const specialties = new Set<string>();
-    hospitals.forEach(hospital => {
-        hospital.specialties.forEach(spec => specialties.add(spec));
-    });
-    return Array.from(specialties);
-  }, [hospitals]);
   
   const filteredHospitals = useMemo(() => {
     if (!activeSpecialty) {
@@ -100,7 +92,7 @@ function HospitalSearch() {
                     >
                         All
                     </Button>
-                    {uniqueSpecialties.map(specialty => (
+                    {comprehensiveSpecialties.map(specialty => (
                         <Button
                             key={specialty}
                             variant={activeSpecialty === specialty ? 'default' : 'outline'}
@@ -139,5 +131,3 @@ export default function HospitalsPage() {
         </Suspense>
     );
 }
-
-    

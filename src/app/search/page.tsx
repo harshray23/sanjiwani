@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchClinicsAndDoctors } from '@/lib/data';
+import { searchClinicsAndDoctors, comprehensiveSpecialties } from '@/lib/data';
 import type { Clinic, Doctor } from '@/lib/types';
 import { ClinicCard } from '@/components/ClinicCard';
 import { DoctorCard } from '@/components/DoctorCard';
@@ -41,26 +41,12 @@ function SearchResults() {
      window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
   }
 
-  const uniqueDoctorSpecialties = useMemo(() => {
-    const specialties = new Set<string>();
-    results.doctors.forEach(doctor => specialties.add(doctor.specialty));
-    return Array.from(specialties);
-  }, [results.doctors]);
-
   const filteredDoctors = useMemo(() => {
     if (!activeDoctorSpecialty) {
       return results.doctors;
     }
     return results.doctors.filter(doctor => doctor.specialty === activeDoctorSpecialty);
   }, [results.doctors, activeDoctorSpecialty]);
-  
-  const uniqueClinicSpecialties = useMemo(() => {
-    const specialties = new Set<string>();
-    results.clinics.forEach(clinic => {
-        clinic.specialties.forEach(spec => specialties.add(spec));
-    });
-    return Array.from(specialties);
-  }, [results.clinics]);
   
   const filteredClinics = useMemo(() => {
     if (!activeClinicSpecialty) {
@@ -95,8 +81,8 @@ function SearchResults() {
       ) : (
         <Tabs defaultValue="doctors">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="clinics">Clinics ({results.clinics.length})</TabsTrigger>
-            <TabsTrigger value="doctors">Doctors ({results.doctors.length})</TabsTrigger>
+            <TabsTrigger value="clinics">Clinics ({filteredClinics.length})</TabsTrigger>
+            <TabsTrigger value="doctors">Doctors ({filteredDoctors.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="clinics">
             <div className="my-6">
@@ -112,7 +98,7 @@ function SearchResults() {
                     >
                         All
                     </Button>
-                    {uniqueClinicSpecialties.map(specialty => (
+                    {comprehensiveSpecialties.map(specialty => (
                         <Button
                             key={specialty}
                             variant={activeClinicSpecialty === specialty ? 'default' : 'outline'}
@@ -151,7 +137,7 @@ function SearchResults() {
                     >
                         All
                     </Button>
-                    {uniqueDoctorSpecialties.map(specialty => (
+                    {comprehensiveSpecialties.map(specialty => (
                         <Button
                             key={specialty}
                             variant={activeDoctorSpecialty === specialty ? 'default' : 'outline'}

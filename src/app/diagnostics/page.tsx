@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import { getDiagnosticsCentres } from '@/lib/data';
+import { getDiagnosticsCentres, comprehensiveTests } from '@/lib/data';
 import type { DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,11 +70,9 @@ export default function DiagnosticsPage() {
 
     const uniqueTestCategories = useMemo(() => {
         const categories = new Set<string>();
-        centres.forEach(centre => {
-            centre.tests.forEach(test => categories.add(test.category));
-        });
+        comprehensiveTests.forEach(test => categories.add(test.category));
         return Array.from(categories);
-    }, [centres]);
+    }, []);
 
     const filteredCentres = useMemo(() => {
         if (!activeTestCategory) {
