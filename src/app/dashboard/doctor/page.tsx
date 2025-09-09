@@ -155,36 +155,41 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
       if (currentUser) {
-        setUser(currentUser);
-        const mockDoctorId = 'doc-1';
-        const doctorProfile = await getDoctorById(mockDoctorId);
-        
-        if (doctorProfile) {
-            setDoctor(doctorProfile);
-            const [doctorAppointments, clinicData] = await Promise.all([
-                getAppointmentsForDoctor(mockDoctorId),
-                getClinicById(doctorProfile.clinicId)
-            ]);
-            
-            setAppointments(doctorAppointments);
-            if (clinicData) {
-                setClinics([clinicData]);
-            }
+        // Mock: Assume this user is always doc-1 for demo purposes
+        const mockDoctorId = 'doc-1'; 
+        try {
+          const doctorProfile = await getDoctorById(mockDoctorId);
+          
+          if (doctorProfile) {
+              setDoctor(doctorProfile);
+              const [doctorAppointments, clinicData] = await Promise.all([
+                  getAppointmentsForDoctor(mockDoctorId),
+                  getClinicById(doctorProfile.clinicId)
+              ]);
+              
+              setAppointments(doctorAppointments);
+              if (clinicData) {
+                  setClinics([clinicData]);
+              }
 
-            profileForm.reset({
-                bio: doctorProfile.bio,
-                qualifications: doctorProfile.qualifications.join(', '),
-                specialties: doctorProfile.specialty
-            });
+              profileForm.reset({
+                  bio: doctorProfile.bio,
+                  qualifications: doctorProfile.qualifications.join(', '),
+                  specialties: doctorProfile.specialty
+              });
+          }
+        } catch (error) {
+            console.error("Error fetching doctor data:", error);
+            toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
         }
-      } else {
-        setUser(null);
       }
+      // This now correctly waits for all fetches to complete before hiding the loader
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [profileForm]);
+  }, [profileForm, toast]);
 
   const onProfileSubmit = (values: z.infer<typeof profileFormSchema>) => {
       toast({

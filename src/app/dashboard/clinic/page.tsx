@@ -31,19 +31,24 @@ const ClinicDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Mock: Assume user's clinic is 'clinic-1'
+        // Mock: Assume this user's clinic is always 'clinic-1' for demo purposes
         const clinicId = 'clinic-1';
-        const clinicData = await getClinicById(clinicId);
-        if (clinicData) {
-          setClinic(clinicData);
-          const appointmentData = await getAppointmentsForClinic(clinicId);
-          setAppointments(appointmentData);
+        try {
+            const clinicData = await getClinicById(clinicId);
+            if (clinicData) {
+              setClinic(clinicData);
+              const appointmentData = await getAppointmentsForClinic(clinicId);
+              setAppointments(appointmentData);
+            }
+        } catch (error) {
+            console.error("Error fetching clinic data:", error);
+            toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
         }
       }
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
   
   const handleUpdateTimings = () => {
       toast({
@@ -215,3 +220,5 @@ const ClinicDashboard = () => {
 };
 
 export default ClinicDashboard;
+
+    

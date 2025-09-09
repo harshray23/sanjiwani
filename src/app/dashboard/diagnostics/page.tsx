@@ -8,7 +8,7 @@ import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/da
 import type { DiagnosticsCentre, TestAppointment, DiagnosticTest, Pathologist } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FlaskConical, Calendar, Microscope, UserPlus, FileText, Download, Upload, PlusCircle, Pencil, Trash2 } from "lucide-react";
+import { FlaskConical, Calendar, Microscope, UserPlus, FileText, Download, Upload, PlusCircle, Pencil, Trash2, LogIn } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -32,22 +32,27 @@ const DiagnosticsDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Mock: Assume user's diagnostics centre is 'diag-1'
+        // Mock: Assume user's diagnostics centre is 'diag-1' for demo
         const centreId = 'diag-1';
-        const [centreData, appointmentData] = await Promise.all([
-          getDiagnosticsCentreById(centreId),
-          getTestAppointmentsForCentre(centreId)
-        ]);
-        
-        if (centreData) {
-          setCentre(centreData);
+        try {
+            const [centreData, appointmentData] = await Promise.all([
+              getDiagnosticsCentreById(centreId),
+              getTestAppointmentsForCentre(centreId)
+            ]);
+            
+            if (centreData) {
+              setCentre(centreData);
+            }
+            setAppointments(appointmentData);
+        } catch(error) {
+            console.error("Error fetching diagnostics data:", error);
+            toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
         }
-        setAppointments(appointmentData);
       }
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
   
   const handleAction = (action: string, entity: string, id: string) => {
     toast({
@@ -84,7 +89,7 @@ const DiagnosticsDashboard = () => {
           You must be logged in as a diagnostics centre administrator.
         </p>
         <Button asChild className="mt-6">
-          <Link href="/login">Go to Login</Link>
+          <Link href="/login"><LogIn className="mr-2"/>Go to Login</Link>
         </Button>
       </div>
     );
@@ -153,7 +158,7 @@ const DiagnosticsDashboard = () => {
                             <TableRow>
                                 <TableHead>Test Name</TableHead>
                                 <TableHead>Category</TableHead>
-                                <TableHead>Price</TableHead>
+                                <TableHead className="text-right">Price</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -303,3 +308,5 @@ const DiagnosticsDashboard = () => {
 };
 
 export default DiagnosticsDashboard;
+
+    

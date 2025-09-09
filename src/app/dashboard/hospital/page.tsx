@@ -29,19 +29,23 @@ const HospitalDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Mock: Assume user's hospital is 'Metro General Hospital'
-        const hospitalResults = await searchHospitals('Metro General Hospital');
-        if (hospitalResults.length > 0) {
-          setHospital(hospitalResults[0]);
-          // Mock fetching appointments for a hospital. In reality, this would be a direct query.
-          // Here, we'll just leave it empty as we don't have doctors linked to hospitals yet.
-          setAppointments([]); 
+        // Mock: Assume user's hospital is 'Metro General Hospital' for demo
+        try {
+            const hospitalResults = await searchHospitals('Metro General Hospital');
+            if (hospitalResults.length > 0) {
+              setHospital(hospitalResults[0]);
+              // Mock fetching appointments for a hospital. In reality, this would be a direct query.
+              setAppointments([]); 
+            }
+        } catch (error) {
+            console.error("Error fetching hospital data:", error);
+            toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
         }
       }
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
   
   const handleBedUpdate = () => {
       toast({
@@ -208,3 +212,5 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
+
+    
