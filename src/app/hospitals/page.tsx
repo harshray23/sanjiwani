@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchHospitals, getHospitals, comprehensiveSpecialties } from '@/lib/data';
+import { searchHospitals, getHospitals, comprehensiveHospitalDepartments } from '@/lib/data';
 import type { Hospital } from '@/lib/types';
 import { HospitalCard } from '@/components/HospitalCard';
 import { Input } from '@/components/ui/input';
@@ -44,7 +44,7 @@ function HospitalSearch() {
   
   const specialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
+    comprehensiveHospitalDepartments.forEach(spec => counts[spec] = 0);
     hospitals.forEach(hospital => {
       hospital.specialties.forEach(spec => {
         if (counts[spec] !== undefined) {
@@ -120,7 +120,7 @@ function HospitalSearch() {
                     >
                         All ({hospitals.length})
                     </Button>
-                    {comprehensiveSpecialties.map(specialty => (
+                    {comprehensiveHospitalDepartments.map(specialty => (
                         <Button
                             key={specialty}
                             variant={activeSpecialty === specialty ? 'default' : 'outline'}

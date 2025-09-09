@@ -102,6 +102,37 @@ export const comprehensiveSpecialties = [
     "Anatomy", "Physiology", "Biochemistry", "Pharmacology", "Pathology", "Microbiology", "Forensic Medicine"
 ];
 
+export const comprehensiveHospitalDepartments = [
+    "OPD (Outpatient Department)",
+    "IPD (Inpatient Department)",
+    "Emergency / Casualty",
+    "ICU (Intensive Care Unit)",
+    "NICU (Neonatal Intensive Care Unit)",
+    "PICU (Pediatric Intensive Care Unit)",
+    "Operation Theatre (OT)",
+    "Radiology / Imaging",
+    "Pathology & Laboratory Services",
+    "Pharmacy",
+    "Blood Bank",
+    "Dialysis Unit",
+    "Maternity & Labor Room",
+    "Pediatrics Department",
+    "Orthopedics Department",
+    "Cardiology Department",
+    "Neurology Department",
+    "Oncology Department",
+    "Dermatology Department",
+    "ENT Department",
+    "Ophthalmology Department",
+    "Psychiatry Department",
+    "Physiotherapy & Rehabilitation",
+    "Dental Department",
+    "Dietary & Nutrition Department",
+    "Administration / Billing / Records",
+    "Housekeeping & Maintenance",
+    "Ambulance & Transport Services",
+];
+
 export const getClinics = async (): Promise<Clinic[]> => {
     const clinics = await getCollection<Clinic>('clinics');
     // Assign a varied set of specialties to each hospital for better filtering demo
@@ -168,7 +199,7 @@ export const getHospitals = async (): Promise<Hospital[]> => {
     // Assign a varied set of specialties to each hospital for better filtering demo
     return hospitals.map((hospital, index) => ({
       ...hospital,
-      specialties: comprehensiveSpecialties.slice(index % 5, (index % 5) + Math.floor(Math.random() * 5) + 3)
+      specialties: comprehensiveHospitalDepartments.slice(index % 5, (index % 5) + Math.floor(Math.random() * 8) + 5)
     }));
 };
 
