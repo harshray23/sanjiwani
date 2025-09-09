@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
+import Image from 'next/image';
+import { Input } from '@/components/ui/input';
 
 const DiagnosticsDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -96,11 +98,12 @@ const DiagnosticsDashboard = () => {
       </div>
 
        <Tabs defaultValue="appointments">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
           <TabsTrigger value="tests">Available Tests ({centre.tests.length})</TabsTrigger>
           <TabsTrigger value="reports">Test Reports</TabsTrigger>
           <TabsTrigger value="staff">Manage Staff ({centre.pathologists.length})</TabsTrigger>
+          <TabsTrigger value="profile">Centre Profile</TabsTrigger>
         </TabsList>
 
         <TabsContent value="appointments">
@@ -250,6 +253,47 @@ const DiagnosticsDashboard = () => {
                             ))}
                         </TableBody>
                     </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="profile">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Centre Profile</CardTitle>
+                    <CardDescription>Update your diagnostics centre's public details.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1 space-y-2">
+                             <label className="font-semibold">Centre Image</label>
+                             <Image 
+                                src={centre.imageUrl} 
+                                alt={centre.name}
+                                width={200}
+                                height={200}
+                                className="w-full aspect-square object-cover rounded-lg border"
+                             />
+                              <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload New Photo
+                            </Button>
+                        </div>
+                        <div className="md:col-span-2 space-y-4">
+                             <div className="space-y-2">
+                                <label className="font-semibold">Centre Name</label>
+                                <Input defaultValue={centre.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">Contact Phone</label>
+                                <Input defaultValue={centre.contact.phone} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">Contact Email</label>
+                                <Input defaultValue={centre.contact.email} />
+                            </div>
+                        </div>
+                    </div>
+                    <Button onClick={() => toast({title: 'Profile Updated!'})}>Update Information</Button>
                 </CardContent>
             </Card>
         </TabsContent>

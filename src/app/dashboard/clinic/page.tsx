@@ -8,7 +8,7 @@ import { getClinicById, getAppointmentsForClinic } from '@/lib/data';
 import type { Clinic, Doctor, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Building, Calendar, Clock, Loader2, UserPlus, Users, Pencil, LogIn, Hourglass, Trash2 } from "lucide-react";
+import { Building, Calendar, Clock, Loader2, UserPlus, Users, Pencil, LogIn, Hourglass, Trash2, Upload } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 const ClinicDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -168,22 +169,40 @@ const ClinicDashboard = () => {
                     <CardDescription>Update your clinic's public details.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="font-semibold">Clinic Name</label>
-                        <Input defaultValue={clinic.name} />
-                    </div>
-                     <div className="space-y-2">
-                        <label className="font-semibold">About Section</label>
-                        <Textarea defaultValue={clinic.about} rows={5}/>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
-                         <div className="space-y-2">
-                            <label className="font-semibold flex items-center gap-2"><Hourglass/>Opening Time</label>
-                            <Input type="time" defaultValue="09:00" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1 space-y-2">
+                             <label className="font-semibold">Clinic Picture</label>
+                             <Image 
+                                src={clinic.imageUrl} 
+                                alt={clinic.name}
+                                width={200}
+                                height={200}
+                                className="w-full aspect-square object-cover rounded-lg border"
+                             />
+                              <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload New Photo
+                            </Button>
                         </div>
-                        <div className="space-y-2">
-                            <label className="font-semibold flex items-center gap-2"><Hourglass/>Closing Time</label>
-                            <Input type="time" defaultValue="18:00" />
+                        <div className="md:col-span-2 space-y-4">
+                             <div className="space-y-2">
+                                <label className="font-semibold">Clinic Name</label>
+                                <Input defaultValue={clinic.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">About Section</label>
+                                <Textarea defaultValue={clinic.about} rows={5}/>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="font-semibold flex items-center gap-2"><Hourglass/>Opening Time</label>
+                                    <Input type="time" defaultValue="09:00" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="font-semibold flex items-center gap-2"><Hourglass/>Closing Time</label>
+                                    <Input type="time" defaultValue="18:00" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <Button onClick={handleUpdateTimings}>Update Information</Button>

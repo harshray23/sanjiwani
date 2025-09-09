@@ -8,7 +8,7 @@ import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/da
 import type { Appointment, Doctor, Clinic } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil } from "lucide-react";
+import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import Image from 'next/image';
 
 const profileFormSchema = z.object({
   bio: z.string().min(10, "Bio must be at least 10 characters.").max(500, "Bio cannot exceed 500 characters."),
@@ -269,50 +269,70 @@ const DoctorDashboard = () => {
                 <CardDescription>Update your public profile information and skills.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Form {...profileForm}>
-                    <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                        <FormField
-                            control={profileForm.control}
-                            name="bio"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Your Bio</FormLabel>
-                                    <FormControl>
-                                        <Textarea placeholder="Tell patients a little about yourself..." {...field} rows={5}/>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={profileForm.control}
-                            name="qualifications"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Qualifications</FormLabel>
-                                     <FormControl>
-                                        <Input placeholder="e.g., MD, MBBS, FACC" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={profileForm.control}
-                            name="specialties"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Specialties & Skills</FormLabel>
-                                     <FormControl>
-                                        <Input placeholder="e.g., Cardiology, Pediatric Care" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit">Save Changes</Button>
-                    </form>
-                </Form>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-1 space-y-4">
+                         <h4 className="font-semibold">Profile Picture</h4>
+                         <div className="relative w-40 h-40 mx-auto">
+                            <Image
+                                src={doctor.imageUrl}
+                                alt={doctor.name}
+                                width={160}
+                                height={160}
+                                className="rounded-full object-cover border-4 border-primary/20"
+                            />
+                         </div>
+                         <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
+                            <Upload className="mr-2 h-4 w-4"/>
+                            Upload New Photo
+                        </Button>
+                    </div>
+                    <div className="md:col-span-2">
+                        <Form {...profileForm}>
+                            <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                                <FormField
+                                    control={profileForm.control}
+                                    name="bio"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Your Bio</FormLabel>
+                                            <FormControl>
+                                                <Textarea placeholder="Tell patients a little about yourself..." {...field} rows={5}/>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="qualifications"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Qualifications</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., MD, MBBS, FACC" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="specialties"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Specialties & Skills</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., Cardiology, Pediatric Care" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit">Save Changes</Button>
+                            </form>
+                        </Form>
+                    </div>
+                </div>
             </CardContent>
            </Card>
         </TabsContent>

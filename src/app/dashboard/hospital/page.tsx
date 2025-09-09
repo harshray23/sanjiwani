@@ -8,7 +8,7 @@ import { searchHospitals } from '@/lib/data'; // Using search to get one
 import type { Hospital, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Hospital as HospitalIcon, BedDouble, Loader2, UserPlus, Users, LogIn, Trash2, Pencil } from "lucide-react";
+import { Hospital as HospitalIcon, BedDouble, Loader2, UserPlus, Users, LogIn, Trash2, Pencil, Upload } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -16,6 +16,7 @@ import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 const HospitalDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -115,21 +116,39 @@ const HospitalDashboard = () => {
                     <CardDescription>Update your hospital's public information and facilities.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <label className="font-semibold">Hospital Name</label>
-                        <Input defaultValue={hospital.name} />
-                    </div>
-                     <div className="space-y-2">
-                        <label className="font-semibold">Contact Number</label>
-                        <Input defaultValue={hospital.contact} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="font-semibold">Specialties (comma-separated)</label>
-                        <Input defaultValue={hospital.specialties.join(', ')} />
-                    </div>
-                     <div className="space-y-2">
-                        <label className="font-semibold">Facilities (comma-separated)</label>
-                        <Textarea placeholder="e.g., 24/7 Pharmacy, In-house Lab, Canteen..." />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                         <div className="md:col-span-1 space-y-2">
+                             <label className="font-semibold">Hospital Image</label>
+                             <Image 
+                                src={hospital.imageUrl || 'https://picsum.photos/400'} 
+                                alt={hospital.name}
+                                width={200}
+                                height={200}
+                                className="w-full aspect-square object-cover rounded-lg border"
+                             />
+                              <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
+                                <Upload className="mr-2 h-4 w-4"/>
+                                Upload New Image
+                            </Button>
+                        </div>
+                        <div className="md:col-span-2 space-y-4">
+                            <div className="space-y-2">
+                                <label className="font-semibold">Hospital Name</label>
+                                <Input defaultValue={hospital.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">Contact Number</label>
+                                <Input defaultValue={hospital.contact} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">Specialties (comma-separated)</label>
+                                <Input defaultValue={hospital.specialties.join(', ')} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-semibold">Facilities (comma-separated)</label>
+                                <Textarea placeholder="e.g., 24/7 Pharmacy, In-house Lab, Canteen..." />
+                            </div>
+                        </div>
                     </div>
                     <Button onClick={() => toast({title: "Profile Saved!"})}>Save Changes</Button>
                 </CardContent>
