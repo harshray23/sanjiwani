@@ -140,10 +140,15 @@ export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clin
         console.error("Firestore not initialized");
         return { clinics: [], doctors: [] };
     }
-    const lowerCaseQuery = queryText.toLowerCase();
     
     const [allClinics, allDoctors] = await Promise.all([getClinics(), getDoctors()]);
     
+    if (!queryText) {
+      return { clinics: allClinics, doctors: allDoctors };
+    }
+
+    const lowerCaseQuery = queryText.toLowerCase();
+
     const filteredClinics = allClinics.filter(clinic =>
         clinic.name.toLowerCase().includes(lowerCaseQuery) ||
         clinic.location.toLowerCase().includes(lowerCaseQuery) ||
@@ -170,6 +175,9 @@ export const getHospitals = async (): Promise<Hospital[]> => {
 export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
     if (!db) return [];
     const allHospitals = await getHospitals();
+    if (!queryText) {
+        return allHospitals;
+    }
     const lowerCaseQuery = queryText.toLowerCase();
     
     return allHospitals.filter(hospital => 
