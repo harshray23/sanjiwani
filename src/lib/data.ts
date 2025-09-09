@@ -190,7 +190,7 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
     );
 };
 
-const comprehensiveTests = [
+const comprehensiveTests: DiagnosticTest[] = [
   // Blood Tests
   { id: 'test-cbc', name: 'Complete Blood Count (CBC)', price: 300, category: 'Blood Tests' },
   { id: 'test-glucose', name: 'Blood Glucose (Fasting, PP, HbA1c)', price: 500, category: 'Blood Tests' },
@@ -198,44 +198,75 @@ const comprehensiveTests = [
   { id: 'test-lft', name: 'Liver Function Test (LFT)', price: 750, category: 'Blood Tests' },
   { id: 'test-kft', name: 'Kidney Function Test (KFT)', price: 750, category: 'Blood Tests' },
   { id: 'test-thyroid', name: 'Thyroid Function Test (T3, T4, TSH)', price: 600, category: 'Blood Tests' },
-  { id: 'test-cardiac', name: 'Cardiac Markers (Troponin, CK-MB)', price: 1200, category: 'Blood Tests' },
+  { id: 'test-cardiac-markers', name: 'Cardiac Markers (Troponin, CK-MB)', price: 1200, category: 'Blood Tests' },
   { id: 'test-electrolytes', name: 'Electrolytes (Na, K, Ca, Mg, Cl)', price: 400, category: 'Blood Tests' },
   { id: 'test-vitamins', name: 'Vitamin Tests (D, B12)', price: 1500, category: 'Blood Tests' },
   { id: 'test-esr', name: 'ESR (Erythrocyte Sedimentation Rate)', price: 200, category: 'Blood Tests' },
   { id: 'test-coag', name: 'Coagulation Profile (PT, INR, aPTT)', price: 900, category: 'Blood Tests' },
-  { id: 'test-culture', name: 'Blood Culture', price: 1000, category: 'Blood Tests' },
+  { id: 'test-blood-culture', name: 'Blood Culture', price: 1000, category: 'Blood Tests' },
   // Urine & Stool Tests
   { id: 'test-urine-rm', name: 'Urine Routine & Microscopy', price: 250, category: 'Urine & Stool Tests' },
   { id: 'test-urine-culture', name: 'Urine Culture', price: 800, category: 'Urine & Stool Tests' },
+  { id: 'test-24h-urine-protein', name: '24-Hour Urine Protein', price: 600, category: 'Urine & Stool Tests' },
   { id: 'test-stool-rm', name: 'Stool Routine & Microscopy', price: 250, category: 'Urine & Stool Tests' },
+  { id: 'test-stool-culture', name: 'Stool Culture', price: 700, category: 'Urine & Stool Tests' },
+  { id: 'test-occult-blood', name: 'Occult Blood Test', price: 400, category: 'Urine & Stool Tests' },
   // Cardiac & Vascular Tests
   { id: 'test-ecg', name: 'Electrocardiogram (ECG/EKG)', price: 350, category: 'Cardiac & Vascular Tests' },
   { id: 'test-echo', name: 'Echocardiogram (ECHO)', price: 2500, category: 'Cardiac & Vascular Tests' },
   { id: 'test-tmt', name: 'Treadmill Test (TMT)', price: 2000, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-holter', name: 'Holter Monitoring', price: 3000, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-cardiac-ct-mri', name: 'Cardiac CT/MRI', price: 10000, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-angiography', name: 'Angiography', price: 15000, category: 'Cardiac & Vascular Tests' },
+  { id: 'test-doppler-usg', name: 'Doppler Ultrasound', price: 1800, category: 'Cardiac & Vascular Tests' },
   // Neurological Tests
   { id: 'test-eeg', name: 'Electroencephalogram (EEG)', price: 2000, category: 'Neurological Tests' },
+  { id: 'test-emg', name: 'Electromyography (EMG)', price: 3000, category: 'Neurological Tests' },
+  { id: 'test-nerve-conduction', name: 'Nerve Conduction Study', price: 3500, category: 'Neurological Tests' },
+  { id: 'test-ct-brain', name: 'CT Brain', price: 2500, category: 'Neurological Tests' },
   { id: 'test-mri-brain', name: 'MRI Brain', price: 8000, category: 'Neurological Tests' },
+  { id: 'test-lumbar-puncture', name: 'Lumbar Puncture (CSF Analysis)', price: 4000, category: 'Neurological Tests' },
   // Respiratory Tests
   { id: 'test-xray-chest', name: 'Chest X-Ray', price: 500, category: 'Respiratory Tests' },
   { id: 'test-pft', name: 'Pulmonary Function Test (PFT)', price: 1500, category: 'Respiratory Tests' },
+  { id: 'test-ct-chest', name: 'CT Chest (HRCT)', price: 5000, category: 'Respiratory Tests' },
+  { id: 'test-abg', name: 'Arterial Blood Gas (ABG)', price: 1200, category: 'Respiratory Tests' },
+  { id: 'test-bronchoscopy', name: 'Bronchoscopy', price: 7000, category: 'Respiratory Tests' },
+  { id: 'test-tb', name: 'Tuberculosis Test (Mantoux, GeneXpert)', price: 2000, category: 'Respiratory Tests' },
   // Imaging & Radiology
+  { id: 'test-xray', name: 'X-Ray', price: 400, category: 'Imaging & Radiology' },
   { id: 'test-usg', name: 'Ultrasound (USG)', price: 1200, category: 'Imaging & Radiology' },
   { id: 'test-ct-scan', name: 'CT Scan', price: 5000, category: 'Imaging & Radiology' },
   { id: 'test-mri-scan', name: 'MRI Scan', price: 8000, category: 'Imaging & Radiology' },
   { id: 'test-pet-scan', name: 'PET Scan', price: 25000, category: 'Imaging & Radiology' },
   { id: 'test-mammography', name: 'Mammography', price: 1800, category: 'Imaging & Radiology' },
+  { id: 'test-dexa-scan', name: 'Bone Densitometry (DEXA)', price: 2200, category: 'Imaging & Radiology' },
   // Infectious Disease Tests
   { id: 'test-covid', name: 'COVID-19 Test (RT-PCR)', price: 500, category: 'Infectious Disease Tests' },
   { id: 'test-hiv', name: 'HIV Test', price: 600, category: 'Infectious Disease Tests' },
   { id: 'test-hepatitis', name: 'Hepatitis Panel', price: 1200, category: 'Infectious Disease Tests' },
   { id: 'test-dengue', name: 'Dengue Test', price: 800, category: 'Infectious Disease Tests' },
+  { id: 'test-malaria', name: 'Malaria Test', price: 400, category: 'Infectious Disease Tests' },
+  { id: 'test-typhoid', name: 'Typhoid Test (Widal, Typhidot)', price: 500, category: 'Infectious Disease Tests' },
+  { id: 'test-syphilis', name: 'Syphilis Test (VDRL)', price: 450, category: 'Infectious Disease Tests' },
   // Pathology / Biopsy
   { id: 'test-fnac', name: 'FNAC (Fine Needle Aspiration Cytology)', price: 1500, category: 'Pathology / Biopsy' },
   { id: 'test-biopsy', name: 'Tissue Biopsy', price: 3000, category: 'Pathology / Biopsy' },
+  { id: 'test-pap-smear', name: 'Pap Smear (Cervical Screening)', price: 900, category: 'Pathology / Biopsy' },
+  { id: 'test-bone-marrow', name: 'Bone Marrow Aspiration & Biopsy', price: 5000, category: 'Pathology / Biopsy' },
+  // Orthopedic / Bone Tests
+  { id: 'test-xray-bone', name: 'X-Ray Bones & Joints', price: 500, category: 'Orthopedic / Bone Tests' },
+  { id: 'test-mri-joint', name: 'CT/MRI of Spine & Joints', price: 7000, category: 'Orthopedic / Bone Tests' },
+  { id: 'test-bone-scan', name: 'Bone Scan', price: 6000, category: 'Orthopedic / Bone Tests' },
   // Specialized Diagnostic Tests
   { id: 'test-endoscopy', name: 'Endoscopy (Upper GI)', price: 4000, category: 'Specialized Diagnostic Tests' },
   { id: 'test-colonoscopy', name: 'Colonoscopy', price: 6000, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-laparoscopy', name: 'Laparoscopy (Diagnostic)', price: 20000, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-hysteroscopy', name: 'Hysteroscopy', price: 10000, category: 'Specialized Diagnostic Tests' },
   { id: 'test-psa', name: 'PSA (Prostate Specific Antigen)', price: 900, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-cancer-markers', name: 'Cancer Markers (CA-125, CEA)', price: 2500, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-allergy', name: 'Allergy Testing', price: 4000, category: 'Specialized Diagnostic Tests' },
+  { id: 'test-genetic', name: 'Genetic Testing (Karyotyping)', price: 8000, category: 'Specialized Diagnostic Tests' },
 ];
 
 export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
