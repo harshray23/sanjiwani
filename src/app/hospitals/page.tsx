@@ -12,6 +12,7 @@ import { Loader2, SearchIcon, Siren, Filter } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 function HospitalSearch() {
   const searchParams = useSearchParams();
@@ -108,28 +109,30 @@ function HospitalSearch() {
       ) : (
         <div>
            <div className="my-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <Filter className="h-5 w-5 text-primary"/>
-                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
-                </div>
-                 <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={!activeSpecialty ? 'default' : 'outline'}
-                        onClick={() => setActiveSpecialty(null)}
-                        size="sm"
-                    >
-                        All ({hospitals.length})
-                    </Button>
-                    {comprehensiveHospitalDepartments.map(specialty => (
-                        <Button
-                            key={specialty}
-                            variant={activeSpecialty === specialty ? 'default' : 'outline'}
-                            onClick={() => setActiveSpecialty(specialty)}
-                            size="sm"
-                        >
-                            {specialty} ({specialtyCounts[specialty] || 0})
-                        </Button>
-                    ))}
+                <div className="flex items-center gap-4">
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <Filter className="mr-2 h-4 w-4"/>
+                                {activeSpecialty || "Filter by Department"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto">
+                            <DropdownMenuLabel>Filter by Department</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={activeSpecialty || "All"} onValueChange={(value) => setActiveSpecialty(value === "All" ? null : value)}>
+                                <DropdownMenuRadioItem value="All">All ({hospitals.length})</DropdownMenuRadioItem>
+                                {comprehensiveHospitalDepartments.map(specialty => (
+                                    <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                        {specialty} ({specialtyCounts[specialty] || 0})
+                                    </DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                     {activeSpecialty && (
+                        <Button variant="ghost" onClick={() => setActiveSpecialty(null)}>Clear Filter</Button>
+                    )}
                 </div>
             </div>
           {filteredHospitals.length > 0 ? (

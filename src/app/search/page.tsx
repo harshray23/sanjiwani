@@ -13,6 +13,7 @@ import { Loader2, SearchIcon, Filter } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -108,28 +109,30 @@ function SearchResults() {
           </TabsList>
           <TabsContent value="clinics">
             <div className="my-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <Filter className="h-5 w-5 text-primary"/>
-                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
-                </div>
-                 <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={!activeClinicSpecialty ? 'default' : 'outline'}
-                        onClick={() => setActiveClinicSpecialty(null)}
-                        size="sm"
-                    >
-                        All ({results.clinics.length})
-                    </Button>
-                    {comprehensiveSpecialties.map(specialty => (
-                        <Button
-                            key={specialty}
-                            variant={activeClinicSpecialty === specialty ? 'default' : 'outline'}
-                            onClick={() => setActiveClinicSpecialty(specialty)}
-                            size="sm"
-                        >
-                            {specialty} ({clinicSpecialtyCounts[specialty] || 0})
-                        </Button>
-                    ))}
+                <div className="flex items-center gap-4">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <Filter className="mr-2 h-4 w-4"/>
+                                {activeClinicSpecialty || "Filter by Specialization"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto">
+                            <DropdownMenuLabel>Filter by Specialization</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={activeClinicSpecialty || "All"} onValueChange={(value) => setActiveClinicSpecialty(value === "All" ? null : value)}>
+                                <DropdownMenuRadioItem value="All">All ({results.clinics.length})</DropdownMenuRadioItem>
+                                {comprehensiveSpecialties.map(specialty => (
+                                    <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                        {specialty} ({clinicSpecialtyCounts[specialty] || 0})
+                                    </DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    {activeClinicSpecialty && (
+                        <Button variant="ghost" onClick={() => setActiveClinicSpecialty(null)}>Clear Filter</Button>
+                    )}
                 </div>
             </div>
             {filteredClinics.length > 0 ? (
@@ -147,28 +150,30 @@ function SearchResults() {
           </TabsContent>
           <TabsContent value="doctors">
             <div className="my-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <Filter className="h-5 w-5 text-primary"/>
-                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant={!activeDoctorSpecialty ? 'default' : 'outline'}
-                        onClick={() => setActiveDoctorSpecialty(null)}
-                        size="sm"
-                    >
-                        All ({results.doctors.length})
-                    </Button>
-                    {comprehensiveSpecialties.map(specialty => (
-                        <Button
-                            key={specialty}
-                            variant={activeDoctorSpecialty === specialty ? 'default' : 'outline'}
-                            onClick={() => setActiveDoctorSpecialty(specialty)}
-                            size="sm"
-                        >
-                            {specialty} ({doctorSpecialtyCounts[specialty] || 0})
-                        </Button>
-                    ))}
+                <div className="flex items-center gap-4">
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                                <Filter className="mr-2 h-4 w-4"/>
+                                {activeDoctorSpecialty || "Filter by Specialization"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto">
+                            <DropdownMenuLabel>Filter by Specialization</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={activeDoctorSpecialty || "All"} onValueChange={(value) => setActiveDoctorSpecialty(value === "All" ? null : value)}>
+                                <DropdownMenuRadioItem value="All">All ({results.doctors.length})</DropdownMenuRadioItem>
+                                {comprehensiveSpecialties.map(specialty => (
+                                    <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                        {specialty} ({doctorSpecialtyCounts[specialty] || 0})
+                                    </DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    {activeDoctorSpecialty && (
+                        <Button variant="ghost" onClick={() => setActiveDoctorSpecialty(null)}>Clear Filter</Button>
+                    )}
                 </div>
             </div>
              {filteredDoctors.length > 0 ? (

@@ -13,6 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const CentreCard = ({ centre }: { centre: DiagnosticsCentre }) => (
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
@@ -128,28 +129,30 @@ export default function DiagnosticsPage() {
             ) : (
                 <div>
                     <div className="my-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Filter className="h-5 w-5 text-primary"/>
-                            <h3 className="text-md font-semibold text-accent">Filter by Test Category</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            <Button
-                                variant={!activeTestCategory ? 'default' : 'outline'}
-                                onClick={() => setActiveTestCategory(null)}
-                                size="sm"
-                            >
-                                All ({centres.length})
-                            </Button>
-                            {uniqueTestCategories.map(category => (
-                                <Button
-                                    key={category}
-                                    variant={activeTestCategory === category ? 'default' : 'outline'}
-                                    onClick={() => setActiveTestCategory(category)}
-                                    size="sm"
-                                >
-                                    {category} ({testCategoryCounts[category] || 0})
-                                </Button>
-                            ))}
+                        <div className="flex items-center gap-4">
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline">
+                                        <Filter className="mr-2 h-4 w-4"/>
+                                        {activeTestCategory || "Filter by Test Category"}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto">
+                                    <DropdownMenuLabel>Filter by Test Category</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuRadioGroup value={activeTestCategory || "All"} onValueChange={(value) => setActiveTestCategory(value === "All" ? null : value)}>
+                                        <DropdownMenuRadioItem value="All">All ({centres.length})</DropdownMenuRadioItem>
+                                        {uniqueTestCategories.map(category => (
+                                            <DropdownMenuRadioItem key={category} value={category}>
+                                                {category} ({testCategoryCounts[category] || 0})
+                                            </DropdownMenuRadioItem>
+                                        ))}
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            {activeTestCategory && (
+                                <Button variant="ghost" onClick={() => setActiveTestCategory(null)}>Clear Filter</Button>
+                            )}
                         </div>
                     </div>
 
