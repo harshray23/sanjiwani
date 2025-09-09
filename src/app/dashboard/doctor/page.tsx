@@ -157,27 +157,26 @@ const DoctorDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // In a real app, you'd fetch the doctor profile linked to the UID
-        // For mock, we'll assume the doctor is the first one with a matching email pattern.
-        const mockDoctorId = 'doc-1'; // Hardcoding for demo
+        const mockDoctorId = 'doc-1';
         const doctorProfile = await getDoctorById(mockDoctorId);
         
         if (doctorProfile) {
             setDoctor(doctorProfile);
-            const doctorAppointments = await getAppointmentsForDoctor(mockDoctorId);
+            const [doctorAppointments, clinicData] = await Promise.all([
+                getAppointmentsForDoctor(mockDoctorId),
+                getClinicById(doctorProfile.clinicId)
+            ]);
+            
             setAppointments(doctorAppointments);
+            if (clinicData) {
+                setClinics([clinicData]);
+            }
 
             profileForm.reset({
                 bio: doctorProfile.bio,
                 qualifications: doctorProfile.qualifications.join(', '),
                 specialties: doctorProfile.specialty
             });
-
-            // Fetch associated clinics
-            const clinicData = await getClinicById(doctorProfile.clinicId);
-            if (clinicData) {
-                setClinics([clinicData]);
-            }
         }
       } else {
         setUser(null);
