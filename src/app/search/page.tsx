@@ -22,7 +22,8 @@ function SearchResults() {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<{ clinics: Clinic[]; doctors: Doctor[] }>({ clinics: [], doctors: [] });
   const [searchQuery, setSearchQuery] = useState(query);
-  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
+  const [activeDoctorSpecialty, setActiveDoctorSpecialty] = useState<string | null>(null);
+  const [activeClinicSpecialty, setActiveClinicSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -40,18 +41,34 @@ function SearchResults() {
      window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
   }
 
-  const uniqueSpecialties = useMemo(() => {
+  const uniqueDoctorSpecialties = useMemo(() => {
     const specialties = new Set<string>();
     results.doctors.forEach(doctor => specialties.add(doctor.specialty));
     return Array.from(specialties);
   }, [results.doctors]);
 
   const filteredDoctors = useMemo(() => {
-    if (!activeSpecialty) {
+    if (!activeDoctorSpecialty) {
       return results.doctors;
     }
-    return results.doctors.filter(doctor => doctor.specialty === activeSpecialty);
-  }, [results.doctors, activeSpecialty]);
+    return results.doctors.filter(doctor => doctor.specialty === activeDoctorSpecialty);
+  }, [results.doctors, activeDoctorSpecialty]);
+  
+  const uniqueClinicSpecialties = useMemo(() => {
+    const specialties = new Set<string>();
+    results.clinics.forEach(clinic => {
+        clinic.specialties.forEach(spec => specialties.add(spec));
+    });
+    return Array.from(specialties);
+  }, [results.clinics]);
+  
+  const filteredClinics = useMemo(() => {
+    if (!activeClinicSpecialty) {
+        return results.clinics;
+    }
+    return results.clinics.filter(clinic => clinic.specialties.includes(activeClinicSpecialty));
+  }, [results.clinics, activeClinicSpecialty]);
+
 
   return (
     <div className="container mx-auto py-8">
@@ -82,12 +99,42 @@ function SearchResults() {
             <TabsTrigger value="doctors">Doctors ({results.doctors.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="clinics">
-            {results.clinics.length > 0 ? (
+            <div className="my-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="h-5 w-5 text-primary"/>
+                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
+                </div>
+                 <div className="flex flex-wrap gap-2">
+                    <Button
+                        variant={!activeClinicSpecialty ? 'default' : 'outline'}
+                        onClick={() => setActiveClinicSpecialty(null)}
+                        size="sm"
+                    >
+                        All
+                    </Button>
+                    {uniqueClinicSpecialties.map(specialty => (
+                        <Button
+                            key={specialty}
+                            variant={activeClinicSpecialty === specialty ? 'default' : 'outline'}
+                            onClick={() => setActiveClinicSpecialty(specialty)}
+                            size="sm"
+                        >
+                            {specialty}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+            {filteredClinics.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {results.clinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
+                {filteredClinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
               </div>
             ) : (
-              <p className="text-center py-12 text-muted-foreground">No clinics found matching your search.</p>
+              <p className="text-center py-12 text-muted-foreground">
+                {activeClinicSpecialty
+                    ? `No clinics found for the specialization "${activeClinicSpecialty}".`
+                    : "No clinics found matching your search."
+                }
+              </p>
             )}
           </TabsContent>
           <TabsContent value="doctors">
@@ -98,17 +145,17 @@ function SearchResults() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button
-                        variant={!activeSpecialty ? 'default' : 'outline'}
-                        onClick={() => setActiveSpecialty(null)}
+                        variant={!activeDoctorSpecialty ? 'default' : 'outline'}
+                        onClick={() => setActiveDoctorSpecialty(null)}
                         size="sm"
                     >
                         All
                     </Button>
-                    {uniqueSpecialties.map(specialty => (
+                    {uniqueDoctorSpecialties.map(specialty => (
                         <Button
                             key={specialty}
-                            variant={activeSpecialty === specialty ? 'default' : 'outline'}
-                            onClick={() => setActiveSpecialty(specialty)}
+                            variant={activeDoctorSpecialty === specialty ? 'default' : 'outline'}
+                            onClick={() => setActiveDoctorSpecialty(specialty)}
                             size="sm"
                         >
                             {specialty}
@@ -122,8 +169,8 @@ function SearchResults() {
               </div>
             ) : (
               <p className="text-center py-12 text-muted-foreground">
-                {activeSpecialty 
-                    ? `No doctors found for the specialization "${activeSpecialty}".`
+                {activeDoctorSpecialty 
+                    ? `No doctors found for the specialization "${activeDoctorSpecialty}".`
                     : "No doctors found matching your search."
                 }
               </p>

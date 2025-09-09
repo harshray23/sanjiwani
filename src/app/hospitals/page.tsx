@@ -1,14 +1,14 @@
 
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { searchHospitals, getHospitals } from '@/lib/data';
 import type { Hospital } from '@/lib/types';
 import { HospitalCard } from '@/components/HospitalCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, SearchIcon, Siren } from 'lucide-react';
+import { Loader2, SearchIcon, Siren, Filter } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
@@ -20,6 +20,7 @@ function HospitalSearch() {
   const [isLoading, setIsLoading] = useState(true);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -37,6 +38,22 @@ function HospitalSearch() {
     // which re-runs the useEffect hook.
     window.location.href = `/hospitals?query=${encodeURIComponent(searchQuery)}`;
   };
+  
+  const uniqueSpecialties = useMemo(() => {
+    const specialties = new Set<string>();
+    hospitals.forEach(hospital => {
+        hospital.specialties.forEach(spec => specialties.add(spec));
+    });
+    return Array.from(specialties);
+  }, [hospitals]);
+  
+  const filteredHospitals = useMemo(() => {
+    if (!activeSpecialty) {
+        return hospitals;
+    }
+    return hospitals.filter(hospital => hospital.specialties.includes(activeSpecialty));
+  }, [hospitals, activeSpecialty]);
+
 
   return (
     <div className="w-full max-w-7xl mx-auto py-8">
@@ -70,15 +87,43 @@ function HospitalSearch() {
         </div>
       ) : (
         <div>
-          {hospitals.length > 0 ? (
+           <div className="my-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="h-5 w-5 text-primary"/>
+                    <h3 className="text-md font-semibold text-accent">Filter by Specialization</h3>
+                </div>
+                 <div className="flex flex-wrap gap-2">
+                    <Button
+                        variant={!activeSpecialty ? 'default' : 'outline'}
+                        onClick={() => setActiveSpecialty(null)}
+                        size="sm"
+                    >
+                        All
+                    </Button>
+                    {uniqueSpecialties.map(specialty => (
+                        <Button
+                            key={specialty}
+                            variant={activeSpecialty === specialty ? 'default' : 'outline'}
+                            onClick={() => setActiveSpecialty(specialty)}
+                            size="sm"
+                        >
+                            {specialty}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+          {filteredHospitals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {hospitals.map(hospital => (
+              {filteredHospitals.map(hospital => (
                 <HospitalCard key={hospital.id} hospital={hospital} />
               ))}
             </div>
           ) : (
             <p className="text-center py-16 text-muted-foreground bg-card rounded-lg shadow-md">
-              No hospitals found matching your search. Try a different query.
+                {activeSpecialty
+                    ? `No hospitals found for the specialization "${activeSpecialty}".`
+                    : "No hospitals found matching your search. Try a different query."
+                }
             </p>
           )}
         </div>
