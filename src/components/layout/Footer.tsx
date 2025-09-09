@@ -114,7 +114,14 @@ export function Footer() {
             <div className="flex items-center gap-4">
                 <span>Follow us:</span>
                 {socialLinks.map(social => (
-                    <a key={social.name} href={social.href} className="text-muted-foreground hover:text-primary transition-colors" aria-label={social.name}>
+                    <a 
+                        key={social.name} 
+                        href={social.href} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-muted-foreground hover:text-primary transition-colors" 
+                        aria-label={social.name}
+                    >
                         {social.icon}
                     </a>
                 ))}
