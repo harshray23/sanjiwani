@@ -23,14 +23,15 @@ import { Input } from '@/components/ui/input';
 
 const DiagnosticsDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
+  const [centre, setCentre] = useState<DiagnosticsCentre | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<TestAppointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      setIsAuthLoading(false);
       if (currentUser) {
         // Mock: Assume user's diagnostics centre is 'diag-1' for demo
         const centreId = 'diag-1';
@@ -42,14 +43,18 @@ const DiagnosticsDashboard = () => {
             
             if (centreData) {
               setCentre(centreData);
+            } else {
+              setCentre(null);
             }
             setAppointments(appointmentData);
         } catch(error) {
             console.error("Error fetching diagnostics data:", error);
             toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
+            setCentre(null);
         }
+      } else {
+        setCentre(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -72,7 +77,7 @@ const DiagnosticsDashboard = () => {
   }
 
 
-  if (isLoading) {
+  if (isAuthLoading || centre === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -308,5 +313,3 @@ const DiagnosticsDashboard = () => {
 };
 
 export default DiagnosticsDashboard;
-
-    

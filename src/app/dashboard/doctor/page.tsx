@@ -138,10 +138,10 @@ const LocationCard = ({ clinic, doctor }: { clinic: Clinic, doctor: Doctor }) =>
 
 const DoctorDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [doctor, setDoctor] = useState<Doctor | null | undefined>(undefined);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { toast } = useToast();
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -156,6 +156,7 @@ const DoctorDashboard = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      setIsAuthLoading(false);
       if (currentUser) {
         // Mock: Assume this user is always doc-1 for demo purposes
         const mockDoctorId = 'doc-1'; 
@@ -179,14 +180,17 @@ const DoctorDashboard = () => {
                   qualifications: doctorProfile.qualifications.join(', '),
                   specialties: doctorProfile.specialty
               });
+          } else {
+              setDoctor(null); // Explicitly set to null if not found
           }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
             toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
+            setDoctor(null); // Set to null on error
         }
+      } else {
+        setDoctor(null); // No user, so no doctor profile
       }
-      // This now correctly waits for all fetches to complete before hiding the loader
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [profileForm, toast]);
@@ -199,7 +203,7 @@ const DoctorDashboard = () => {
       console.log(values);
   };
   
-  if (isLoading) {
+  if (isAuthLoading || doctor === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -374,5 +378,3 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
-
-    

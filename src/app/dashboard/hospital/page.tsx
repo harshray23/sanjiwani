@@ -20,14 +20,15 @@ import Image from 'next/image';
 
 const HospitalDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [hospital, setHospital] = useState<Hospital | null>(null);
+  const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      setIsAuthLoading(false);
       if (currentUser) {
         // Mock: Assume user's hospital is 'Metro General Hospital' for demo
         try {
@@ -36,13 +37,17 @@ const HospitalDashboard = () => {
               setHospital(hospitalResults[0]);
               // Mock fetching appointments for a hospital. In reality, this would be a direct query.
               setAppointments([]); 
+            } else {
+              setHospital(null);
             }
         } catch (error) {
             console.error("Error fetching hospital data:", error);
             toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
+            setHospital(null);
         }
+      } else {
+        setHospital(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -61,7 +66,7 @@ const HospitalDashboard = () => {
     });
   }
 
-  if (isLoading) {
+  if (isAuthLoading || hospital === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -212,5 +217,3 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
-
-    

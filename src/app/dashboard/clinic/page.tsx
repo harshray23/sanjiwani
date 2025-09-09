@@ -22,14 +22,15 @@ import Image from 'next/image';
 
 const ClinicDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [clinic, setClinic] = useState<Clinic | null>(null);
+  const [clinic, setClinic] = useState<Clinic | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      setIsAuthLoading(false);
       if (currentUser) {
         // Mock: Assume this user's clinic is always 'clinic-1' for demo purposes
         const clinicId = 'clinic-1';
@@ -39,13 +40,17 @@ const ClinicDashboard = () => {
               setClinic(clinicData);
               const appointmentData = await getAppointmentsForClinic(clinicId);
               setAppointments(appointmentData);
+            } else {
+              setClinic(null);
             }
         } catch (error) {
             console.error("Error fetching clinic data:", error);
             toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
+            setClinic(null);
         }
+      } else {
+        setClinic(null);
       }
-      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -65,7 +70,7 @@ const ClinicDashboard = () => {
   }
 
 
-  if (isLoading) {
+  if (isAuthLoading || clinic === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -220,5 +225,3 @@ const ClinicDashboard = () => {
 };
 
 export default ClinicDashboard;
-
-    
