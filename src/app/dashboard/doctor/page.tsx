@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForDoctor, getDoctorById, getClinicById } from '@/lib/data';
-import type { Appointment, Doctor, Clinic } from '@/lib/types';
+import { getAppointmentsForDoctor, getDoctorById, getClinicById, getUserProfile } from '@/lib/data';
+import type { Appointment, Doctor, Clinic, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload, LogIn } from "lucide-react";
+import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload, LogIn, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -137,11 +137,11 @@ const LocationCard = ({ clinic, doctor }: { clinic: Clinic, doctor: Doctor }) =>
 }
 
 const DoctorDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [doctor, setDoctor] = useState<Doctor | null | undefined>(undefined);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -155,42 +155,45 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false); // Auth check is complete
       if (currentUser) {
-        // Mock: Assume this user is always doc-1 for demo purposes
-        const mockDoctorId = 'doc-1'; 
         try {
-          const doctorProfile = await getDoctorById(mockDoctorId);
-          
-          if (doctorProfile) {
-              setDoctor(doctorProfile);
-              const [doctorAppointments, clinicData] = await Promise.all([
-                  getAppointmentsForDoctor(mockDoctorId),
-                  getClinicById(doctorProfile.clinicId)
-              ]);
-              
-              setAppointments(doctorAppointments);
-              if (clinicData) {
-                  setClinics([clinicData]);
-              }
+            const profile = await getUserProfile(currentUser.uid);
+            setUserProfile(profile);
 
-              profileForm.reset({
-                  bio: doctorProfile.bio,
-                  qualifications: doctorProfile.qualifications.join(', '),
-                  specialties: doctorProfile.specialty
-              });
-          } else {
-              setDoctor(null); // Explicitly set to null if not found
-          }
+            if (profile?.role === 'doctor') {
+                const mockDoctorId = 'doc-1';
+                const doctorProfile = await getDoctorById(mockDoctorId);
+                
+                if (doctorProfile) {
+                    setDoctor(doctorProfile);
+                    const [doctorAppointments, clinicData] = await Promise.all([
+                        getAppointmentsForDoctor(mockDoctorId),
+                        getClinicById(doctorProfile.clinicId)
+                    ]);
+                    
+                    setAppointments(doctorAppointments);
+                    if (clinicData) {
+                        setClinics([clinicData]);
+                    }
+
+                    profileForm.reset({
+                        bio: doctorProfile.bio,
+                        qualifications: doctorProfile.qualifications.join(', '),
+                        specialties: doctorProfile.specialty
+                    });
+                } else {
+                    setDoctor(null);
+                }
+            }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
             toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
-            setDoctor(null); // Set to null on error
+            setUserProfile(null);
         }
       } else {
-        setDoctor(null); // No user, so no doctor profile
+        setUserProfile(null);
       }
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [profileForm, toast]);
@@ -203,7 +206,7 @@ const DoctorDashboard = () => {
       console.log(values);
   };
   
-  if (isAuthLoading || doctor === undefined) {
+  if (isLoading || userProfile === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -212,19 +215,22 @@ const DoctorDashboard = () => {
     );
   }
 
-  if (!user || !doctor) {
+  if (!userProfile || userProfile.role !== 'doctor' || !doctor) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
-        <p className="mt-2 text-muted-foreground">
-          You must be logged in as a doctor to view this page.
-        </p>
-        <Button asChild className="mt-6">
-          <Link href="/login">
-            <LogIn className="mr-2 h-4 w-4"/>
-            Go to Login
-          </Link>
-        </Button>
+        <Card className="max-w-md mx-auto p-8">
+            <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
+            <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
+            <p className="mt-2 text-muted-foreground">
+              You must be logged in as a doctor to view this page. Your current role is '{userProfile?.role || 'not logged in'}'.
+            </p>
+            <Button asChild className="mt-6">
+              <Link href="/login">
+                <LogIn className="mr-2 h-4 w-4"/>
+                Go to Login
+              </Link>
+            </Button>
+        </Card>
       </div>
     );
   }

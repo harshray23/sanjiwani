@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { searchHospitals } from '@/lib/data'; // Using search to get one
-import type { Hospital, Appointment } from '@/lib/types';
+import { searchHospitals, getUserProfile } from '@/lib/data';
+import type { Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Hospital as HospitalIcon, BedDouble, Loader2, UserPlus, Users, LogIn, Trash2, Pencil, Upload } from "lucide-react";
+import { BedDouble, UserPlus, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -19,35 +19,37 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const HospitalDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
       if (currentUser) {
-        // Mock: Assume user's hospital is 'Metro General Hospital' for demo
         try {
-            const hospitalResults = await searchHospitals('Metro General Hospital');
-            if (hospitalResults.length > 0) {
-              setHospital(hospitalResults[0]);
-              // Mock fetching appointments for a hospital. In reality, this would be a direct query.
-              setAppointments([]); 
-            } else {
-              setHospital(null);
+            const profile = await getUserProfile(currentUser.uid);
+            setUserProfile(profile);
+
+            if (profile?.role === 'hospital') {
+                const hospitalResults = await searchHospitals('Metro General Hospital'); // Mock fetch
+                if (hospitalResults.length > 0) {
+                  setHospital(hospitalResults[0]);
+                  setAppointments([]); // Mock appointments
+                } else {
+                  setHospital(null);
+                }
             }
         } catch (error) {
             console.error("Error fetching hospital data:", error);
             toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
-            setHospital(null);
+            setUserProfile(null);
         }
       } else {
-        setHospital(null);
+        setUserProfile(null);
       }
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -66,7 +68,7 @@ const HospitalDashboard = () => {
     });
   }
 
-  if (isAuthLoading || hospital === undefined) {
+  if (isLoading || userProfile === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -75,19 +77,22 @@ const HospitalDashboard = () => {
     );
   }
 
-  if (!user || !hospital) {
+  if (!userProfile || userProfile.role !== 'hospital' || !hospital) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
-        <p className="mt-2 text-muted-foreground">
-          You must be logged in as a hospital administrator to view this page.
-        </p>
-        <Button asChild className="mt-6">
-          <Link href="/login">
-            <LogIn className="mr-2"/>
-            Go to Login
-          </Link>
-        </Button>
+        <Card className="max-w-md mx-auto p-8">
+            <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
+            <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
+            <p className="mt-2 text-muted-foreground">
+              You must be logged in as a hospital administrator to view this page.
+            </p>
+            <Button asChild className="mt-6">
+              <Link href="/login">
+                <LogIn className="mr-2"/>
+                Go to Login
+              </Link>
+            </Button>
+        </Card>
       </div>
     );
   }

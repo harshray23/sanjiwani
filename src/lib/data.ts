@@ -68,6 +68,17 @@ export const getUsers = async (): Promise<User[]> => {
     return getCollection<User>('users');
 }
 
+export const getUserProfile = async (uid: string): Promise<User | null> => {
+    if (!db) return null;
+    const userRef = doc(db, "users", uid);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+        return { uid: docSnap.id, ...docSnap.data() } as User;
+    }
+    return null;
+};
+
+
 export const createUserInFirestore = async (user: FirebaseUser, role: Role, details: any) => {
     if (!db) throw new Error("Firestore not initialized");
 

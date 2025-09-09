@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinicById, getAppointmentsForClinic } from '@/lib/data';
-import type { Clinic, Doctor, Appointment } from '@/lib/types';
+import { getClinicById, getAppointmentsForClinic, getUserProfile } from '@/lib/data';
+import type { Clinic, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Building, Calendar, Clock, Loader2, UserPlus, Users, Pencil, LogIn, Hourglass, Trash2, Upload } from "lucide-react";
+import { UserPlus, Pencil, LogIn, Hourglass, Trash2, Upload, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -21,36 +21,39 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const ClinicDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [clinic, setClinic] = useState<Clinic | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
       if (currentUser) {
-        // Mock: Assume this user's clinic is always 'clinic-1' for demo purposes
-        const clinicId = 'clinic-1';
         try {
-            const clinicData = await getClinicById(clinicId);
-            if (clinicData) {
-              setClinic(clinicData);
-              const appointmentData = await getAppointmentsForClinic(clinicId);
-              setAppointments(appointmentData);
-            } else {
-              setClinic(null);
+            const profile = await getUserProfile(currentUser.uid);
+            setUserProfile(profile);
+
+            if (profile?.role === 'clinic') {
+                const clinicId = 'clinic-1'; // Mock: Assume this user's clinic is always 'clinic-1'
+                const clinicData = await getClinicById(clinicId);
+                if (clinicData) {
+                  setClinic(clinicData);
+                  const appointmentData = await getAppointmentsForClinic(clinicId);
+                  setAppointments(appointmentData);
+                } else {
+                  setClinic(null);
+                }
             }
         } catch (error) {
             console.error("Error fetching clinic data:", error);
             toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
-            setClinic(null);
+            setUserProfile(null);
         }
       } else {
-        setClinic(null);
+        setUserProfile(null);
       }
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -70,7 +73,7 @@ const ClinicDashboard = () => {
   }
 
 
-  if (isAuthLoading || clinic === undefined) {
+  if (isLoading || userProfile === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -79,19 +82,22 @@ const ClinicDashboard = () => {
     );
   }
 
-  if (!user || !clinic) {
+  if (!userProfile || userProfile.role !== 'clinic' || !clinic) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
-        <p className="mt-2 text-muted-foreground">
-          You must be logged in as a clinic administrator to view this page.
-        </p>
-        <Button asChild className="mt-6">
-          <Link href="/login">
-             <LogIn className="mr-2"/>
-             Go to Login
-          </Link>
-        </Button>
+        <Card className="max-w-md mx-auto p-8">
+            <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
+            <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
+            <p className="mt-2 text-muted-foreground">
+              You must be logged in as a clinic administrator to view this page.
+            </p>
+            <Button asChild className="mt-6">
+              <Link href="/login">
+                 <LogIn className="mr-2"/>
+                 Go to Login
+              </Link>
+            </Button>
+        </Card>
       </div>
     );
   }
@@ -125,8 +131,8 @@ const ClinicDashboard = () => {
                                 <p className="font-semibold">{app.patientName}</p>
                                 <p className="text-sm text-muted-foreground">with <span className="font-medium text-foreground">{app.doctor.name}</span></p>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                    <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4"/> {format(new Date(app.date), 'PP')}</span>
-                                    <span className="flex items-center gap-1.5"><Clock className="h-4 w-4"/> {app.time}</span>
+                                    <span className="flex items-center gap-1.5"> {format(new Date(app.date), 'PP')}</span>
+                                    <span className="flex items-center gap-1.5"> {app.time}</span>
                                 </p>
                             </div>
                             <p className="text-sm font-bold">{app.status}</p>

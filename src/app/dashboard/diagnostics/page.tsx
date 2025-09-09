@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/data';
-import type { DiagnosticsCentre, TestAppointment, DiagnosticTest, Pathologist } from '@/lib/types';
+import { getDiagnosticsCentreById, getTestAppointmentsForCentre, getUserProfile } from '@/lib/data';
+import type { DiagnosticsCentre, TestAppointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { FlaskConical, Calendar, Microscope, UserPlus, FileText, Download, Upload, PlusCircle, Pencil, Trash2, LogIn } from "lucide-react";
+import { Calendar, UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -22,39 +22,42 @@ import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 
 const DiagnosticsDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [centre, setCentre] = useState<DiagnosticsCentre | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<TestAppointment[]>([]);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
       if (currentUser) {
-        // Mock: Assume user's diagnostics centre is 'diag-1' for demo
-        const centreId = 'diag-1';
         try {
-            const [centreData, appointmentData] = await Promise.all([
-              getDiagnosticsCentreById(centreId),
-              getTestAppointmentsForCentre(centreId)
-            ]);
-            
-            if (centreData) {
-              setCentre(centreData);
-            } else {
-              setCentre(null);
+            const profile = await getUserProfile(currentUser.uid);
+            setUserProfile(profile);
+
+            if (profile?.role === 'diagnostics_centres') {
+                const centreId = 'diag-1'; // Mock: Assume user's diagnostics centre is 'diag-1'
+                const [centreData, appointmentData] = await Promise.all([
+                  getDiagnosticsCentreById(centreId),
+                  getTestAppointmentsForCentre(centreId)
+                ]);
+                
+                if (centreData) {
+                  setCentre(centreData);
+                } else {
+                  setCentre(null);
+                }
+                setAppointments(appointmentData);
             }
-            setAppointments(appointmentData);
         } catch(error) {
             console.error("Error fetching diagnostics data:", error);
             toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
-            setCentre(null);
+            setUserProfile(null);
         }
       } else {
-        setCentre(null);
+        setUserProfile(null);
       }
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [toast]);
@@ -77,7 +80,7 @@ const DiagnosticsDashboard = () => {
   }
 
 
-  if (isAuthLoading || centre === undefined) {
+  if (isLoading || userProfile === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -86,16 +89,19 @@ const DiagnosticsDashboard = () => {
     );
   }
 
-  if (!user || !centre) {
+  if (!userProfile || userProfile.role !== 'diagnostics_centres' || !centre) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
-        <p className="mt-2 text-muted-foreground">
-          You must be logged in as a diagnostics centre administrator.
-        </p>
-        <Button asChild className="mt-6">
-          <Link href="/login"><LogIn className="mr-2"/>Go to Login</Link>
-        </Button>
+        <Card className="max-w-md mx-auto p-8">
+            <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
+            <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
+            <p className="mt-2 text-muted-foreground">
+              You must be logged in as a diagnostics centre administrator.
+            </p>
+            <Button asChild className="mt-6">
+              <Link href="/login"><LogIn className="mr-2"/>Go to Login</Link>
+            </Button>
+        </Card>
       </div>
     );
   }
