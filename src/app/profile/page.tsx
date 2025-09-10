@@ -67,13 +67,15 @@ export default function ProfilePage() {
   }, [form]);
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
-    if (!user || !userProfile) {
+    if (!user) {
         toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive"});
         return;
     }
     setIsSubmitting(true);
     try {
-        await updateUserProfile(user.uid, userProfile.role, values);
+        // This function now only needs to update the /users collection.
+        // Your security rules allow this.
+        await updateUserProfile(user.uid, values);
         toast({
             title: "Profile Updated",
             description: "Your information has been saved successfully.",
