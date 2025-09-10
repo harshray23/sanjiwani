@@ -107,6 +107,7 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
             }
             detailsData.consultationFee = 500; // Default fee
             detailsData.name = baseData.name;
+            detailsData.availability = ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"];
             break;
         case 'clinic':
             detailsCollectionName = 'clinics';
@@ -353,3 +354,10 @@ export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetai
   const doctorRef = doc(db, 'doctors', uid);
   await updateDoc(doctorRef, data);
 };
+
+export const updateUserVerification = async (uid: string, verified: boolean): Promise<void> => {
+    if (!db) throw new Error("Firestore not initialized");
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { verified });
+};
+

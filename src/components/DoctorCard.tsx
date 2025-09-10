@@ -5,7 +5,7 @@ import type { DoctorProfile } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Briefcase, GraduationCap } from 'lucide-react';
+import { Star, Briefcase, GraduationCap, BadgeCheck } from 'lucide-react';
 
 interface DoctorCardProps {
   doctor: DoctorProfile;
@@ -25,6 +25,16 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <div className="flex-1">
           <CardTitle className="text-lg font-headline mb-1">Dr. {doctor.name}</CardTitle>
           <CardDescription>{doctor.specialization}</CardDescription>
+           {doctor.verified ? (
+            <Badge variant="default" className="mt-2 bg-green-100 text-green-800 border-green-200">
+                <BadgeCheck className="h-4 w-4 mr-1"/>
+                Verified
+            </Badge>
+           ) : (
+            <Badge variant="destructive" className="mt-2">
+                Not Verified
+            </Badge>
+           )}
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-grow">
@@ -34,10 +44,6 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                 <span>
                     License: {doctor.licenseNo}
                 </span>
-            </p>
-            <p className="flex items-start gap-2">
-                <Briefcase className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>Verified: {doctor.verified ? 'Yes' : 'No'}</span>
             </p>
         </div>
       </CardContent>

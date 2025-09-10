@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres } from '@/lib/data';
+import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres, updateUserVerification } from '@/lib/data';
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical } from "lucide-react";
+import { LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical, BadgeCheck } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 type AdminData = {
     doctors: Doctor[];
@@ -32,17 +33,8 @@ const AdminDashboard = () => {
   const [data, setData] = useState<AdminData | undefined>(undefined);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // In a real app, you'd check a custom claim or a secure user role document
-        if (!currentUser.email?.startsWith('admin@')) {
-          setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
-          return;
-        }
-        
-        try {
+  const fetchAdminData = async () => {
+     try {
           // Fetch all admin data in parallel for faster loading
           const [doctors, clinics, hospitals, appointments, users, diagnosticsCentres] = await Promise.all([
             getDoctors(),
@@ -58,6 +50,18 @@ const AdminDashboard = () => {
           toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
           setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
         }
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // In a real app, you'd check a custom claim or a secure user role document
+        if (!currentUser.email?.startsWith('admin@')) {
+          setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
+          return;
+        }
+        fetchAdminData();
       } else {
         setData(undefined);
       }
@@ -70,6 +74,21 @@ const AdminDashboard = () => {
         title: "Action Mocked",
         description: `This would remove the ${type} with ID: ${id}.`,
     });
+  }
+  
+  const handleVerify = async (userId: string, currentStatus: boolean) => {
+    try {
+        await updateUserVerification(userId, !currentStatus);
+        toast({
+            title: "User Status Updated",
+            description: `User has been ${!currentStatus ? 'verified' : 'un-verified'}.`,
+        });
+        // Re-fetch data to update UI
+        fetchAdminData();
+    } catch (error) {
+        console.error("Failed to update verification status", error);
+        toast({ title: "Error", description: "Could not update user status.", variant: "destructive" });
+    }
   }
 
   if (data === undefined) {
@@ -193,6 +212,7 @@ const AdminDashboard = () => {
                                 <TableHead>User Email</TableHead>
                                 <TableHead>Role</TableHead>
                                 <TableHead>Joined On</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -202,7 +222,16 @@ const AdminDashboard = () => {
                                     <TableCell className="font-medium">{u.email}</TableCell>
                                     <TableCell className="capitalize">{u.role}</TableCell>
                                     <TableCell>{format(new Date(u.createdAt.seconds * 1000), "PP")}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={u.verified ? 'default' : 'destructive'}>
+                                            {u.verified ? 'Verified' : 'Not Verified'}
+                                        </Badge>
+                                    </TableCell>
                                     <TableCell className="text-right">
+                                        <Button variant={u.verified ? 'secondary' : 'default'} size="sm" onClick={() => handleVerify(u.uid, u.verified)}>
+                                            <BadgeCheck className="mr-2 h-4 w-4"/>
+                                            {u.verified ? 'Un-verify' : 'Verify'}
+                                        </Button>
                                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemove('user', u.uid)}><Trash2 className="h-4 w-4"/></Button>
                                     </TableCell>
                                 </TableRow>
@@ -222,11 +251,14 @@ const AdminDashboard = () => {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Specialty</TableHead>
                                 <TableHead>Clinic</TableHead>
+                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {data.doctors.map(doc => (
+                            {data.doctors.map(doc => {
+                                const userDoc = data.users.find(u => u.uid === (doc as any).uid)
+                                return (
                                 <TableRow key={doc.id}>
                                     <TableCell className="font-medium flex items-center gap-3">
                                         <Avatar className="h-9 w-9">
@@ -237,12 +269,21 @@ const AdminDashboard = () => {
                                     </TableCell>
                                     <TableCell>{doc.specialty}</TableCell>
                                     <TableCell>{data.clinics.find(c => c.id === doc.clinicId)?.name || 'N/A'}</TableCell>
+                                     <TableCell>
+                                        {userDoc && <Badge variant={userDoc.verified ? 'default' : 'destructive'}>
+                                            {userDoc.verified ? 'Verified' : 'Not Verified'}
+                                        </Badge>}
+                                    </TableCell>
                                     <TableCell className="text-right">
+                                        {userDoc && <Button variant={userDoc.verified ? 'secondary' : 'default'} size="sm" onClick={() => handleVerify(userDoc.uid, userDoc.verified)}>
+                                            <BadgeCheck className="mr-2 h-4 w-4"/>
+                                            {userDoc.verified ? 'Un-verify' : 'Verify'}
+                                        </Button>}
                                         <Button variant="ghost" size="icon"><Pencil className="h-4 w-4"/></Button>
                                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemove('doctor', doc.id)}><Trash2 className="h-4 w-4"/></Button>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </CardContent>
@@ -346,5 +387,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-    
