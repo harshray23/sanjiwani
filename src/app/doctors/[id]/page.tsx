@@ -177,7 +177,7 @@ export default function DoctorDetailPage() {
                 <Button 
                 onClick={() => handleBookAppointment('clinic')}
                 className="w-full"
-                disabled={isAuthLoading}
+                disabled={isAuthLoading || !doctor.availability || doctor.availability.length === 0}
               >
                   Book In-Clinic Visit
               </Button>

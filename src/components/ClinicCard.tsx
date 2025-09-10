@@ -1,15 +1,14 @@
 
-
 import Link from 'next/link';
 import Image from 'next/image';
-import type { ClinicProfile } from '@/lib/types';
+import type { ClinicDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star } from 'lucide-react';
 
 interface ClinicCardProps {
-  clinic: ClinicProfile;
+  clinic: ClinicDetails;
 }
 
 export function ClinicCard({ clinic }: ClinicCardProps) {
@@ -17,7 +16,7 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-0">
         <Image
-          src={`https://i.pravatar.cc/400?u=${clinic.id}`}
+          src={clinic.imageUrl || `https://i.pravatar.cc/400?u=${clinic.id}`}
           alt={clinic.name}
           width={400}
           height={200}
@@ -31,8 +30,8 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
           {clinic.address}
         </CardDescription>
         <div className="flex items-center gap-2 mb-4">
-            <Badge variant="default" className="flex items-center gap-1">
-                Verified: {clinic.verified ? 'Yes' : 'No'}
+            <Badge variant={clinic.verified ? 'default' : 'destructive'}>
+                {clinic.verified ? 'Verified' : 'Not Verified'}
             </Badge>
         </div>
       </CardContent>

@@ -6,13 +6,26 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Briefcase, GraduationCap, BadgeCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getClinicById } from '@/lib/data';
 
 interface DoctorCardProps {
   doctor: DoctorDetails;
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
-  
+  const [clinicName, setClinicName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (doctor.clinicId) {
+      getClinicById(doctor.clinicId).then(clinic => {
+        if (clinic) {
+          setClinicName(clinic.name);
+        }
+      });
+    }
+  }, [doctor.clinicId]);
+
   return (
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-4 flex-row gap-4 items-start">

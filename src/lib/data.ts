@@ -100,14 +100,19 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
     let detailsCollectionName: string | null = null;
     let finalDetailsData: any = { ...detailsData };
 
+    // This is the key change: ensure public data is stored in the public collection.
+    const publicProfileData = {
+        name: baseData.name,
+        phone: baseData.phone,
+        verified: false, // All start as unverified
+    };
+
     switch (role) {
         case 'doctor':
             detailsCollectionName = 'doctors';
-            // Ensure essential public info is in the doctor's document
             finalDetailsData = {
                 ...detailsData,
-                name: baseData.name,
-                phone: baseData.phone,
+                ...publicProfileData,
                 imageUrl: `https://i.pravatar.cc/150?u=${user.uid}`,
                 consultationFee: 500, // Default fee
                 availability: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"], // Default availability
@@ -117,16 +122,16 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
             detailsCollectionName = 'clinics';
             finalDetailsData = {
                 ...detailsData,
-                name: baseData.name,
-                phone: baseData.phone,
+                ...publicProfileData,
+                imageUrl: `https://i.pravatar.cc/400?u=${user.uid}`,
+                doctors: [],
             };
             break;
         case 'diag_centre':
             detailsCollectionName = 'diagnosisCentres';
             finalDetailsData = {
                 ...detailsData,
-                name: baseData.name,
-                phone: baseData.phone,
+                ...publicProfileData,
             };
             break;
         case 'patient':
@@ -138,12 +143,11 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
     }
 
     if (detailsCollectionName) {
-        // Use setDoc with the user's UID as the document ID for the details collection as well
         const detailsRef = doc(db, detailsCollectionName, user.uid);
         await setDoc(detailsRef, {
             ...finalDetailsData,
-            userId: user.uid, // Keep a reference back to the user doc
-            id: user.uid,     // Ensure the id field matches the doc id
+            userId: user.uid,
+            id: user.uid,
         });
     }
 
@@ -151,182 +155,12 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
     return userProfile.data();
 }
 
-// --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
-
-export const getDoctors = async (): Promise<DoctorDetails[]> => {
-    // This function now correctly assumes the /doctors collection has all needed public info.
-    const doctorsList = await getCollection<DoctorDetails>('doctors');
-    
-    // Create a map of clinic IDs to clinic names for efficient lookup
-    const clinics = await getCollection<ClinicDetails>('clinics');
-    const clinicNameMap = new Map(clinics.map(clinic => [clinic.id, clinic.name]));
-
-    // Populate clinicName for each doctor
-    const populatedDoctors = doctorsList.map(doctor => {
-        const clinicName = doctor.clinicId ? clinicNameMap.get(doctor.clinicId) : undefined;
-        return {
-            ...doctor,
-            id: doctor.id, 
-            uid: doctor.id, // uid is the same as the document id
-            clinicName: clinicName || null,
-        };
-    });
-
-    return populatedDoctors;
-};
-
-export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
-    // This function now only needs to read from the public /doctors collection
-    const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
-    if (!doctorDetails) return undefined;
-    
-    // Construct the profile from the public doctor document.
-    // This is safe and avoids permission errors.
-    return {
-        uid: doctorDetails.id,
-        name: doctorDetails.name,
-        email: '', // Not public, keep empty
-        phone: doctorDetails.phone || '', // phone might be public
-        role: 'doctor',
-        verified: doctorDetails.verified || false,
-        createdAt: '', // Not public, keep empty
-        ...doctorDetails
-    } as DoctorProfile;
-};
-
-
-export const getClinics = async (): Promise<ClinicDetails[]> => {
-    return await getCollection<ClinicDetails>('clinics');
-};
-
-export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
-    // This function is now safe as it only reads from the public /clinics collection
-    const clinicData = await getDocumentById<ClinicDetails>(`clinics`, id);
-    return clinicData;
-};
-
-
-// --- APPOINTMENTS ---
-
-export const createAppointment = async (
-  patientId: string, 
-  doctorId: string, 
-  clinicId: string, 
-  slot: string,
-  type: 'clinic' | 'video'
-): Promise<Appointment> => {
-    if (!db) throw new Error("Firestore not initialized");
-
-    const newAppointmentData = {
-      patientId,
-      doctorId,
-      clinicId,
-      centreId: null,
-      type: type,
-      status: 'confirmed',
-      scheduledAt: Timestamp.fromDate(new Date()),
-      createdAt: serverTimestamp()
-    };
-    
-    const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
-    
-    const createdAppointment = {
-        id: docRef.id,
-        ...newAppointmentData,
-        scheduledAt: newAppointmentData.scheduledAt.toDate().toISOString(),
-        createdAt: new Date().toISOString() // Approximate for immediate return
-    } as unknown as Appointment;
-    
-    return createdAppointment;
-};
-
-
-// --- SEARCH & COMBINED FUNCTIONS ---
-export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
-    const [doctors, clinics] = await Promise.all([getDoctors(), getClinics()]);
-    
-    if (!queryText) {
-      return { clinics, doctors };
-    }
-
-    const lowerCaseQuery = queryText.toLowerCase();
-
-    const filteredClinics = clinics.filter(clinic =>
-        clinic.name.toLowerCase().includes(lowerCaseQuery) ||
-        (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery))
-    );
-
-    const filteredDoctors = doctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(lowerCaseQuery) ||
-        (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery))
-    );
-
-    return { clinics: filteredClinics, doctors: filteredDoctors };
-};
-
-export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
-  if (!db) return [];
-  const q = query(
-      collection(db, 'appointments'), 
-      where('patientId', '==', patientId),
-      orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
-
-  return Promise.all(appointments.map(async (app) => {
-      const populatedApp = { ...app };
-      if (populatedApp.doctorId) {
-          populatedApp.doctor = await getDoctorById(populatedApp.doctorId);
-      }
-      if (populatedApp.clinicId) {
-          populatedApp.clinic = await getClinicById(populatedApp.clinicId);
-      }
-      populatedApp.patient = await getUserProfile(populatedApp.patientId) || undefined;
-      return convertTimestamps(populatedApp);
-  }));
-};
-
-export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
-   if(!db) return undefined;
-   const appointment = await getDocumentById<Appointment>('appointments', id);
-   if(appointment) {
-       if (appointment.doctorId) appointment.doctor = await getDoctorById(appointment.doctorId);
-       if (appointment.clinicId) appointment.clinic = await getClinicById(appointment.clinicId);
-       if (appointment.patientId) appointment.patient = await getUserProfile(appointment.patientId) || undefined;
-   }
-   return convertTimestamps(appointment);
-};
-
-export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
-  if (!db) return [];
-  const q = query(
-    collection(db, 'appointments'),
-    where('clinicId', '==', clinicId),
-    orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
-
-  return Promise.all(appointments.map(async (app) => {
-      if (app.doctorId) app.doctor = await getDoctorById(app.doctorId);
-      if (app.patientId) app.patient = await getUserProfile(app.patientId) || undefined;
-      return convertTimestamps(app);
-  }));
-};
-
-export const getUsers = async (): Promise<User[]> => getCollection<User>('users');
-
-
-// --- PROFILE UPDATES ---
 
 export const updateUserProfile = async (uid: string, data: Partial<User>) => {
     if (!db || !uid) throw new Error("Firestore not initialized or UID missing.");
     const userRef = doc(db, "users", uid);
     await updateDoc(userRef, data);
 
-    // After updating the main user profile, we need to cascade some changes
-    // to the role-specific collections to maintain data consistency for public profiles.
     const userProfile = await getUserProfile(uid);
     if (!userProfile) return;
 
@@ -381,6 +215,170 @@ export const updateUserVerification = async (uid: string, verified: boolean): Pr
         }
     }
 };
+
+
+// --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
+
+export const getDoctors = async (): Promise<DoctorDetails[]> => {
+    const doctorsList = await getCollection<DoctorDetails>('doctors');
+    const clinics = await getCollection<ClinicDetails>('clinics');
+    const clinicNameMap = new Map(clinics.map(clinic => [clinic.id, clinic.name]));
+
+    const populatedDoctors = doctorsList.map(doctor => {
+        const clinicName = doctor.clinicId ? clinicNameMap.get(doctor.clinicId) : undefined;
+        return {
+            ...doctor,
+            id: doctor.id, 
+            uid: doctor.id, 
+            clinicName: clinicName || null,
+        };
+    });
+
+    return populatedDoctors;
+};
+
+export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
+    const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
+    if (!doctorDetails) return undefined;
+    
+    // The profile is now constructed directly from the public collection
+    return {
+        uid: doctorDetails.id,
+        name: doctorDetails.name,
+        email: '', 
+        phone: doctorDetails.phone || '',
+        role: 'doctor',
+        verified: doctorDetails.verified || false,
+        createdAt: '',
+        ...doctorDetails
+    } as DoctorProfile;
+};
+
+
+export const getClinics = async (): Promise<ClinicDetails[]> => {
+    return await getCollection<ClinicDetails>('clinics');
+};
+
+export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
+    // This function is now safe as it only reads from the public /clinics collection
+    return await getDocumentById<ClinicDetails>('clinics', id);
+};
+
+
+// --- APPOINTMENTS ---
+
+export const createAppointment = async (
+  patientId: string, 
+  doctorId: string, 
+  clinicId: string, 
+  slot: string,
+  type: 'clinic' | 'video'
+): Promise<Appointment> => {
+    if (!db) throw new Error("Firestore not initialized");
+
+    const newAppointmentData = {
+      patientId,
+      doctorId,
+      clinicId,
+      centreId: null,
+      type: type,
+      status: 'confirmed',
+      scheduledAt: Timestamp.fromDate(new Date()),
+      createdAt: serverTimestamp()
+    };
+    
+    const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
+    
+    const createdAppointment = {
+        id: docRef.id,
+        ...newAppointmentData,
+        scheduledAt: newAppointmentData.scheduledAt.toDate().toISOString(),
+        createdAt: new Date().toISOString()
+    } as unknown as Appointment;
+    
+    return createdAppointment;
+};
+
+
+// --- SEARCH & COMBINED FUNCTIONS ---
+export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
+    const [doctors, clinics] = await Promise.all([getDoctors(), getClinics()]);
+    
+    if (!queryText) {
+      return { clinics, doctors };
+    }
+
+    const lowerCaseQuery = queryText.toLowerCase();
+
+    const filteredClinics = clinics.filter(clinic =>
+        clinic.name.toLowerCase().includes(lowerCaseQuery) ||
+        (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery))
+    );
+
+    const filteredDoctors = doctors.filter(doctor =>
+        doctor.name.toLowerCase().includes(lowerCaseQuery) ||
+        (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery))
+    );
+
+    return { clinics: filteredClinics, doctors: filteredDoctors };
+};
+
+export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
+  if (!db) return [];
+  const q = query(
+      collection(db, 'appointments'), 
+      where('patientId', '==', patientId),
+      orderBy('createdAt', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
+
+  return Promise.all(appointments.map(async (app) => {
+      const populatedApp = { ...app };
+      if (populatedApp.doctorId) {
+          populatedApp.doctor = await getDoctorById(populatedApp.doctorId);
+      }
+      if (populatedApp.clinicId) {
+          populatedApp.clinic = await getClinicById(populatedApp.clinicId);
+      }
+      if (populatedApp.patientId) {
+         populatedApp.patient = await getUserProfile(populatedApp.patientId) || undefined;
+      }
+      return convertTimestamps(populatedApp);
+  }));
+};
+
+export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
+   if(!db) return undefined;
+   const appointment = await getDocumentById<Appointment>('appointments', id);
+   if(appointment) {
+       if (appointment.doctorId) appointment.doctor = await getDoctorById(appointment.doctorId);
+       if (appointment.clinicId) appointment.clinic = await getClinicById(appointment.clinicId);
+       if (appointment.patientId) appointment.patient = await getUserProfile(appointment.patientId) || undefined;
+   }
+   return convertTimestamps(appointment);
+};
+
+export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
+  if (!db) return [];
+  const q = query(
+    collection(db, 'appointments'),
+    where('clinicId', '==', clinicId),
+    orderBy('createdAt', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
+
+  return Promise.all(appointments.map(async (app) => {
+      if (app.doctorId) app.doctor = await getDoctorById(app.doctorId);
+      if (app.patientId) app.patient = await getUserProfile(app.patientId) || undefined;
+      return convertTimestamps(app);
+  }));
+};
+
+export const getUsers = async (): Promise<User[]> => getCollection<User>('users');
+
+
 
 
 // --- LEGACY OR MOCK FUNCTIONS ---

@@ -5,7 +5,7 @@
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { searchClinicsAndDoctors, comprehensiveSpecialties } from '@/lib/data';
-import type { ClinicProfile, DoctorProfile } from '@/lib/types';
+import type { ClinicDetails, DoctorDetails } from '@/lib/types';
 import { ClinicCard } from '@/components/ClinicCard';
 import { DoctorCard } from '@/components/DoctorCard';
 import { Input } from '@/components/ui/input';
@@ -21,10 +21,9 @@ function SearchResults() {
   const query = searchParams.get('query') || '';
 
   const [isLoading, setIsLoading] = useState(true);
-  const [results, setResults] = useState<{ clinics: ClinicProfile[]; doctors: DoctorProfile[] }>({ clinics: [], doctors: [] });
+  const [results, setResults] = useState<{ clinics: ClinicDetails[]; doctors: DoctorDetails[] }>({ clinics: [], doctors: [] });
   const [searchQuery, setSearchQuery] = useState(query);
   const [activeDoctorSpecialty, setActiveDoctorSpecialty] = useState<string | null>(null);
-  const [activeClinicSpecialty, setActiveClinicSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -47,15 +46,6 @@ function SearchResults() {
     }
     return results.doctors.filter(doctor => doctor.specialization === activeDoctorSpecialty);
   }, [results.doctors, activeDoctorSpecialty]);
-  
-  const filteredClinics = useMemo(() => {
-    if (!activeClinicSpecialty) {
-        return results.clinics;
-    }
-    // Note: Clinic specialty is not part of the new schema, so this won't work as expected.
-    // This needs to be refactored if clinic specialties are added back.
-    return results.clinics;
-  }, [results.clinics, activeClinicSpecialty]);
 
   const doctorSpecialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -67,13 +57,6 @@ function SearchResults() {
     });
     return counts;
   }, [results.doctors]);
-
-  const clinicSpecialtyCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    // This is now invalid as clinics don't have specialties.
-    return counts;
-  }, [results.clinics]);
-
 
   return (
     <div className="container mx-auto py-8">
@@ -100,16 +83,13 @@ function SearchResults() {
       ) : (
         <Tabs defaultValue="doctors">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="clinics">Clinics ({filteredClinics.length})</TabsTrigger>
+            <TabsTrigger value="clinics">Clinics ({results.clinics.length})</TabsTrigger>
             <TabsTrigger value="doctors">Doctors ({filteredDoctors.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="clinics">
-            <div className="my-6">
-                {/* Clinic filtering is disabled as specialties are removed from clinic schema */}
-            </div>
-            {filteredClinics.length > 0 ? (
+            {results.clinics.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {filteredClinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
+                {results.clinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
               </div>
             ) : (
               <p className="text-center py-12 text-muted-foreground">

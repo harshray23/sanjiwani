@@ -3,68 +3,58 @@
 import type { Timestamp } from 'firebase/firestore';
 
 export interface User {
-  uid: string; // This will be the document ID from Firestore
+  uid: string;
   name: string;
   email: string;
   phone: string;
   role: 'patient' | 'doctor' | 'clinic' | 'diag_centre' | 'admin';
   verified: boolean;
-  createdAt: any; // serverTimestamp
-  medicalHistory?: any; // To be defined later
+  createdAt: any;
+  medicalHistory?: any;
 }
 
-// Represents the document in the /doctors collection
 export interface DoctorDetails {
-  id: string; // The document ID, which should match the user ID
-  userId: string; // Reference to the user in /users/{userId}
+  id: string;
+  userId: string;
   name: string;
   specialization: string;
   licenseNo: string;
   consultationFee: number;
-  availability: string[]; // Array of time slots
+  availability: string[];
   clinicId?: string;
-  verified?: boolean; // Now part of the details
+  verified?: boolean;
   imageUrl?: string;
   phone?: string;
-  clinicName?: string | null; // Added for populated data
+  clinicName?: string | null;
 }
 
-// A complete Doctor profile, combining User and DoctorDetails
 export interface DoctorProfile extends User, Omit<DoctorDetails, 'id' | 'userId' | 'name'> {
-  // Inherits all fields from User
-  // and adds specialization, licenseNo, etc.
-  // We use the User uid as the primary ID.
 }
 
-// Represents the document in the /clinics collection
 export interface ClinicDetails {
-  id: string; // The document ID, which should match the user ID
-  userId: string; // Reference to the user in /users/{userId}
+  id: string;
+  userId: string;
   name: string;
   address: string;
   licenseNo: string;
   verified: boolean;
+  imageUrl?: string;
+  doctors: DoctorDetails[];
 }
 
-// A complete Clinic profile, combining User and ClinicDetails
 export interface ClinicProfile extends Omit<User, 'name'>, Omit<ClinicDetails, 'id' | 'userId'> {
-    // We use ClinicDetails.name, so we omit User.name
 }
 
-
-// Represents the document in the /diagnosisCentres collection
 export interface DiagnosisCentreDetails {
-  id: string; // The document ID, which should match the user ID
-  userId: string; // Reference to the user in /users/{userId}
+  id: string;
+  userId: string;
   name: string;
   servicesOffered: string[];
   licenseNo: string;
   verified: boolean;
 }
 
-// A complete Diagnosis Centre profile
 export interface DiagnosisCentreProfile extends Omit<User, 'name'>, Omit<DiagnosisCentreDetails, 'id' | 'userId'> {
-    // Uses name from DiagnosisCentreDetails
 }
 
 export interface Appointment {
@@ -75,41 +65,36 @@ export interface Appointment {
   centreId?: string;
   type: 'token' | 'video' | 'test';
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  scheduledAt: any; // Timestamp
-  createdAt: any; // Timestamp
-
-  // --- Populated data ---
+  scheduledAt: any;
+  createdAt: any;
   patient?: User;
   doctor?: DoctorProfile;
   clinic?: ClinicProfile;
-  // centre?: DiagnosisCentreProfile;
 }
 
 export interface Report {
   id: string;
   appointmentId: string;
-  uploadedBy: string; // doctorId or centreId
+  uploadedBy: string;
   fileUrl: string;
-  createdAt: any; // Timestamp
+  createdAt: any;
 }
 
 export interface Payment {
   id: string;
   userId: string;
-  serviceId: string; // appointmentId or testId
+  serviceId: string;
   amount: number;
   status: 'pending' | 'success' | 'failed' | 'refunded';
-  createdAt: any; // Timestamp
+  createdAt: any;
 }
 
 export interface AdminLog {
   id: string;
   action: string;
-  performedBy: string; // userId
-  timestamp: any; // Timestamp
+  performedBy: string;
+  timestamp: any;
 }
-
-// --- Old types for reference, to be removed/refactored ---
 
 export interface VideoConsultationDetails {
     meetingLink: string;
@@ -123,7 +108,6 @@ export interface AppointmentFeedback {
     comments: string;
 }
 
-// Legacy Doctor type
 export type Doctor = {
   id: string;
   name: string;
@@ -141,7 +125,6 @@ export type Doctor = {
   address?: string;
 }
 
-// Legacy Clinic type
 export type Clinic = {
   id: string;
   name: string;
@@ -158,7 +141,6 @@ export type Clinic = {
   }
 }
 
-// Legacy Hospital Type
 export interface Hospital {
   id: string;
   name: string;
@@ -181,10 +163,9 @@ export interface Hospital {
     ventilator: { total: number; available: number };
     oxygen: { total: number; available: number };
   };
-  lastUpdated: any; // Can be Date or Firebase Timestamp
+  lastUpdated: any;
 }
 
-// Legacy Diagnostics Types
 export interface Pathologist {
   id: string;
   name: string;
@@ -223,5 +204,5 @@ export interface TestAppointment {
   date: string;
   time: string;
   status: 'Scheduled' | 'Completed' | 'Report Ready' | 'Cancelled';
-  reportUrl?: string; // Link to the PDF report
+  reportUrl?: string;
 }
