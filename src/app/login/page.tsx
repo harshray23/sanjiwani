@@ -54,7 +54,7 @@ const customerSignUpSchema = baseSignUpSchema.extend({
 });
 
 const doctorSignUpSchema = baseSignUpSchema.extend({
-    name: z.string().min(2, "Name is required."),
+    fullName: z.string().min(2, "Name is required."),
     address: z.string().min(5, "Address is required."),
     phone: z.string().min(10, "A valid phone number is required."),
     qualifications: z.string().min(2, "Qualifications are required."),
@@ -249,7 +249,7 @@ const SignUpForm = () => {
 
                 {selectedRole === 'doctor' && (
                     <>
-                         <FormField control={form.control} name="name" render={({ field }) => (
+                         <FormField control={form.control} name="fullName" render={({ field }) => (
                             <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Dr. John Doe" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={form.control} name="address" render={({ field }) => (
