@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTr
 import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
-import Logo from './Logo';
+import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +29,13 @@ export function Header() {
     <header className="bg-card/95 backdrop-blur-sm border-b shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 text-accent hover:text-accent/90 transition-colors">
-          <Logo className="h-10 w-10" />
+          <Image
+            src="/logo.jpg"
+            alt="Sanjiwani Health Logo"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
           <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani Health</h1>
         </Link>
 
@@ -98,7 +104,7 @@ export function Header() {
                                 <Link href={item.href} className="flex items-center gap-2">
                                      {item.icon}
                                      {item.label}
-                                </Link>
+                                 </Link>
                             </Button>
                          ))}
                     </div>

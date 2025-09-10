@@ -1,6 +1,6 @@
 
 import { Phone, Mail, MapPin, Heart, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import Logo from "./Logo";
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
@@ -43,7 +43,13 @@ export function Footer() {
           {/* Column 1: Company Info */}
           <div className="space-y-4 md:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 text-accent">
-                <Logo className="h-12 w-12" />
+                <Image
+                  src="/logo.jpg"
+                  alt="Sanjiwani Health Logo"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
+                />
                 <div>
                     <h2 className="text-2xl font-bold font-headline">Sanjiwani</h2>
                     <p className="text-lg text-muted-foreground font-headline -mt-1">Health</p>
