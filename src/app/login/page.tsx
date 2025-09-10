@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -129,7 +128,6 @@ const SignUpForm = () => {
         
         const schema = getSignUpSchema(selectedRole);
         
-        // **THE FIX**: Create a clean data object with only the fields relevant to the selected role.
         const relevantFields = Object.keys(schema.shape);
         const cleanValues: Record<string, any> = {};
         for (const key of relevantFields) {
@@ -154,10 +152,8 @@ const SignUpForm = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, validationResult.data.email, validationResult.data.password);
             
-            // Save user details to Firestore
             await createUserInFirestore(userCredential.user, selectedRole, validationResult.data);
 
-            // Sign the user out immediately after creation so they have to log in.
             await signOut(auth);
 
             toast({
@@ -494,3 +490,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
