@@ -334,5 +334,3 @@ const DiagnosticsDashboard = () => {
 };
 
 export default DiagnosticsDashboard;
-
-    

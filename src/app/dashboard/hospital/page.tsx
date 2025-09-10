@@ -241,5 +241,3 @@ const HospitalDashboard = () => {
 };
 
 export default HospitalDashboard;
-
-    
