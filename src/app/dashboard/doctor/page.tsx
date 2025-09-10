@@ -56,8 +56,8 @@ const DoctorDashboard = () => {
             setDoctor(doctorProfile);
             if (doctorProfile) {
                  profileForm.reset({
-                    specialization: doctorProfile.specialization,
-                    licenseNo: doctorProfile.licenseNo,
+                    specialization: doctorProfile.specialization || '',
+                    licenseNo: doctorProfile.licenseNo || '',
                 });
             }
             // TODO: Fetch appointments for the doctor
