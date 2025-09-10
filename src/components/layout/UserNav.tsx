@@ -33,7 +33,6 @@ export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -49,8 +48,6 @@ export function UserNav() {
       }
       setIsLoading(false);
     });
-    // Set mounted state after initial render
-    setIsMounted(true);
     return () => unsubscribe();
   }, []);
 
@@ -63,11 +60,6 @@ export function UserNav() {
         console.error('Logout error:', error);
         toast({ title: 'Logout Failed', description: 'Could not log you out. Please try again.', variant: 'destructive'});
     }
-  }
-
-  // Prevent rendering on the server or during the initial client render to avoid hydration mismatch
-  if (!isMounted) {
-    return <div className="w-24 h-10 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
 
   if (isLoading) {

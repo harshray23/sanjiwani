@@ -11,30 +11,34 @@ export function PageLoader() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Don't show loader on initial page load
-    if (isInitialLoad) {
-      setIsInitialLoad(false);
-      return;
-    }
+    // This effect runs on the client after hydration.
+    // We use it to set up the loading state logic.
+    setIsLoading(false); // Ensure loader is hidden initially on client
 
-    setIsLoading(true);
+    const handleStart = () => setIsLoading(true);
+    const handleComplete = () => setIsLoading(false);
 
-    const timer = setTimeout(() => {
-      // This is a failsafe to hide the loader if something goes wrong
-      setIsLoading(false);
-    }, 5000); // Hide after 5 seconds regardless
+    // This is a bit of a workaround for Next.js App Router.
+    // We're simulating route change events.
+    const originalPushState = history.pushState;
+    history.pushState = function (...args) {
+      handleStart();
+      originalPushState.apply(this, args);
+      // We can't reliably know when it finishes, so we'll use a timeout
+      // and also rely on the subsequent effect hook.
+      setTimeout(handleComplete, 1000); 
+    };
 
     return () => {
-      clearTimeout(timer);
-      setIsLoading(false);
+      history.pushState = originalPushState;
     };
-  }, [pathname, searchParams]);
+
+  }, []);
 
   useEffect(() => {
-    // This effect specifically handles hiding the loader.
+    // This effect will run whenever the path changes, hiding the loader.
     setIsLoading(false);
   }, [pathname, searchParams]);
 
