@@ -1,51 +1,21 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users can read their own profile and create it, but cannot delete or edit indiscriminately.
-    match /users/{userId} {
-      allow read, update, create: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Publicly readable data for browsing before login
-    match /doctors/{doctorId} {
-      allow read: if true;
-      allow create, update, delete: if request.auth != null; // Should be restricted to admins/doctors in production
-    }
-
-    match /clinics/{clinicId} {
-      allow read: if true;
-      allow create, update, delete: if request.auth != null; // Should be restricted to admins/clinics in production
-    }
-
-    match /hospitals/{hospitalId} {
-      allow read: if true;
-      allow create, update, delete: if request.auth != null; // Should be restricted to admins/hospitals in production
-    }
     
-    match /diagnostics/{centreId} {
+    // Default rule: Allow public read access, but only authenticated users can write.
+    // This is a good starting point for many applications. It allows users to see public
+    // content (like doctors, clinics, hospitals) but restricts data creation/modification
+    // to those who have an account.
+    match /{document=**} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null; // Should be restricted to admins/diagnostics in production
-    }
-    
-    match /diagnostics/{centreId}/pathologists/{pathologistId} {
-        allow read: if true;
-        allow create, update, delete: if request.auth != null;
+      allow write: if request.auth != null;
     }
 
-    // Appointments can be created by any authenticated user.
-    // They can only be read/updated by the patient who booked them or the involved doctor/clinic (future rule).
-    match /appointments/{appointmentId} {
-      allow create: if request.auth != null;
-      allow read, update: if request.auth != null && resource.data.patientId == request.auth.uid;
-    }
-    
-    match /testAppointments/{appointmentId} {
-      allow create: if request.auth != null;
-      allow read, update: if request.auth != null && resource.data.patientId == request.auth.uid;
-    }
-
+    // You can add more specific rules for collections here as your app grows.
+    // For example, to only allow a user to edit their own profile:
+    // match /users/{userId} {
+    //   allow write: if request.auth != null && request.auth.uid == userId;
+    // }
   }
 }
