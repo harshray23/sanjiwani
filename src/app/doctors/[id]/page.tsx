@@ -121,7 +121,7 @@ export default function DoctorDetailPage() {
                     className="rounded-lg border-4 border-primary/20 object-cover w-32 h-32 sm:w-[150px] sm:h-[150px]"
                 />
                 <div className="flex-1 text-center sm:text-left">
-                    <h1 className="text-3xl font-bold font-headline text-accent">Dr. {doctor.name}</h1>
+                    <h1 className="text-3xl font-bold font-headline text-accent">{doctor.name}</h1>
                     <p className="text-lg text-primary">{doctor.specialization}</p>
                     {clinic && <Link href={`/clinics/${clinic.id}`} className="text-md text-muted-foreground hover:underline">{clinic.name}</Link>}
                     

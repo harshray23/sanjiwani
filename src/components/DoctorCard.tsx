@@ -37,7 +37,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
           className="rounded-full border-2 border-primary object-cover"
         />
         <div className="flex-1">
-          <CardTitle className="text-lg font-headline mb-1">Dr. {doctor.name}</CardTitle>
+          <CardTitle className="text-lg font-headline mb-1">{doctor.name}</CardTitle>
           <CardDescription>{doctor.specialization}</CardDescription>
            {doctor.verified ? (
             <Badge variant="default" className="mt-2 bg-green-100 text-green-800 border-green-200">
