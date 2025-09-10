@@ -5,11 +5,11 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getDoctorById, getUserProfile } from '@/lib/data';
+import { getDoctorById, getUserProfile, updateDoctorProfile } from '@/lib/data';
 import type { DoctorProfile, ClinicProfile, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Pencil, Upload, LogIn, ShieldAlert } from "lucide-react";
+import { Calendar, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Pencil, Upload, LogIn, ShieldAlert, IndianRupee } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -28,12 +28,14 @@ import Image from 'next/image';
 const profileFormSchema = z.object({
   specialization: z.string().min(2, "Please list at least one specialty."),
   licenseNo: z.string().min(2, "License number is required."),
+  consultationFee: z.coerce.number().positive("Fee must be a positive number."),
 });
 
 const DoctorDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [doctor, setDoctor] = useState<DoctorProfile | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -41,6 +43,7 @@ const DoctorDashboard = () => {
     defaultValues: {
       specialization: "",
       licenseNo: "",
+      consultationFee: 0,
     },
   });
 
@@ -58,10 +61,13 @@ const DoctorDashboard = () => {
                  profileForm.reset({
                     specialization: doctorProfile.specialization || '',
                     licenseNo: doctorProfile.licenseNo || '',
+                    consultationFee: doctorProfile.consultationFee || 500,
                 });
             }
             // TODO: Fetch appointments for the doctor
             setAppointments([]);
+          } else {
+            setDoctor(null); // Explicitly set to null if role is not doctor
           }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
@@ -72,20 +78,30 @@ const DoctorDashboard = () => {
         setUserProfile(null);
         setDoctor(null);
       }
+      setIsLoading(false);
     });
+
     return () => unsubscribe();
   }, [profileForm, toast]);
 
-  const onProfileSubmit = (values: z.infer<typeof profileFormSchema>) => {
-      toast({
-          title: "Profile Updated!",
-          description: "Your information has been saved successfully.",
-      });
-      console.log(values);
-      // TODO: Implement actual update logic
+  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
+      if (!userProfile) return;
+      try {
+        await updateDoctorProfile(userProfile.uid, values);
+        toast({
+            title: "Profile Updated!",
+            description: "Your information has been saved successfully.",
+        });
+        // Refetch doctor data to update UI if needed
+        const updatedDoctorProfile = await getDoctorById(userProfile.uid);
+        setDoctor(updatedDoctorProfile);
+      } catch (error) {
+        console.error("Failed to update profile", error);
+        toast({ title: "Update Failed", description: "Could not save your profile.", variant: "destructive"});
+      }
   };
   
-  if (userProfile === undefined) {
+  if (userProfile === undefined || isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
@@ -217,6 +233,19 @@ const DoctorDashboard = () => {
                                             <FormLabel>License Number</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Your medical license number" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="consultationFee"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Consultation Fee (INR)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g., 800" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

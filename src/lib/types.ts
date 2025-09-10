@@ -17,14 +17,16 @@ export interface User {
 export interface DoctorDetails {
   id: string; // The document ID, which should match the user ID
   userId: string; // Reference to the user in /users/{userId}
+  name: string;
   specialization: string;
   licenseNo: string;
+  consultationFee: number;
   availability: string[]; // Array of time slots
   clinicId?: string;
 }
 
 // A complete Doctor profile, combining User and DoctorDetails
-export interface DoctorProfile extends User, Omit<DoctorDetails, 'id' | 'userId'> {
+export interface DoctorProfile extends User, Omit<DoctorDetails, 'id' | 'userId' | 'name'> {
   // Inherits all fields from User
   // and adds specialization, licenseNo, etc.
   // We use the User uid as the primary ID.

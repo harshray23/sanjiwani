@@ -1,4 +1,5 @@
 
+
 import {
   collection,
   addDoc,
@@ -61,8 +62,8 @@ async function getCollection<T>(collectionName: string): Promise<T[]> {
 
 // Generic function to get a document by ID
 async function getDocumentById<T>(collectionName:string, id: string): Promise<T | undefined> {
-     if (!db) {
-        console.error("Firestore not initialized");
+     if (!db || !id) {
+        console.error("Firestore not initialized or ID is missing");
         return undefined;
     }
     const docRef = doc(db, collectionName, id);
@@ -104,9 +105,12 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
             if (typeof detailsData.qualifications === 'string') {
                 detailsData.qualifications = detailsData.qualifications.split(',').map((s: string) => s.trim()).filter(Boolean);
             }
+            detailsData.consultationFee = 500; // Default fee
+            detailsData.name = baseData.name;
             break;
         case 'clinic':
             detailsCollectionName = 'clinics';
+            detailsData.name = baseData.name;
             break;
         case 'diag_centre':
             detailsCollectionName = 'diagnosisCentres';
@@ -126,7 +130,6 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
         const detailsRef = doc(db, detailsCollectionName, user.uid);
         await setDoc(detailsRef, {
             ...detailsData,
-            name: baseData.name, // Add name to details for easier querying
             userId: user.uid,
         });
     }
@@ -137,8 +140,8 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 
 // --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
 
-export const getDoctors = async (): Promise<DoctorProfile[]> => {
-    const doctors = await getCollection<DoctorProfile>('doctors');
+export const getDoctors = async (): Promise<DoctorDetails[]> => {
+    const doctors = await getCollection<DoctorDetails>('doctors');
     return doctors.map(doc => ({ ...doc, uid: doc.id }));
 };
 
@@ -160,7 +163,7 @@ export const getClinics = async (): Promise<ClinicProfile[]> => {
           console.warn(`Clinic detail document ${details.id} is missing a userId.`);
           return null;
         }
-        const userProfile = await getDocumentById<User>('users', details.userId);
+        const userProfile = await getUserProfile(details.userId);
         if (!userProfile) return null;
         return { ...userProfile, ...details, id: userProfile.uid } as ClinicProfile;
     }));
@@ -174,7 +177,7 @@ export const getClinicById = async (id: string): Promise<ClinicProfile | undefin
     const clinicDetails = await getDocumentById<ClinicDetails>('clinics', id);
     if (!clinicDetails) return undefined;
 
-    return { ...userProfile, ...details, id: userProfile.uid };
+    return { ...userProfile, ...clinicDetails, id: userProfile.uid };
 }
 
 
@@ -215,7 +218,7 @@ export const createAppointment = async (
 
 
 // --- Legacy or Combined Functions ---
-export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicProfile[], doctors: DoctorProfile[] }> => {
+export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicProfile[], doctors: DoctorDetails[] }> => {
     const [doctors, clinics] = await Promise.all([getDoctors(), getClinics()]);
     
     if (!queryText) {

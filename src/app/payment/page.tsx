@@ -59,7 +59,7 @@ function PaymentForm() {
   const selectedSlot = searchParams.get('slot');
   const consultationType = (searchParams.get('type') || 'clinic') as 'clinic' | 'video';
   
-  const consultationFee = 500; // Mock fee
+  const consultationFee = doctor?.consultationFee || 500; // Use doctor's fee or a default
   const platformFee = consultationType === 'video' ? 100 : 50;
   const totalFee = consultationFee + platformFee;
 

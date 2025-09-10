@@ -101,8 +101,7 @@ export default function DoctorDetailPage() {
     return <div className="text-center py-12">Doctor not found.</div>;
   }
   
-  // These are now mocks, as this data isn't in the new structure
-  const consultationFee = 500;
+  const consultationFee = doctor.consultationFee || 500;
   const platformFee = 50;
   const totalFee = consultationFee + platformFee;
 
