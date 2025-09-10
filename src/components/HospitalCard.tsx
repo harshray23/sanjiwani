@@ -5,7 +5,7 @@ import type { Hospital } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { BedDouble, MapPin, Phone, Star, CheckCircle, AlertCircle, Zap, MapIcon } from 'lucide-react';
+import { BedDouble, MapPin, Phone, Star, Zap, MapIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -81,7 +81,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-card">
       <CardHeader className="p-0 relative">
         <Image
-          src={hospital.imageUrl || `https://picsum.photos/600/400`}
+          src={hospital.imageUrl || `https://picsum.photos/seed/hospital/600/400`}
           alt={hospital.name}
           width={600}
           height={400}
@@ -140,7 +140,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
           disabled={totalAvailableBeds === 0}
           variant={totalAvailableBeds > 0 ? "default" : "secondary"}
         >
-          <Link href={`/hospitals/${hospital.id}/book`}> 
+          <Link href={`/hospitals/${hospital.id}`}> 
             <BedDouble className="w-4 h-4 mr-2" /> 
             {totalAvailableBeds > 0 ? `Reserve a Bed (${totalAvailableBeds} available)` : 'Check Availability Details'}
           </Link>
@@ -152,3 +152,5 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     </Card>
   );
 }
+
+    

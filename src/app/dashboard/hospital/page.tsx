@@ -45,6 +45,8 @@ const HospitalDashboard = () => {
                   setHospital(null);
                   setAppointments([]);
                 }
+            } else if (profile) {
+                setHospital(null);
             }
         } catch (error) {
             console.error("Error fetching hospital data:", error);

@@ -8,7 +8,7 @@ import { getDiagnosticsCentreById, getTestAppointmentsForCentre, getUserProfile 
 import type { DiagnosticsCentre, TestAppointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert } from "lucide-react";
+import { UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -48,6 +48,9 @@ const DiagnosticsDashboard = () => {
                   setCentre(null);
                   setAppointments([]);
                 }
+            } else if (profile) {
+                // User has a profile, but not the correct role
+                setCentre(null);
             }
         } catch(error) {
             console.error("Error fetching diagnostics data:", error);
@@ -155,7 +158,7 @@ const DiagnosticsDashboard = () => {
                                 <TableRow key={app.id}>
                                     <TableCell className="font-medium">{app.patientName}</TableCell>
                                     <TableCell>{app.test.name}</TableCell>
-                                    <TableCell>{format(new Date(app.date), 'PP')} at {app.time}</TableCell>
+                                    <TableCell>{format(new Date(app.date), 'PPp')}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
                                     </TableCell>

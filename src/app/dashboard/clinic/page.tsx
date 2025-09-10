@@ -48,6 +48,9 @@ const ClinicDashboard = () => {
                   setClinic(null);
                   setAppointments([]);
                 }
+            } else if (profile) {
+                // User has a profile, but not the correct role
+                setClinic(null);
             }
         } catch (error) {
             console.error("Error fetching clinic data:", error);
@@ -147,8 +150,7 @@ const ClinicDashboard = () => {
                                 <p className="font-semibold">{app.patientName}</p>
                                 <p className="text-sm text-muted-foreground">with <span className="font-medium text-foreground">{app.doctor.name}</span></p>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                    <span className="flex items-center gap-1.5"> {format(new Date(app.date), 'PP')}</span>
-                                    <span className="flex items-center gap-1.5"> {app.time}</span>
+                                    <span className="flex items-center gap-1.5"> {format(new Date(app.date), 'PPp')}</span>
                                 </p>
                             </div>
                             <p className="text-sm font-bold">{app.status}</p>

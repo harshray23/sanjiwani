@@ -167,31 +167,6 @@ function PaymentForm() {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
-  if (consultationType === 'clinic') {
-    return (
-       <div className="py-12 w-full">
-        <Card className="w-full max-w-lg mx-auto shadow-xl">
-            <CardHeader className="text-center">
-                <CardTitle className="text-3xl font-headline text-accent">Feature Coming Soon!</CardTitle>
-                <CardDescription>In-clinic payment processing is currently under development. Please check back later.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 flex flex-col items-center">
-                <div className="w-64 h-64">
-                    {comingSoonAnimation ? (
-                        <Lottie animationData={comingSoonAnimation} loop={true} />
-                    ) : <p>Loading animation...</p>}
-                </div>
-                <Button asChild className="mt-8" onClick={() => router.back()}>
-                    <Link href="#">
-                        Go Back
-                    </Link>
-                </Button>
-            </CardContent>
-        </Card>
-        </div>
-    )
-  }
-
   return (
     <div className="py-12">
       <Card className="w-full max-w-4xl mx-auto shadow-xl">
@@ -346,7 +321,5 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
-
-    
 
     

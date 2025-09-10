@@ -8,7 +8,7 @@ import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDia
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Loader2, LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical } from "lucide-react";
+import { LogIn, Shield, Users, Stethoscope, Building, Hospital as HospitalIcon, Pencil, Trash2, Calendar, CheckCircle, UserPlus, Activity, FlaskConical } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -143,7 +143,7 @@ const AdminDashboard = () => {
                             </Avatar>
                             <div className="flex-1 text-sm">
                                 <p><span className="font-semibold">{app.patientName}</span> booked an appointment with <span className="font-semibold">{app.doctor.name}</span>.</p>
-                                <p className="text-xs text-muted-foreground">{format(new Date(app.date), 'PPpp')}</p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(app.date), 'PPp')}</p>
                             </div>
                         </div>
                      ))}
@@ -154,7 +154,7 @@ const AdminDashboard = () => {
                             </Avatar>
                             <div className="flex-1 text-sm">
                                 <p><span className="font-semibold">{usr.email}</span> registered as a new {usr.role}.</p>
-                                <p className="text-xs text-muted-foreground">{format(new Date(), 'PPpp')}</p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(usr.createdAt.seconds * 1000), 'PPp')}</p>
                             </div>
                         </div>
                      ))}
@@ -201,7 +201,7 @@ const AdminDashboard = () => {
                                 <TableRow key={u.uid}>
                                     <TableCell className="font-medium">{u.email}</TableCell>
                                     <TableCell className="capitalize">{u.role}</TableCell>
-                                    <TableCell>{format(new Date(), "PP")}</TableCell>
+                                    <TableCell>{format(new Date(u.createdAt.seconds * 1000), "PP")}</TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleRemove('user', u.uid)}><Trash2 className="h-4 w-4"/></Button>
                                     </TableCell>
