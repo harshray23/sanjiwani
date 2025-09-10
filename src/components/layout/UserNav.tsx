@@ -81,6 +81,16 @@ export function UserNav() {
   
   const fallbackColor = user.email ? getAvatarColor(user.email) : 'bg-gray-500';
   
+  const dashboardLinks: Record<string, {href: string, label: string, icon: React.ReactNode}> = {
+    doctor: { href: '/dashboard/doctor', label: 'Doctor Dashboard', icon: <LayoutDashboard /> },
+    clinic: { href: '/dashboard/clinic', label: 'Clinic Dashboard', icon: <Building /> },
+    hospital: { href: '/dashboard/hospital', label: 'Hospital Dashboard', icon: <Hospital /> },
+    diagnostics_centres: { href: '/dashboard/diagnostics', label: 'Diagnostics Dashboard', icon: <FlaskConical /> },
+    admin: { href: '/dashboard/admin', label: 'Admin Dashboard', icon: <Shield /> },
+  }
+
+  const userDashboard = userRole ? dashboardLinks[userRole] : null;
+
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -104,62 +114,31 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-         {userRole === 'customer' && (
-            <>
-              <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>My Profile</span>
-                  </Link>
-              </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+              <Link href="/profile">
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>My Profile</span>
+              </Link>
+          </DropdownMenuItem>
+
+          {userRole === 'patient' && (
               <DropdownMenuItem asChild>
                   <Link href="/appointments">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>My Appointments</span>
                   </Link>
               </DropdownMenuItem>
-            </>
-         )}
-         {userRole === 'doctor' && (
-             <DropdownMenuItem asChild>
-                <Link href="/dashboard/doctor">
-                    <LayoutDashboard className="mr-2 h-4 w-4"/>
-                    <span>Doctor Dashboard</span>
+          )}
+
+          {userDashboard && (
+            <DropdownMenuItem asChild>
+                <Link href={userDashboard.href}>
+                    {React.cloneElement(userDashboard.icon as React.ReactElement, { className: 'mr-2 h-4 w-4' })}
+                    <span>{userDashboard.label}</span>
                 </Link>
-             </DropdownMenuItem>
-         )}
-         {userRole === 'clinic' && (
-             <DropdownMenuItem asChild>
-                <Link href="/dashboard/clinic">
-                    <Building className="mr-2 h-4 w-4"/>
-                    <span>Clinic Dashboard</span>
-                </Link>
-             </DropdownMenuItem>
-         )}
-         {userRole === 'hospital' && (
-             <DropdownMenuItem asChild>
-                <Link href="/dashboard/hospital">
-                    <Hospital className="mr-2 h-4 w-4"/>
-                    <span>Hospital Dashboard</span>
-                </Link>
-             </DropdownMenuItem>
-         )}
-         {userRole === 'diagnostics_centres' && (
-             <DropdownMenuItem asChild>
-                <Link href="/dashboard/diagnostics">
-                    <FlaskConical className="mr-2 h-4 w-4"/>
-                    <span>Diagnostics Dashboard</span>
-                </Link>
-             </DropdownMenuItem>
-         )}
-          {userRole === 'admin' && (
-             <DropdownMenuItem asChild>
-                <Link href="/dashboard/admin">
-                    <Shield className="mr-2 h-4 w-4"/>
-                    <span>Admin Dashboard</span>
-                </Link>
-             </DropdownMenuItem>
-         )}
+            </DropdownMenuItem>
+          )}
+        
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
@@ -170,5 +149,3 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
-
-    
