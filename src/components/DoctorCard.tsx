@@ -38,7 +38,12 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <div className="text-sm text-muted-foreground space-y-2">
             <p className="flex items-start gap-2">
                 <GraduationCap className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>{doctor.qualifications.join(', ')}</span>
+                <span>
+                    {Array.isArray(doctor.qualifications) 
+                        ? doctor.qualifications.join(', ')
+                        : doctor.qualifications
+                    }
+                </span>
             </p>
             <p className="flex items-start gap-2">
                 <Briefcase className="h-4 w-4 mt-0.5 shrink-0" />

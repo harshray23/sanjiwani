@@ -75,17 +75,31 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
     const userRoleRef = doc(db, "users", uid);
     const userRoleSnap = await getDoc(userRoleRef);
     if (!userRoleSnap.exists()) {
+        console.error(`No user found in 'users' collection for UID: ${uid}`);
         return null;
     }
-    const userRoleData = userRoleSnap.data() as { role: Role };
+    const userRoleData = userRoleSnap.data();
 
     // Step 2: Based on the role, get the detailed profile from the specific collection.
-    const role = userRoleData.role;
-    let profileCollectionName = role;
-    if(role === 'diagnostics_centres'){
-        profileCollectionName = 'diagnostics_centres'
-    } else {
-        profileCollectionName = `${role}s`; // e.g., 'doctors', 'clinics'
+    const role = userRoleData.role as Role;
+    if (!role) {
+         console.error(`User with UID ${uid} has no role.`);
+         return { uid: uid, email: userRoleData.email, role: 'customer', createdAt: userRoleData.createdAt } as User;
+    }
+    
+    let profileCollectionName: string;
+    
+    switch (role) {
+        case 'customer': profileCollectionName = 'customers'; break;
+        case 'doctor': profileCollectionName = 'doctors'; break;
+        case 'clinic': profileCollectionName = 'clinics'; break;
+        case 'hospital': profileCollectionName = 'hospitals'; break;
+        case 'diagnostics_centres': profileCollectionName = 'diagnostics_centres'; break;
+        case 'admin': profileCollectionName = 'admins'; break;
+        default:
+            console.error(`Invalid role '${role}' for user UID: ${uid}`);
+            // Fallback to customer if role is invalid
+            return { uid: uid, email: userRoleData.email, role: 'customer', createdAt: userRoleData.createdAt } as User;
     }
 
     const userProfileRef = doc(db, profileCollectionName, uid);
@@ -96,8 +110,9 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
         return { uid: userProfileSnap.id, ...userProfileSnap.data(), role: role } as User;
     }
     
+    console.warn(`No profile found in '${profileCollectionName}' for UID: ${uid}. Returning basic info.`);
     // Fallback in case there's a role entry but no detailed profile
-    return { uid: uid, email: userRoleSnap.data().email, role: role, createdAt: userRoleSnap.data().createdAt } as User;
+    return { uid: uid, email: userRoleData.email, role: role, createdAt: userRoleData.createdAt } as User;
 };
 
 
@@ -114,21 +129,32 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, deta
     });
 
     // 2. Determine the correct collection name for the detailed profile
-    let profileCollectionName = role;
-    if(role === 'diagnostics_centres'){
-        profileCollectionName = 'diagnostics_centres'
-    } else {
-        profileCollectionName = `${role}s`; // e.g., 'customers', 'doctors'
+    let profileCollectionName: string;
+     switch (role) {
+        case 'customer': profileCollectionName = 'customers'; break;
+        case 'doctor': profileCollectionName = 'doctors'; break;
+        case 'clinic': profileCollectionName = 'clinics'; break;
+        case 'hospital': profileCollectionName = 'hospitals'; break;
+        case 'diagnostics_centres': profileCollectionName = 'diagnostics_centres'; break;
+        case 'admin': profileCollectionName = 'admins'; break;
+        default: throw new Error(`Invalid role: ${role}`);
     }
 
     // 3. Create the detailed profile in the role-specific collection
     const profileRef = doc(db, profileCollectionName, user.uid);
-    const profileData = {
+
+    const profileData: { [key: string]: any } = {
         uid: user.uid,
         email: user.email!,
         createdAt: serverTimestamp(),
-        ...details // Spread all the other details from the form
+        ...details
     };
+    
+    // Convert qualifications string to array for doctors before saving
+    if (role === 'doctor' && typeof details.qualifications === 'string') {
+        profileData.qualifications = details.qualifications.split(',').map((q: string) => q.trim()).filter((q: string) => q);
+    }
+
 
     await setDoc(profileRef, profileData);
     
