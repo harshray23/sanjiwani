@@ -37,15 +37,21 @@ import { createUserInFirestore, getUserProfile } from "@/lib/data";
 const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
 export type Role = z.infer<typeof roleEnum>;
 
+const emailValidation = z.string().refine(
+    (email) => email.includes('@') && email.includes('.com'),
+    { message: "Please enter a valid email address containing '@' and '.com'." }
+);
+
 const signInSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: emailValidation,
   password: z.string().min(1, { message: "Password is required." }),
 });
 
 const baseSignUpSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: emailValidation,
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
+
 
 const customerSignUpSchema = baseSignUpSchema.extend({
     fullName: z.string().min(2, "Name is required."),
@@ -87,7 +93,7 @@ const SignUpForm = () => {
     const { toast } = useToast();
 
     const form = useForm({
-        resolver: zodResolver(baseSignUpSchema),
+        // The resolver will be dynamically applied in the submit handler
         defaultValues: {
             email: "",
             password: "",
@@ -128,6 +134,7 @@ const SignUpForm = () => {
         
         const schema = getSignUpSchema(selectedRole);
         
+        // Data cleaning step: create a new object with only the fields relevant to the selected role's schema.
         const relevantFields = Object.keys(schema.shape);
         const cleanValues: Record<string, any> = {};
         for (const key of relevantFields) {
@@ -152,6 +159,7 @@ const SignUpForm = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, validationResult.data.email, validationResult.data.password);
             
+            // Pass the validated and cleaned data to Firestore
             await createUserInFirestore(userCredential.user, selectedRole, validationResult.data);
 
             await signOut(auth);
@@ -490,5 +498,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
 
     
