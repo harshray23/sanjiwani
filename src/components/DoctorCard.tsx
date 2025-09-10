@@ -1,5 +1,4 @@
 
-
 import Link from 'next/link';
 import Image from 'next/image';
 import type { DoctorProfile } from '@/lib/types';
@@ -17,8 +16,8 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-4 flex-row gap-4 items-start">
         <Image
-          src={`https://i.pravatar.cc/80?u=${doctor.uid}`}
-          alt={doctor.name}
+          src={doctor.imageUrl || `https://i.pravatar.cc/80?u=${doctor.uid}`}
+          alt={doctor.name || 'Doctor profile picture'}
           width={80}
           height={80}
           className="rounded-full border-2 border-primary object-cover"

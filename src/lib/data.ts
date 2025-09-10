@@ -1,5 +1,4 @@
 
-
 import {
   collection,
   addDoc,
@@ -139,17 +138,8 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 // --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
 
 export const getDoctors = async (): Promise<DoctorProfile[]> => {
-    const doctorDetailsList = await getCollection<DoctorDetails>('doctors');
-    const doctorProfiles = await Promise.all(doctorDetailsList.map(async (details) => {
-        if (!details.userId) { // Check if userId exists
-          console.warn(`Doctor detail document ${details.id} is missing a userId.`);
-          return null;
-        }
-        const userProfile = await getDocumentById<User>('users', details.userId);
-        if (!userProfile) return null;
-        return { ...userProfile, ...details, id: userProfile.uid } as DoctorProfile;
-    }));
-    return doctorProfiles.filter((p): p is DoctorProfile => p !== null);
+    const doctors = await getCollection<DoctorProfile>('doctors');
+    return doctors.map(doc => ({ ...doc, uid: doc.id }));
 };
 
 
@@ -166,6 +156,10 @@ export const getDoctorById = async (id: string): Promise<DoctorProfile | undefin
 export const getClinics = async (): Promise<ClinicProfile[]> => {
     const clinicDetailsList = await getCollection<ClinicDetails>('clinics');
     const clinicProfiles = await Promise.all(clinicDetailsList.map(async (details) => {
+        if (!details.userId) { // Check if userId exists
+          console.warn(`Clinic detail document ${details.id} is missing a userId.`);
+          return null;
+        }
         const userProfile = await getDocumentById<User>('users', details.userId);
         if (!userProfile) return null;
         return { ...userProfile, ...details, id: userProfile.uid } as ClinicProfile;
@@ -349,4 +343,10 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
   );
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() } as TestAppointment));
+};
+
+export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetails>): Promise<void> => {
+  if (!db) throw new Error("Firestore not initialized");
+  const doctorRef = doc(db, 'doctors', uid);
+  await updateDoc(doctorRef, data);
 };
