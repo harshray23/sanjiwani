@@ -16,11 +16,11 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-4 flex-row gap-4 items-start">
         <Image
-          src={doctor.imageUrl}
+          src={doctor.imageUrl || `https://picsum.photos/seed/${doctor.id}/80/80`}
           alt={doctor.name}
           width={80}
           height={80}
-          className="rounded-full border-2 border-primary"
+          className="rounded-full border-2 border-primary object-cover"
           data-ai-hint={doctor.dataAiHint}
         />
         <div className="flex-1">
