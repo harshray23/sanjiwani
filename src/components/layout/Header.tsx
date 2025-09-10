@@ -60,7 +60,7 @@ export function Header() {
             <DropdownMenuContent align="start">
               {serviceItems.map((item) => (
                 <DropdownMenuItem key={item.label} asChild>
-                  <Link href={item.href}>
+                  <Link href={item.href} className="flex items-center gap-2">
                     {item.icon}
                     {item.label}
                   </Link>
