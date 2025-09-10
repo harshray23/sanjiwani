@@ -169,7 +169,6 @@ const SignUpForm = () => {
                         <SelectItem value="clinic">Clinic</SelectItem>
                         <SelectItem value="hospital">Hospital</SelectItem>
                         <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                 </Select>
                  <p className="text-sm text-muted-foreground text-center">Select a role to see the required sign-up form.</p>
