@@ -127,7 +127,6 @@ const SignUpForm = () => {
                 description: "Please fill all required fields correctly.",
                 variant: "destructive"
             });
-            console.error(validationResult.error.flatten().fieldErrors);
             // This can be enhanced to show errors on specific fields
             setIsLoading(false);
             return;
@@ -490,4 +489,5 @@ export default function LoginPage() {
     
 
     
+
 
