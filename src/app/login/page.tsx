@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +48,11 @@ const baseSignUpSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
+const customerSignUpSchema = baseSignUpSchema.extend({
+    fullName: z.string().min(2, "Name is required."),
+    phone: z.string().min(10, "A valid phone number is required."),
+});
+
 const doctorSignUpSchema = baseSignUpSchema.extend({
     name: z.string().min(2, "Name is required."),
     address: z.string().min(5, "Address is required."),
@@ -83,6 +89,7 @@ const SignUpForm = () => {
 
     const form = useForm({
         resolver: zodResolver(
+            selectedRole === 'customer' ? customerSignUpSchema :
             selectedRole === 'doctor' ? doctorSignUpSchema :
             selectedRole === 'clinic' ? clinicSignUpSchema :
             selectedRole === 'hospital' ? hospitalSignUpSchema :
@@ -92,6 +99,7 @@ const SignUpForm = () => {
         defaultValues: {
             email: "",
             password: "",
+            fullName: "",
             name: "",
             address: "",
             phone: "",
@@ -200,6 +208,17 @@ const SignUpForm = () => {
                     </FormItem>
                 )} />
                 
+                {selectedRole === 'customer' && (
+                     <>
+                         <FormField control={form.control} name="fullName" render={({ field }) => (
+                            <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="phone" render={({ field }) => (
+                            <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input placeholder="Your contact number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </>
+                )}
+
                 {selectedRole === 'doctor' && (
                     <>
                          <FormField control={form.control} name="name" render={({ field }) => (

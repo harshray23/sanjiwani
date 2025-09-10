@@ -70,32 +70,69 @@ export const getUsers = async (): Promise<User[]> => {
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
     if (!db) return null;
-    const userRef = doc(db, "users", uid);
-    const docSnap = await getDoc(userRef);
-    if (docSnap.exists()) {
-        return { uid: docSnap.id, ...docSnap.data() } as User;
+    
+    // Step 1: Get the user's role from the central 'users' collection.
+    const userRoleRef = doc(db, "users", uid);
+    const userRoleSnap = await getDoc(userRoleRef);
+    if (!userRoleSnap.exists()) {
+        return null;
     }
-    return null;
+    const userRoleData = userRoleSnap.data() as { role: Role };
+
+    // Step 2: Based on the role, get the detailed profile from the specific collection.
+    const role = userRoleData.role;
+    let profileCollectionName = role;
+    if(role === 'diagnostics_centres'){
+        profileCollectionName = 'diagnostics_centres'
+    } else {
+        profileCollectionName = `${role}s`; // e.g., 'doctors', 'clinics'
+    }
+
+    const userProfileRef = doc(db, profileCollectionName, uid);
+    const userProfileSnap = await getDoc(userProfileRef);
+
+    if (userProfileSnap.exists()) {
+        // Combine the role data with the detailed profile data
+        return { uid: userProfileSnap.id, ...userProfileSnap.data(), role: role } as User;
+    }
+    
+    // Fallback in case there's a role entry but no detailed profile
+    return { uid: uid, email: userRoleSnap.data().email, role: role, createdAt: userRoleSnap.data().createdAt } as User;
 };
 
 
 export const createUserInFirestore = async (user: FirebaseUser, role: Role, details: any) => {
     if (!db) throw new Error("Firestore not initialized");
 
-    const userRef = doc(db, "users", user.uid);
-
-    const userData: User = {
+    // 1. Create a document in the master `users` collection for role lookup
+    const userRoleRef = doc(db, "users", user.uid);
+    await setDoc(userRoleRef, {
         uid: user.uid,
         email: user.email!,
         role: role,
+        createdAt: serverTimestamp()
+    });
+
+    // 2. Determine the correct collection name for the detailed profile
+    let profileCollectionName = role;
+    if(role === 'diagnostics_centres'){
+        profileCollectionName = 'diagnostics_centres'
+    } else {
+        profileCollectionName = `${role}s`; // e.g., 'customers', 'doctors'
+    }
+
+    // 3. Create the detailed profile in the role-specific collection
+    const profileRef = doc(db, profileCollectionName, user.uid);
+    const profileData = {
+        uid: user.uid,
+        email: user.email!,
         createdAt: serverTimestamp(),
-        fullName: details.name,
-        phone: details.phone,
-        address: details.address,
+        ...details // Spread all the other details from the form
     };
 
-    await setDoc(userRef, userData);
-    return userData;
+    await setDoc(profileRef, profileData);
+    
+    return { ...profileData, role: role };
 }
 
 export const comprehensiveSpecialties = [
