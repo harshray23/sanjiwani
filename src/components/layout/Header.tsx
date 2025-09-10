@@ -32,8 +32,8 @@ export function Header() {
           <Image
             src="/logo.jpg"
             alt="Sanjiwani Health Logo"
-            width={56}
-            height={56}
+            width={64}
+            height={64}
             className="rounded-full"
           />
           <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani Health</h1>

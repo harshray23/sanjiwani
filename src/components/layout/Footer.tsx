@@ -46,8 +46,8 @@ export function Footer() {
                 <Image
                   src="/logo.jpg"
                   alt="Sanjiwani Health Logo"
-                  width={56}
-                  height={56}
+                  width={72}
+                  height={72}
                   className="rounded-full"
                 />
                 <div>
