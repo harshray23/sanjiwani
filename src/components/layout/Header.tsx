@@ -27,13 +27,13 @@ export function Header() {
 
   return (
     <header className="bg-card/95 backdrop-blur-sm border-b shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-24 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 text-accent hover:text-accent/90 transition-colors">
           <Image
             src="/logo.jpg"
             alt="Sanjiwani Health Logo"
-            width={64}
-            height={64}
+            width={80}
+            height={80}
             className="rounded-full"
           />
           <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani Health</h1>
