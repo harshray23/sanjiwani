@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { DoctorDetails } from '@/lib/types';
@@ -5,27 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Briefcase, GraduationCap, BadgeCheck } from 'lucide-react';
-import { getClinicById } from '@/lib/data';
-import { useEffect, useState } from 'react';
 
 interface DoctorCardProps {
   doctor: DoctorDetails;
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
-  const [clinicName, setClinicName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (doctor.clinicId) {
-      getClinicById(doctor.clinicId).then(clinic => {
-        if (clinic) {
-          setClinicName(clinic.name);
-        }
-      });
-    }
-  }, [doctor.clinicId]);
-
-
+  
   return (
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-4 flex-row gap-4 items-start">
@@ -59,10 +46,10 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                     License: {doctor.licenseNo}
                 </span>
             </p>
-             {clinicName && (
+             {doctor.clinicName && (
                <p className="flex items-start gap-2">
                 <Briefcase className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>{clinicName}</span>
+                <span>{doctor.clinicName}</span>
               </p>
             )}
         </div>

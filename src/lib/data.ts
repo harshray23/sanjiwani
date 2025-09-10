@@ -1,3 +1,4 @@
+
 import {
   collection,
   addDoc,
@@ -137,8 +138,24 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 // --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
 
 export const getDoctors = async (): Promise<DoctorDetails[]> => {
-    const doctors = await getCollection<DoctorDetails>('doctors');
-    return doctors.map(doc => ({ ...doc, id: doc.id, uid: doc.id }));
+    const doctorsList = await getCollection<DoctorDetails>('doctors');
+    
+    // Create a map of clinic IDs to clinic names for efficient lookup
+    const clinics = await getClinics();
+    const clinicNameMap = new Map(clinics.map(clinic => [clinic.id, clinic.name]));
+
+    // Populate clinicName for each doctor
+    const populatedDoctors = doctorsList.map(doctor => {
+        const clinicName = doctor.clinicId ? clinicNameMap.get(doctor.clinicId) : undefined;
+        return {
+            ...doctor,
+            id: doctor.id, 
+            uid: doctor.id,
+            clinicName: clinicName || null, // Ensure clinicName is part of the object
+        };
+    });
+
+    return populatedDoctors;
 };
 
 export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
@@ -375,3 +392,4 @@ export const updateUserProfile = async (uid: string, role: Role, data: Partial<U
         }
     }
 };
+

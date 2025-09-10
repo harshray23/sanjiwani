@@ -26,6 +26,7 @@ export interface DoctorDetails {
   verified?: boolean; // Now part of the details
   imageUrl?: string;
   phone?: string;
+  clinicName?: string | null; // Added for populated data
 }
 
 // A complete Doctor profile, combining User and DoctorDetails
