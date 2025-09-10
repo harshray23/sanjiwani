@@ -162,11 +162,9 @@ const DoctorDashboard = () => {
           if (profile?.role === 'doctor') {
             const mockDoctorId = 'doc-1'; 
             
-            // Fetch all doctor-related data in parallel
             const [doctorProfile, doctorAppointments, clinicData] = await Promise.all([
                 getDoctorById(mockDoctorId),
                 getAppointmentsForDoctor(mockDoctorId),
-                // This assumes a doctor is tied to one primary clinic. This could be expanded.
                 getClinicById('clinic-1') 
             ]);
 
@@ -184,7 +182,6 @@ const DoctorDashboard = () => {
                     specialties: doctorProfile.specialty
                 });
             } else {
-                // If the doctor's specific profile isn't found, set to null
                 setDoctor(null);
                 setAppointments([]);
                 setClinics([]);
@@ -212,7 +209,7 @@ const DoctorDashboard = () => {
       console.log(values);
   };
   
-  if (userProfile === undefined || doctor === undefined) {
+  if (userProfile === undefined) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
         <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
