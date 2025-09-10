@@ -78,46 +78,80 @@ async function getDocumentById<T>(collectionName:string, id: string): Promise<T 
 // --- USER MANAGEMENT ---
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
-    if(!uid) return null;
-    const user = await getDocumentById<User>('users', uid);
-    return user || null;
+    if (!uid) return null;
+    
+    // First, try to get the user from the 'users' collection
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    if (userDoc.exists()) {
+        return convertTimestamps({ uid: userDoc.id, ...userDoc.data() } as User);
+    }
+
+    // If not found in 'users', try to get from 'doctors' collection (for doctor-specific login)
+    const doctorDoc = await getDoc(doc(db, 'doctors', uid));
+    if (doctorDoc.exists()) {
+        const doctorData = doctorDoc.data() as DoctorDetails;
+        // Adapt the doctor data to the User structure
+        return convertTimestamps({
+            uid: doctorDoc.id,
+            name: doctorData.name,
+            email: doctorData.email,
+            phone: doctorData.phone || '',
+            role: 'doctor',
+            verified: doctorData.verified || false,
+            createdAt: new Date().toISOString(), // createdAt might not exist on doctor doc, provide fallback
+        } as User);
+    }
+
+    // If no profile is found in any relevant collection, return null
+    return null;
 };
 
 export const createUserInFirestore = async (user: FirebaseUser, role: Role, baseData: any, detailsData: any) => {
     if (!db) throw new Error("Firestore not initialized");
 
-    const userRef = doc(db, "users", user.uid);
-    // Use setDoc to create the document with the specific UID
-    await setDoc(userRef, {
-        ...baseData,
-        uid: user.uid,
+    const commonProfileData = {
+        name: baseData.name,
         email: user.email!,
-        role: role,
-        verified: false, 
+        phone: baseData.phone,
+        verified: false,
         createdAt: serverTimestamp()
+    };
+    
+    // Special handling for 'doctor' role
+    if (role === 'doctor') {
+        const doctorRef = doc(db, "doctors", user.uid);
+        await setDoc(doctorRef, {
+            ...commonProfileData,
+            ...detailsData,
+            id: user.uid, // DEPRECATED: Keep for now, but should use uid.
+            userId: user.uid, // DEPRECATED: Keep for now, but should use uid.
+            imageUrl: `https://i.pravatar.cc/150?u=${user.uid}`,
+            consultationFee: 500, // Default fee
+            availability: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"], // Default availability
+        });
+        const doctorProfile = await getDoc(doctorRef);
+        return doctorProfile.data();
+    }
+
+
+    // Standard handling for all other roles
+    const userRef = doc(db, "users", user.uid);
+    await setDoc(userRef, {
+        ...commonProfileData,
+        uid: user.uid,
+        role: role,
     });
 
     let detailsCollectionName: string | null = null;
     let finalDetailsData: any = { ...detailsData };
-
-    // This is the key change: ensure public data is stored in the public collection.
+    
     const publicProfileData = {
         name: baseData.name,
         phone: baseData.phone,
-        verified: false, // All start as unverified
+        verified: false,
     };
 
     switch (role) {
-        case 'doctor':
-            detailsCollectionName = 'doctors';
-            finalDetailsData = {
-                ...detailsData,
-                ...publicProfileData,
-                imageUrl: `https://i.pravatar.cc/150?u=${user.uid}`,
-                consultationFee: 500, // Default fee
-                availability: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"], // Default availability
-            };
-            break;
         case 'clinic':
             detailsCollectionName = 'clinics';
             finalDetailsData = {
@@ -136,7 +170,6 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
             break;
         case 'patient':
         case 'admin':
-            // No separate details collection for patients or admins
             break;
         default:
             throw new Error(`Invalid role for details creation: ${role}`);
@@ -146,8 +179,8 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
         const detailsRef = doc(db, detailsCollectionName, user.uid);
         await setDoc(detailsRef, {
             ...finalDetailsData,
+            id: user.uid, // DEPRECATED
             userId: user.uid,
-            id: user.uid,
         });
     }
 
@@ -158,11 +191,22 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 
 export const updateUserProfile = async (uid: string, data: Partial<User>) => {
     if (!db || !uid) throw new Error("Firestore not initialized or UID missing.");
+    
+    const userProfile = await getUserProfile(uid);
+    if (!userProfile) {
+        throw new Error("User profile not found to update.");
+    }
+    
+    // If the user is a doctor, update their document in the 'doctors' collection
+    if (userProfile.role === 'doctor') {
+        const doctorRef = doc(db, "doctors", uid);
+        await updateDoc(doctorRef, data);
+        return;
+    }
+
+    // For all other users, update the document in the 'users' collection
     const userRef = doc(db, "users", uid);
     await updateDoc(userRef, data);
-
-    const userProfile = await getUserProfile(uid);
-    if (!userProfile) return;
 
     const detailsToUpdate: { name?: string; phone?: string } = {};
     if (data.name) detailsToUpdate.name = data.name;
@@ -172,7 +216,6 @@ export const updateUserProfile = async (uid: string, data: Partial<User>) => {
 
     let detailsCollectionName: string | null = null;
     switch (userProfile.role) {
-        case 'doctor': detailsCollectionName = 'doctors'; break;
         case 'clinic': detailsCollectionName = 'clinics'; break;
         case 'diag_centre': detailsCollectionName = 'diagnosisCentres'; break;
     }
@@ -194,14 +237,20 @@ export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetai
 
 export const updateUserVerification = async (uid: string, verified: boolean): Promise<void> => {
     if (!db) throw new Error("Firestore not initialized");
-    const userRef = doc(db, 'users', uid);
+    
+    const profile = await getUserProfile(uid);
+    if (!profile) return;
+
+    let collectionName = 'users';
+    if(profile.role === 'doctor') {
+        collectionName = 'doctors';
+    }
+
+    const userRef = doc(db, collectionName, uid);
     await updateDoc(userRef, { verified });
 
-    const userProfile = await getUserProfile(uid);
-    if (!userProfile) return;
-
     let detailsCollectionName: string | null = null;
-    switch (userProfile.role) {
+    switch (profile.role) {
         case 'doctor': detailsCollectionName = 'doctors'; break;
         case 'clinic': detailsCollectionName = 'clinics'; break;
         case 'diag_centre': detailsCollectionName = 'diagnosisCentres'; break;
@@ -228,8 +277,8 @@ export const getDoctors = async (): Promise<DoctorDetails[]> => {
         const clinicName = doctor.clinicId ? clinicNameMap.get(doctor.clinicId) : undefined;
         return {
             ...doctor,
-            id: doctor.id, 
-            uid: doctor.id, 
+            id: doctor.id, // Keep original id from collection
+            uid: doctor.id, // For backward compatibility with DoctorCard
             clinicName: clinicName || null,
         };
     });
@@ -241,11 +290,10 @@ export const getDoctorById = async (id: string): Promise<DoctorProfile | undefin
     const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
     if (!doctorDetails) return undefined;
     
-    // The profile is now constructed directly from the public collection
     return {
         uid: doctorDetails.id,
         name: doctorDetails.name,
-        email: '', 
+        email: doctorDetails.email || '', 
         phone: doctorDetails.phone || '',
         role: 'doctor',
         verified: doctorDetails.verified || false,
@@ -260,7 +308,6 @@ export const getClinics = async (): Promise<ClinicDetails[]> => {
 };
 
 export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
-    // This function is now safe as it only reads from the public /clinics collection
     return await getDocumentById<ClinicDetails>('clinics', id);
 };
 
@@ -431,3 +478,5 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() } as TestAppointment));
 };
+
+    

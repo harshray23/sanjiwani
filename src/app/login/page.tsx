@@ -344,7 +344,7 @@ export default function LoginPage() {
       
     } catch (error: any) {
        let description = "An unknown error occurred. Please try again.";
-       if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
+       if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
            description = "Invalid email or password. Please check your credentials and try again.";
        }
        toast({
@@ -475,3 +475,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    

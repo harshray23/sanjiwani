@@ -17,6 +17,7 @@ export interface DoctorDetails {
   id: string;
   userId: string;
   name: string;
+  email: string; // Add email to doctor details for login mapping
   specialization: string;
   licenseNo: string;
   consultationFee: number;
@@ -28,7 +29,7 @@ export interface DoctorDetails {
   clinicName?: string | null;
 }
 
-export interface DoctorProfile extends User, Omit<DoctorDetails, 'id' | 'userId' | 'name'> {
+export interface DoctorProfile extends User, Omit<DoctorDetails, 'id' | 'userId' | 'name' | 'email'> {
 }
 
 export interface ClinicDetails {
@@ -206,3 +207,5 @@ export interface TestAppointment {
   status: 'Scheduled' | 'Completed' | 'Report Ready' | 'Cancelled';
   reportUrl?: string;
 }
+
+    
