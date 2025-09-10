@@ -1,314 +1,159 @@
 
-import {
-  collection,
-  addDoc,
-  getDocs,
-  getDoc,
-  doc,
-  query,
-  where,
-  updateDoc,
-  Timestamp,
-  orderBy,
-  setDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from './firebase';
-import type { 
-    User, 
-    DoctorProfile, 
-    DoctorDetails,
-    ClinicProfile,
-    ClinicDetails,
-    DiagnosisCentreProfile,
-    DiagnosisCentreDetails,
-    Appointment,
-    Hospital,
-    DiagnosticsCentre,
-    TestAppointment
+import type {
+  User,
+  DoctorProfile,
+  DoctorDetails,
+  ClinicProfile,
+  ClinicDetails,
+  Appointment,
+  Hospital,
+  DiagnosticsCentre,
+  TestAppointment,
+  DiagnosticTest,
+  Pathologist
 } from './types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { Role } from '@/app/login/page';
-
-// Helper to convert Firestore Timestamps to serializable strings in nested objects
-const convertTimestamps = (data: any): any => {
-    if (data instanceof Timestamp) {
-        return data.toDate().toISOString();
-    }
-    if (Array.isArray(data)) {
-        return data.map(convertTimestamps);
-    }
-    if (data !== null && typeof data === 'object') {
-        const newData: { [key: string]: any } = {};
-        for (const key in data) {
-            newData[key] = convertTimestamps(data[key]);
-        }
-        return newData;
-    }
-    return data;
-};
+import { Timestamp } from 'firebase/firestore';
 
 
-// Generic function to get documents from a collection
-async function getCollection<T>(collectionName: string): Promise<T[]> {
-    if (!db) {
-        console.error("Firestore not initialized");
-        return [];
-    }
-    const querySnapshot = await getDocs(collection(db, collectionName));
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-}
+// --- MOCK DATA ---
 
-// Generic function to get a document by ID
-async function getDocumentById<T>(collectionName:string, id: string): Promise<T | undefined> {
-     if (!db || !id) {
-        console.error("Firestore not initialized or ID is missing");
-        return undefined;
-    }
-    const docRef = doc(db, collectionName, id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        const data = { id: docSnap.id, ...docSnap.data() } as T;
-        return convertTimestamps(data);
-    }
-    return undefined;
-}
+const mockUsers: User[] = [
+  { uid: 'patient-1', name: 'John Patient', email: 'patient@test.com', phone: '123-456-7890', role: 'patient', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doctor-1', name: 'Emily Carter', email: 'emily.carter@test.com', phone: '111-222-3333', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doctor-2', name: 'John Smith', email: 'john.smith@test.com', phone: '444-555-6666', role: 'doctor', verified: false, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'clinic-1', name: 'Sunnyvale Clinic', email: 'clinic@test.com', phone: '987-654-3210', role: 'clinic', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'admin-1', name: 'Admin User', email: 'admin@test.com', phone: '000-000-0000', role: 'admin', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'diag-1', name: 'City Diagnostics', email: 'diag@test.com', phone: '555-444-3333', role: 'diagnostics_centres', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'hospital-1', name: 'Metro General Hospital', email: 'hospital@test.com', phone: '123-123-1234', role: 'hospital', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 
+];
+
+const mockDoctors: DoctorDetails[] = [
+  { id: 'doctor-1', userId: 'doctor-1', name: 'Dr. Emily Carter', email: 'emily.carter@test.com', specialization: 'Cardiology', licenseNo: 'DOC-L12345', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "02:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor-1', phone: '111-222-3333', clinicName: 'Sunnyvale Clinic' },
+  { id: 'doctor-2', userId: 'doctor-2', name: 'Dr. John Smith', email: 'john.smith@test.com', specialization: 'Dermatology', licenseNo: 'DOC-L67890', consultationFee: 700, availability: ["09:00 AM", "11:30 AM"], clinicId: 'clinic-2', verified: false, imageUrl: 'https://i.pravatar.cc/150?u=doctor-2', phone: '444-555-6666', clinicName: 'Oakwood Medical' },
+  { id: 'doctor-3', userId: 'doctor-3', name: 'Dr. Sarah Lee', email: 'sarah.lee@test.com', specialization: 'Pediatrics', licenseNo: 'DOC-L54321', consultationFee: 600, availability: ["10:00 AM", "01:00 PM", "03:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor-3', phone: '777-888-9999', clinicName: 'Sunnyvale Clinic' },
+];
+
+const mockClinics: ClinicDetails[] = [
+  { id: 'clinic-1', userId: 'clinic-1', name: 'Sunnyvale Clinic', address: '123 Health St, Wellness City', licenseNo: 'CLN-A123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-1/400/200', doctors: [mockDoctors[0], mockDoctors[2]] },
+  { id: 'clinic-2', userId: 'clinic-2', name: 'Oakwood Medical', address: '456 Cure Ave, Remedy Town', licenseNo: 'CLN-B456', verified: false, imageUrl: 'https://picsum.photos/seed/clinic-2/400/200', doctors: [mockDoctors[1]] },
+];
+
+const mockAppointments: Appointment[] = [
+  { id: 'appt-1', patientId: 'patient-1', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'clinic', status: 'confirmed', scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[0] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
+  { id: 'appt-2', patientId: 'patient-1', doctorId: 'doctor-3', clinicId: 'clinic-1', type: 'clinic', status: 'completed', scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[2] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  { id: 'appt-3', patientId: 'patient-2', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'clinic', status: 'confirmed', scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patientName: 'Jane Doe', doctor: mockDoctors[0] as unknown as DoctorProfile, date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() },
+  { id: 'appt-4', patientId: 'patient-3', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'video', status: 'confirmed', scheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patientName: 'Peter Pan', doctor: mockDoctors[0] as unknown as DoctorProfile, date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString() },
+];
+
+export const comprehensiveTests: DiagnosticTest[] = [
+  { id: 'test-1', name: 'Complete Blood Count (CBC)', category: 'Pathology', price: 300 },
+  { id: 'test-2', name: 'Lipid Profile', category: 'Pathology', price: 600 },
+  { id: 'test-3', name: 'Liver Function Test (LFT)', category: 'Pathology', price: 550 },
+  { id: 'test-4', name: 'Kidney Function Test (KFT)', category: 'Pathology', price: 500 },
+  { id: 'test-5', name: 'Thyroid Profile', category: 'Hormonal', price: 700 },
+  { id: 'test-6', name: 'X-Ray Chest', category: 'Radiology', price: 400 },
+  { id: 'test-7', name: 'Ultrasound Abdomen', category: 'Radiology', price: 1200 },
+];
+
+const mockPathologists: Pathologist[] = [
+    { id: 'path-1', name: 'Dr. Alan Grant', qualifications: ['MD Pathology'], imageUrl: 'https://i.pravatar.cc/150?u=path-1'},
+    { id: 'path-2', name: 'Dr. Ellie Sattler', qualifications: ['MBBS, DNB'], imageUrl: 'https://i.pravatar.cc/150?u=path-2'},
+]
+
+const mockDiagnostics: DiagnosticsCentre[] = [
+  { id: 'diag-1', name: 'City Diagnostics', location: '789 Test Ave, Lab City', contact: { phone: '555-444-3333', email: 'contact@citydiag.com' }, rating: 4.7, imageUrl: 'https://picsum.photos/seed/diag-1/400/200', dataAiHint: 'laboratory microscope', tests: comprehensiveTests.slice(0,4), pathologists: [mockPathologists[0]] },
+  { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-2/400/200', dataAiHint: 'mri machine', tests: comprehensiveTests.slice(4), pathologists: [mockPathologists[1]] },
+];
+
+const mockHospitals: Hospital[] = [
+    { id: 'hosp-1', name: 'Metro General Hospital', location: { address: '1 Hospital Plaza, Metro City' }, contact: '555-111-1111', rating: 4.8, specialties: ['Emergency', 'Cardiology', 'General Surgery'], emergencyAvailable: true, beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-1/600/400', dataAiHint: 'hospital building' },
+    { id: 'hosp-2', name: 'Hope Childrens Hospital', location: { address: '2 Hope St, Kidville' }, contact: '555-222-2222', rating: 4.9, specialties: ['Pediatrics', 'Maternity', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, lastUpdated: new Date(Date.now() - 3600000).toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-2/600/400', dataAiHint: 'children hospital' },
+];
+
+const mockTestAppointments: TestAppointment[] = [
+    { id: 't-appt-1', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-1', test: comprehensiveTests[0], date: new Date().toISOString(), time: '10:00 AM', status: 'Report Ready', reportUrl: '#' },
+    { id: 't-appt-2', patientId: 'patient-2', patientName: 'Jane Doe', centreId: 'diag-1', test: comprehensiveTests[1], date: new Date().toISOString(), time: '11:00 AM', status: 'Completed' },
+    { id: 't-appt-3', patientId: 'patient-3', patientName: 'Peter Pan', centreId: 'diag-1', test: comprehensiveTests[2], date: new Date(Date.now() + 86400000).toISOString(), time: '09:00 AM', status: 'Scheduled' },
+]
 
 // --- USER MANAGEMENT ---
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
-    if (!uid) return null;
-    
-    // First, try to get the user from the 'users' collection
-    const userDoc = await getDoc(doc(db, 'users', uid));
-    if (userDoc.exists()) {
-        return convertTimestamps({ uid: userDoc.id, ...userDoc.data() } as User);
-    }
+    console.log(`MOCK: getUserProfile for uid: ${uid}`);
+    const user = mockUsers.find(u => u.uid === uid);
+    if (user) return Promise.resolve(user);
 
-    // If not found in 'users', try to get from 'doctors' collection (for doctor-specific login)
-    const doctorDoc = await getDoc(doc(db, 'doctors', uid));
-    if (doctorDoc.exists()) {
-        const doctorData = doctorDoc.data() as DoctorDetails;
-        // Adapt the doctor data to the User structure
-        return convertTimestamps({
-            uid: doctorDoc.id,
-            name: doctorData.name,
-            email: doctorData.email,
-            phone: doctorData.phone || '',
+    // If not in users, check if it's a doctor (special case)
+    const doctor = mockDoctors.find(d => d.userId === uid);
+    if(doctor) {
+        return Promise.resolve({
+            uid: doctor.userId,
+            name: doctor.name,
+            email: doctor.email,
+            phone: doctor.phone || '',
             role: 'doctor',
-            verified: doctorData.verified || false,
-            createdAt: new Date().toISOString(), // createdAt might not exist on doctor doc, provide fallback
+            verified: doctor.verified || false,
+            createdAt: new Date().toISOString()
         } as User);
     }
-
-    // If no profile is found in any relevant collection, return null
-    return null;
+    return Promise.resolve(null);
 };
 
-export const createUserInFirestore = async (user: FirebaseUser, role: Role, baseData: any, detailsData: any) => {
-    if (!db) throw new Error("Firestore not initialized");
-
-    const commonProfileData = {
-        name: baseData.name,
-        email: user.email!,
-        phone: baseData.phone,
-        verified: false,
-        createdAt: serverTimestamp()
-    };
-    
-    // Special handling for 'doctor' role
-    if (role === 'doctor') {
-        const doctorRef = doc(db, "doctors", user.uid);
-        await setDoc(doctorRef, {
-            ...commonProfileData,
-            ...detailsData,
-            id: user.uid, // DEPRECATED: Keep for now, but should use uid.
-            userId: user.uid, // DEPRECATED: Keep for now, but should use uid.
-            imageUrl: `https://i.pravatar.cc/150?u=${user.uid}`,
-            consultationFee: 500, // Default fee
-            availability: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"], // Default availability
-        });
-        const doctorProfile = await getDoc(doctorRef);
-        return doctorProfile.data();
-    }
-
-
-    // Standard handling for all other roles
-    const userRef = doc(db, "users", user.uid);
-    await setDoc(userRef, {
-        ...commonProfileData,
-        uid: user.uid,
-        role: role,
-    });
-
-    let detailsCollectionName: string | null = null;
-    let finalDetailsData: any = { ...detailsData };
-    
-    const publicProfileData = {
-        name: baseData.name,
-        phone: baseData.phone,
-        verified: false,
-    };
-
-    switch (role) {
-        case 'clinic':
-            detailsCollectionName = 'clinics';
-            finalDetailsData = {
-                ...detailsData,
-                ...publicProfileData,
-                imageUrl: `https://i.pravatar.cc/400?u=${user.uid}`,
-                doctors: [],
-            };
-            break;
-        case 'diag_centre':
-            detailsCollectionName = 'diagnosisCentres';
-            finalDetailsData = {
-                ...detailsData,
-                ...publicProfileData,
-            };
-            break;
-        case 'patient':
-        case 'admin':
-            break;
-        default:
-            throw new Error(`Invalid role for details creation: ${role}`);
-    }
-
-    if (detailsCollectionName) {
-        const detailsRef = doc(db, detailsCollectionName, user.uid);
-        await setDoc(detailsRef, {
-            ...finalDetailsData,
-            id: user.uid, // DEPRECATED
-            userId: user.uid,
-        });
-    }
-
-    const userProfile = await getDoc(userRef);
-    return userProfile.data();
+export const createUserInFirestore = async (user: FirebaseUser, role: Role, baseData: any, detailsData: any): Promise<any> => {
+    console.log("MOCK: createUserInFirestore called. No database action taken.", { user, role, baseData, detailsData });
+    // This function will now just simulate a successful creation without writing to any database.
+    return Promise.resolve({ ...baseData, ...detailsData });
 }
 
-
-export const updateUserProfile = async (uid: string, data: Partial<User>) => {
-    if (!db || !uid) throw new Error("Firestore not initialized or UID missing.");
-    
-    const userProfile = await getUserProfile(uid);
-    if (!userProfile) {
-        throw new Error("User profile not found to update.");
-    }
-    
-    // If the user is a doctor, update their document in the 'doctors' collection
-    if (userProfile.role === 'doctor') {
-        const doctorRef = doc(db, "doctors", uid);
-        await updateDoc(doctorRef, data);
-        return;
-    }
-
-    // For all other users, update the document in the 'users' collection
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, data);
-
-    const detailsToUpdate: { name?: string; phone?: string } = {};
-    if (data.name) detailsToUpdate.name = data.name;
-    if (data.phone) detailsToUpdate.phone = data.phone;
-    
-    if (Object.keys(detailsToUpdate).length === 0) return;
-
-    let detailsCollectionName: string | null = null;
-    switch (userProfile.role) {
-        case 'clinic': detailsCollectionName = 'clinics'; break;
-        case 'diag_centre': detailsCollectionName = 'diagnosisCentres'; break;
-    }
-
-    if (detailsCollectionName) {
-        const detailsRef = doc(db, detailsCollectionName, uid);
-        const detailsDoc = await getDoc(detailsRef);
-        if (detailsDoc.exists()) {
-            await updateDoc(detailsRef, detailsToUpdate);
-        }
-    }
+export const updateUserProfile = async (uid: string, data: Partial<User>): Promise<void> => {
+    console.log("MOCK: updateUserProfile called. No database action taken.", { uid, data });
+    return Promise.resolve();
 };
 
 export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetails>): Promise<void> => {
-  if (!db || !uid) throw new Error("Firestore not initialized or UID missing");
-  const doctorRef = doc(db, 'doctors', uid);
-  await updateDoc(doctorRef, data);
+    console.log("MOCK: updateDoctorProfile called. No database action taken.", { uid, data });
+    return Promise.resolve();
 };
 
 export const updateUserVerification = async (uid: string, verified: boolean): Promise<void> => {
-    if (!db) throw new Error("Firestore not initialized");
-    
-    const profile = await getUserProfile(uid);
-    if (!profile) return;
-
-    let collectionName = 'users';
-    if(profile.role === 'doctor') {
-        collectionName = 'doctors';
-    }
-
-    const userRef = doc(db, collectionName, uid);
-    await updateDoc(userRef, { verified });
-
-    let detailsCollectionName: string | null = null;
-    switch (profile.role) {
-        case 'doctor': detailsCollectionName = 'doctors'; break;
-        case 'clinic': detailsCollectionName = 'clinics'; break;
-        case 'diag_centre': detailsCollectionName = 'diagnosisCentres'; break;
-    }
-
-    if (detailsCollectionName) {
-        const detailsRef = doc(db, detailsCollectionName, uid);
-         const detailsDoc = await getDoc(detailsRef);
-        if (detailsDoc.exists()) {
-            await updateDoc(detailsRef, { verified });
-        }
-    }
+    console.log("MOCK: updateUserVerification called. No database action taken.", { uid, verified });
+    const user = mockUsers.find(u => u.uid === uid);
+    if(user) user.verified = verified;
+    const doctor = mockDoctors.find(d => d.id === uid);
+    if(doctor) doctor.verified = verified;
+    return Promise.resolve();
 };
 
 
-// --- DATA FETCHING (DOCTORS, CLINICS, etc.) ---
+// --- DATA FETCHING ---
 
 export const getDoctors = async (): Promise<DoctorDetails[]> => {
-    const doctorsList = await getCollection<DoctorDetails>('doctors');
-    const clinics = await getCollection<ClinicDetails>('clinics');
-    const clinicNameMap = new Map(clinics.map(clinic => [clinic.id, clinic.name]));
-
-    const populatedDoctors = doctorsList.map(doctor => {
-        const clinicName = doctor.clinicId ? clinicNameMap.get(doctor.clinicId) : undefined;
-        return {
-            ...doctor,
-            id: doctor.id, // Keep original id from collection
-            uid: doctor.id, // For backward compatibility with DoctorCard
-            clinicName: clinicName || null,
-        };
-    });
-
-    return populatedDoctors;
+    console.log("MOCK: getDoctors called.");
+    return Promise.resolve(mockDoctors);
 };
 
 export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
-    const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
+    console.log(`MOCK: getDoctorById for id: ${id}`);
+    const doctorDetails = mockDoctors.find(d => d.id === id);
     if (!doctorDetails) return undefined;
     
-    return {
-        uid: doctorDetails.id,
-        name: doctorDetails.name,
-        email: doctorDetails.email || '', 
-        phone: doctorDetails.phone || '',
-        role: 'doctor',
-        verified: doctorDetails.verified || false,
-        createdAt: '',
+    return Promise.resolve({
+        ...mockUsers.find(u => u.uid === id)!,
         ...doctorDetails
-    } as DoctorProfile;
+    });
 };
 
-
 export const getClinics = async (): Promise<ClinicDetails[]> => {
-    return await getCollection<ClinicDetails>('clinics');
+    console.log("MOCK: getClinics called.");
+    return Promise.resolve(mockClinics);
 };
 
 export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
-    return await getDocumentById<ClinicDetails>('clinics', id);
+    console.log(`MOCK: getClinicById for id: ${id}`);
+    return Promise.resolve(mockClinics.find(c => c.id === id));
 };
 
 
@@ -321,112 +166,70 @@ export const createAppointment = async (
   slot: string,
   type: 'clinic' | 'video'
 ): Promise<Appointment> => {
-    if (!db) throw new Error("Firestore not initialized");
-
-    const newAppointmentData = {
+    console.log("MOCK: createAppointment called.", { patientId, doctorId, clinicId, slot, type });
+    const newAppointment: Appointment = {
+      id: `appt-${Date.now()}`,
       patientId,
       doctorId,
       clinicId,
-      centreId: null,
-      type: type,
+      type,
       status: 'confirmed',
-      scheduledAt: Timestamp.fromDate(new Date()),
-      createdAt: serverTimestamp()
+      scheduledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      patientName: 'Mock Patient',
+      date: new Date().toISOString()
     };
-    
-    const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
-    
-    const createdAppointment = {
-        id: docRef.id,
-        ...newAppointmentData,
-        scheduledAt: newAppointmentData.scheduledAt.toDate().toISOString(),
-        createdAt: new Date().toISOString()
-    } as unknown as Appointment;
-    
-    return createdAppointment;
+    mockAppointments.push(newAppointment);
+    return Promise.resolve(newAppointment);
 };
 
-
-// --- SEARCH & COMBINED FUNCTIONS ---
 export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
-    const [doctors, clinics] = await Promise.all([getDoctors(), getClinics()]);
+    console.log(`MOCK: searchClinicsAndDoctors for query: ${queryText}`);
     
     if (!queryText) {
-      return { clinics, doctors };
+      return Promise.resolve({ clinics: mockClinics, doctors: mockDoctors });
     }
 
     const lowerCaseQuery = queryText.toLowerCase();
 
-    const filteredClinics = clinics.filter(clinic =>
+    const filteredClinics = mockClinics.filter(clinic =>
         clinic.name.toLowerCase().includes(lowerCaseQuery) ||
         (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery))
     );
 
-    const filteredDoctors = doctors.filter(doctor =>
+    const filteredDoctors = mockDoctors.filter(doctor =>
         doctor.name.toLowerCase().includes(lowerCaseQuery) ||
         (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery))
     );
 
-    return { clinics: filteredClinics, doctors: filteredDoctors };
+    return Promise.resolve({ clinics: filteredClinics, doctors: filteredDoctors });
 };
 
 export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
-  if (!db) return [];
-  const q = query(
-      collection(db, 'appointments'), 
-      where('patientId', '==', patientId),
-      orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
-
-  return Promise.all(appointments.map(async (app) => {
-      const populatedApp = { ...app };
-      if (populatedApp.doctorId) {
-          populatedApp.doctor = await getDoctorById(populatedApp.doctorId);
-      }
-      if (populatedApp.clinicId) {
-          populatedApp.clinic = await getClinicById(populatedApp.clinicId);
-      }
-      if (populatedApp.patientId) {
-         populatedApp.patient = await getUserProfile(populatedApp.patientId) || undefined;
-      }
-      return convertTimestamps(populatedApp);
-  }));
+  console.log(`MOCK: getAppointmentsForUser for patientId: ${patientId}`);
+  return Promise.resolve(mockAppointments.filter(app => app.patientId === patientId));
 };
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
-   if(!db) return undefined;
-   const appointment = await getDocumentById<Appointment>('appointments', id);
+   console.log(`MOCK: getAppointmentById for id: ${id}`);
+   const appointment = mockAppointments.find(app => app.id === id);
    if(appointment) {
-       if (appointment.doctorId) appointment.doctor = await getDoctorById(appointment.doctorId);
-       if (appointment.clinicId) appointment.clinic = await getClinicById(appointment.clinicId);
-       if (appointment.patientId) appointment.patient = await getUserProfile(appointment.patientId) || undefined;
+       if (appointment.doctorId && !appointment.doctor) appointment.doctor = mockDoctors.find(d => d.id === appointment.doctorId) as unknown as DoctorProfile;
+       if (appointment.clinicId && !appointment.clinic) appointment.clinic = mockClinics.find(c => c.id === appointment.clinicId) as unknown as ClinicProfile;
+       if (appointment.patientId && !appointment.patient) appointment.patient = mockUsers.find(u => u.uid === appointment.patientId);
    }
-   return convertTimestamps(appointment);
+   return Promise.resolve(appointment);
 };
 
 export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
-  if (!db) return [];
-  const q = query(
-    collection(db, 'appointments'),
-    where('clinicId', '==', clinicId),
-    orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
-
-  return Promise.all(appointments.map(async (app) => {
-      if (app.doctorId) app.doctor = await getDoctorById(app.doctorId);
-      if (app.patientId) app.patient = await getUserProfile(app.patientId) || undefined;
-      return convertTimestamps(app);
-  }));
+  console.log(`MOCK: getAppointmentsForClinic for clinicId: ${clinicId}`);
+  return Promise.resolve(mockAppointments.filter(app => app.clinicId === clinicId));
 };
 
-export const getUsers = async (): Promise<User[]> => getCollection<User>('users');
-
-
-
+export const getUsers = async (): Promise<User[]> => {
+    console.log("MOCK: getUsers called.");
+    return Promise.resolve(mockUsers);
+}
 
 // --- LEGACY OR MOCK FUNCTIONS ---
 
@@ -441,42 +244,34 @@ export const comprehensiveHospitalDepartments = [
     'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
 ];
 
-export const comprehensiveTests = [
-  { id: 'test-1', name: 'Complete Blood Count (CBC)', category: 'Pathology' },
-  { id: 'test-2', name: 'Lipid Profile', category: 'Pathology' },
-  { id: 'test-3', name: 'Liver Function Test (LFT)', category: 'Pathology' },
-  { id: 'test-4', name: 'Kidney Function Test (KFT)', category: 'Pathology' },
-  { id: 'test-5', name: 'Thyroid Profile', category: 'Hormonal' },
-  { id: 'test-6', name: 'X-Ray Chest', category: 'Radiology' },
-  { id: 'test-7', name: 'Ultrasound Abdomen', category: 'Radiology' },
-];
 
-export const getHospitals = async (): Promise<Hospital[]> => getCollection<Hospital>('hospitals');
+export const getHospitals = async (): Promise<Hospital[]> => {
+    console.log("MOCK: getHospitals called.");
+    return Promise.resolve(mockHospitals);
+}
 
 export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
-  const hospitals = await getHospitals();
-  if (!queryText) return hospitals;
+  console.log(`MOCK: searchHospitals for query: ${queryText}`);
+  if (!queryText) return Promise.resolve(mockHospitals);
   const lowerCaseQuery = queryText.toLowerCase();
-  return hospitals.filter(h =>
+  return Promise.resolve(mockHospitals.filter(h =>
     h.name.toLowerCase().includes(lowerCaseQuery) ||
     h.location.address.toLowerCase().includes(lowerCaseQuery) ||
     h.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery))
-  );
+  ));
 };
 
-export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => getCollection<DiagnosticsCentre>('diagnostics');
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+    console.log("MOCK: getDiagnosticsCentres called.");
+    return Promise.resolve(mockDiagnostics);
+};
 
-export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => getDocumentById<DiagnosticsCentre>('diagnostics', id);
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
+    console.log(`MOCK: getDiagnosticsCentreById for id: ${id}`);
+    return Promise.resolve(mockDiagnostics.find(d => d.id === id));
+};
 
 export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
-  if (!db) return [];
-  const q = query(
-    collection(db, 'testAppointments'), 
-    where('centreId', '==', centreId),
-    orderBy('date', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() } as TestAppointment));
+    console.log(`MOCK: getTestAppointmentsForCentre for centreId: ${centreId}`);
+    return Promise.resolve(mockTestAppointments.filter(app => app.centreId === centreId));
 };
-
-    

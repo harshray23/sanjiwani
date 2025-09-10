@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getClinics, getDoctors, getHospitals, getAppointments, getUsers, getDiagnosticsCentres, updateUserVerification } from '@/lib/data';
+import { getClinics, getDoctors, getHospitals, getAppointmentsForUser, getUsers, getDiagnosticsCentres, updateUserVerification } from '@/lib/data';
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -35,16 +35,15 @@ const AdminDashboard = () => {
 
   const fetchAdminData = async () => {
      try {
-          // Fetch all admin data in parallel for faster loading
           const [doctors, clinics, hospitals, appointments, users, diagnosticsCentres] = await Promise.all([
             getDoctors(),
             getClinics(),
             getHospitals(),
-            getAppointments(),
+            getAppointmentsForUser('patient-1'), // Mock data for one user
             getUsers(),
             getDiagnosticsCentres()
           ]);
-          setData({ doctors, clinics, hospitals, appointments, users, diagnosticsCentres });
+          setData({ doctors: doctors as Doctor[], clinics: clinics as Clinic[], hospitals, appointments, users, diagnosticsCentres });
         } catch (error) {
           console.error("Failed to load admin data", error);
           toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
@@ -56,7 +55,6 @@ const AdminDashboard = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // In a real app, you'd check a custom claim or a secure user role document
         if (!currentUser.email?.startsWith('admin@')) {
           setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
           return;
@@ -83,7 +81,6 @@ const AdminDashboard = () => {
             title: "User Status Updated",
             description: `User has been ${!currentStatus ? 'verified' : 'un-verified'}.`,
         });
-        // Re-fetch data to update UI
         fetchAdminData();
     } catch (error) {
         console.error("Failed to update verification status", error);
@@ -131,7 +128,6 @@ const AdminDashboard = () => {
         <p className="text-lg text-muted-foreground">Welcome, {user.email}. Monitor and manage the platform here.</p>
       </div>
 
-        {/* KPI Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {kpiCards.map(kpi => (
                 <Card key={kpi.title}>
@@ -257,7 +253,7 @@ const AdminDashboard = () => {
                         </TableHeader>
                         <TableBody>
                             {data.doctors.map(doc => {
-                                const userDoc = data.users.find(u => u.uid === (doc as any).uid)
+                                const userDoc = data.users.find(u => u.uid === (doc as any).id)
                                 return (
                                 <TableRow key={doc.id}>
                                     <TableCell className="font-medium flex items-center gap-3">

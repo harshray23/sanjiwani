@@ -2,10 +2,10 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { getClinicById, getAppointmentsForClinic, getUserProfile } from '@/lib/data';
-import type { Clinic, Appointment, User as AppUser } from '@/lib/types';
+import type { ClinicDetails, Appointment } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { UserPlus, Pencil, LogIn, Hourglass, Trash2, Upload, ShieldAlert } from "lucide-react";
@@ -21,13 +21,15 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const ClinicDashboard = () => {
-  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
-  const [clinic, setClinic] = useState<Clinic | null | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [clinic, setClinic] = useState<ClinicDetails | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
       if (currentUser) {
         try {
             const profile = await getUserProfile(currentUser.uid);
@@ -90,7 +92,7 @@ const ClinicDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'clinic') {
+  if (!user || userProfile?.role !== 'clinic') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -183,7 +185,7 @@ const ClinicDashboard = () => {
                                     </Avatar>
                                     <div>
                                         <p className="font-semibold text-lg">{doc.name}</p>
-                                        <p className="text-sm text-muted-foreground">{doc.specialty}</p>
+                                        <p className="text-sm text-muted-foreground">{doc.specialization}</p>
                                     </div>
                                 </div>
                                 <div>
@@ -225,7 +227,7 @@ const ClinicDashboard = () => {
                             </div>
                             <div className="space-y-2">
                                 <label className="font-semibold">About Section</label>
-                                <Textarea defaultValue={clinic.about} rows={5}/>
+                                <Textarea defaultValue={clinic.about || ''} rows={5}/>
                             </div>
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">

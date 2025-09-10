@@ -7,7 +7,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'patient' | 'doctor' | 'clinic' | 'diag_centre' | 'admin';
+  role: 'patient' | 'doctor' | 'clinic' | 'hospital' | 'diagnostics_centres' | 'admin';
   verified: boolean;
   createdAt: any;
   medicalHistory?: any;
@@ -17,7 +17,7 @@ export interface DoctorDetails {
   id: string;
   userId: string;
   name: string;
-  email: string; // Add email to doctor details for login mapping
+  email: string; 
   specialization: string;
   licenseNo: string;
   consultationFee: number;
@@ -41,6 +41,7 @@ export interface ClinicDetails {
   verified: boolean;
   imageUrl?: string;
   doctors: DoctorDetails[];
+  about?: string;
 }
 
 export interface ClinicProfile extends Omit<User, 'name'>, Omit<ClinicDetails, 'id' | 'userId'> {
@@ -61,13 +62,15 @@ export interface DiagnosisCentreProfile extends Omit<User, 'name'>, Omit<Diagnos
 export interface Appointment {
   id: string;
   patientId: string;
+  patientName: string;
   doctorId?: string;
   clinicId?: string;
   centreId?: string;
-  type: 'token' | 'video' | 'test';
+  type: 'clinic' | 'video' | 'test';
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   scheduledAt: any;
   createdAt: any;
+  date: any; // for clinic dashboard
   patient?: User;
   doctor?: DoctorProfile;
   clinic?: ClinicProfile;
@@ -207,5 +210,3 @@ export interface TestAppointment {
   status: 'Scheduled' | 'Completed' | 'Report Ready' | 'Cancelled';
   reportUrl?: string;
 }
-
-    

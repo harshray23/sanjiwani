@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { searchHospitals, getUserProfile } from '@/lib/data';
 import type { Hospital, Appointment, User as AppUser } from '@/lib/types';
@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const HospitalDashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
@@ -26,6 +27,7 @@ const HospitalDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        setUser(currentUser)
       if (currentUser) {
         try {
             const profile = await getUserProfile(currentUser.uid);
@@ -85,7 +87,7 @@ const HospitalDashboard = () => {
     );
   }
 
-  if (!userProfile || userProfile.role !== 'hospital') {
+  if (!user || userProfile?.role !== 'hospital') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
