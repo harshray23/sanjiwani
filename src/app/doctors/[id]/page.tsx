@@ -159,15 +159,19 @@ export default function DoctorDetailPage() {
                 <h4 className="font-semibold flex items-center gap-2 text-accent"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
                 <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
                 <div className="grid grid-cols-3 gap-2">
-                    {doctor.availability.map(slot => (
-                        <Button 
-                            key={slot}
-                            variant={selectedSlot === slot ? 'default' : 'outline'}
-                            onClick={() => setSelectedSlot(slot)}
-                        >
-                            {slot}
-                        </Button>
-                    ))}
+                    {doctor.availability && doctor.availability.length > 0 ? (
+                        doctor.availability.map(slot => (
+                            <Button 
+                                key={slot}
+                                variant={selectedSlot === slot ? 'default' : 'outline'}
+                                onClick={() => setSelectedSlot(slot)}
+                            >
+                                {slot}
+                            </Button>
+                        ))
+                    ) : (
+                        <p className="col-span-3 text-center text-sm text-muted-foreground">No slots available.</p>
+                    )}
                 </div>
               </div>
 
