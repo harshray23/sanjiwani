@@ -35,7 +35,7 @@ import Logo from "@/components/layout/Logo";
 import Image from "next/image";
 import { createUserInFirestore, getUserProfile } from "@/lib/data";
 
-const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
+const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
 export type Role = z.infer<typeof roleEnum>;
 
 const signInSchema = z.object({
@@ -88,14 +88,8 @@ const SignUpForm = () => {
     const { toast } = useToast();
 
     const form = useForm({
-        resolver: zodResolver(
-            selectedRole === 'customer' ? customerSignUpSchema :
-            selectedRole === 'doctor' ? doctorSignUpSchema :
-            selectedRole === 'clinic' ? clinicSignUpSchema :
-            selectedRole === 'hospital' ? hospitalSignUpSchema :
-            selectedRole === 'diagnostics_centres' ? diagnosticsSignUpSchema :
-            baseSignUpSchema
-        ),
+        // A base schema is used initially, the specific schema is validated in the submit handler
+        resolver: zodResolver(baseSignUpSchema),
         defaultValues: {
             email: "",
             password: "",
@@ -109,8 +103,36 @@ const SignUpForm = () => {
         },
     });
 
+    const getSignUpSchema = (role: Role | null) => {
+        switch (role) {
+            case 'customer': return customerSignUpSchema;
+            case 'doctor': return doctorSignUpSchema;
+            case 'clinic': return clinicSignUpSchema;
+            case 'hospital': return hospitalSignUpSchema;
+            case 'diagnostics_centres': return diagnosticsSignUpSchema;
+            default: return baseSignUpSchema;
+        }
+    };
+
+
     const handleSignUp = async (values: any) => {
         setIsLoading(true);
+        
+        const schema = getSignUpSchema(selectedRole);
+        const validationResult = schema.safeParse(values);
+
+        if (!validationResult.success) {
+             toast({
+                title: "Sign Up Failed",
+                description: "Please fill all required fields correctly.",
+                variant: "destructive"
+            });
+            console.error(validationResult.error.flatten().fieldErrors);
+            // This can be enhanced to show errors on specific fields
+            setIsLoading(false);
+            return;
+        }
+
         try {
             if (!selectedRole) {
                 toast({
@@ -122,10 +144,10 @@ const SignUpForm = () => {
                 return;
             }
 
-            const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+            const userCredential = await createUserWithEmailAndPassword(auth, validationResult.data.email, validationResult.data.password);
             
             // Save user details to Firestore
-            await createUserInFirestore(userCredential.user, selectedRole, values);
+            await createUserInFirestore(userCredential.user, selectedRole, validationResult.data);
 
             // Sign the user out immediately after creation so they have to log in.
             await signOut(auth);
@@ -139,7 +161,7 @@ const SignUpForm = () => {
 
         } catch (error: any) {
             let description = "An unknown error occurred. Please try again.";
-            if (error.code === AuthErrorCodes.EMAIL_EXISTS) {
+            if (error.code === AuthErrorCodes.EMAIL_EXISTS || error.code === 'auth/email-already-in-use') {
                 description = "An account with this email already exists. Please sign in instead.";
             } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
                 description = "The password is too weak. Please use at least 6 characters.";
@@ -182,7 +204,6 @@ const SignUpForm = () => {
         clinic: 'Clinic',
         hospital: 'Hospital',
         diagnostics_centres: 'Diagnostics Centre',
-        admin: 'Admin',
     };
 
     return (
@@ -469,3 +490,4 @@ export default function LoginPage() {
     
 
     
+
