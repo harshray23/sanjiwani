@@ -1,9 +1,10 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { getDoctorById, getClinicById } from '@/lib/data';
-import type { Doctor, Clinic } from '@/lib/types';
+import type { DoctorProfile, ClinicProfile } from '@/lib/types';
 import Image from 'next/image';
 import { Loader2, Star, Briefcase, GraduationCap, Calendar, Clock, Sparkles, IndianRupee, Medal, Video } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -21,8 +22,8 @@ import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 export default function DoctorDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const [doctor, setDoctor] = useState<Doctor | null>(null);
-  const [clinic, setClinic] = useState<Clinic | null>(null);
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
+  const [clinic, setClinic] = useState<ClinicProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -46,9 +47,9 @@ export default function DoctorDetailPage() {
       const doctorData = await getDoctorById(id);
       if (doctorData) {
         setDoctor(doctorData);
-        const clinicData = await getClinicById(doctorData.clinicId);
-        if (clinicData) {
-          setClinic(clinicData);
+        if (doctorData.clinicId) {
+            const clinicData = await getClinicById(doctorData.clinicId);
+            setClinic(clinicData ?? null);
         }
       }
       setIsLoading(false);
@@ -71,13 +72,16 @@ export default function DoctorDetailPage() {
       return;
     }
 
-    if (user) {
+    if (user && doctor) {
         const queryParams = new URLSearchParams({
-            doctorId: doctor!.id,
+            doctorId: doctor.uid,
             type: type
         });
         if (selectedSlot) {
             queryParams.set('slot', selectedSlot);
+        }
+        if(doctor.clinicId) {
+            queryParams.set('clinicId', doctor.clinicId);
         }
         router.push(`/payment?${queryParams.toString()}`);
     } else {
@@ -97,8 +101,10 @@ export default function DoctorDetailPage() {
     return <div className="text-center py-12">Doctor not found.</div>;
   }
   
+  // These are now mocks, as this data isn't in the new structure
+  const consultationFee = 500;
   const platformFee = 50;
-  const totalFee = doctor.consultationFee + platformFee;
+  const totalFee = consultationFee + platformFee;
 
   return (
     <div className="container mx-auto py-8">
@@ -109,46 +115,31 @@ export default function DoctorDetailPage() {
           <Card className="shadow-lg">
             <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <Image
-                    src={doctor.imageUrl}
+                    src={`https://i.pravatar.cc/150?u=${doctor.uid}`}
                     alt={doctor.name}
                     width={150}
                     height={150}
                     className="rounded-lg border-4 border-primary/20 object-cover w-32 h-32 sm:w-[150px] sm:h-[150px]"
-                    data-ai-hint={doctor.dataAiHint}
                 />
                 <div className="flex-1 text-center sm:text-left">
-                    <h1 className="text-3xl font-bold font-headline text-accent">{doctor.name}</h1>
-                    <p className="text-lg text-primary">{doctor.specialty}</p>
+                    <h1 className="text-3xl font-bold font-headline text-accent">Dr. {doctor.name}</h1>
+                    <p className="text-lg text-primary">{doctor.specialization}</p>
                     {clinic && <Link href={`/clinics/${clinic.id}`} className="text-md text-muted-foreground hover:underline">{clinic.name}</Link>}
                     
-                    <div className="flex items-center justify-center sm:justify-start gap-4 mt-2">
-                        <Badge variant="default" className="flex items-center gap-1 text-base p-2">
-                            <Star className="w-4 h-4 fill-yellow-300 text-yellow-300"/> {doctor.rating}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">({doctor.reviewCount} reviews)</span>
-                    </div>
-
                     <div className="mt-4 text-sm text-muted-foreground space-y-2">
                         <p className="flex items-center justify-center sm:justify-start gap-2">
                             <GraduationCap className="h-4 w-4 shrink-0" />
-                            <span>{doctor.qualifications.join(', ')}</span>
+                            <span>License: {doctor.licenseNo}</span>
                         </p>
                         <p className="flex items-center justify-center sm:justify-start gap-2">
                             <Briefcase className="h-4 w-4 shrink-0" />
-                            <span>{doctor.experience} years of experience</span>
+                            <span>{doctor.phone}</span>
                         </p>
                     </div>
                 </div>
             </CardContent>
           </Card>
           
-          {/* Bio Card */}
-          <Card>
-            <CardHeader><CardTitle className="text-xl font-headline text-accent">About Dr. {doctor.name.split(' ').pop()}</CardTitle></CardHeader>
-            <CardContent>
-                <p className="text-foreground/80">{doctor.bio}</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Booking Panel */}
@@ -161,31 +152,20 @@ export default function DoctorDetailPage() {
             <CardContent className="space-y-4">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">Consultation Fee</p>
-                  <p className="text-3xl font-bold text-primary">₹{doctor.consultationFee}</p>
+                  <p className="text-3xl font-bold text-primary">₹{consultationFee}</p>
                 </div>
-
-                <Card className="bg-primary/5 border-primary/20 p-3">
-                  <CardHeader className="p-0 text-center mb-2">
-                      <CardTitle className="text-base font-headline text-primary flex items-center justify-center gap-2"><Sparkles className="w-4 h-4"/>Exclusive Benefits</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 text-sm text-primary/90 space-y-1 text-center">
-                      <p className="flex items-center justify-center gap-1"><Medal className="w-4 h-4" /> Priority Token (No long waits)</p>
-                      <p>+ 10-15% discount on medicines</p>
-                  </CardContent>
-                </Card>
               
               <div className="space-y-2">
                 <h4 className="font-semibold flex items-center gap-2 text-accent"><Calendar className="h-5 w-5 text-primary" /> In-Clinic Appointment</h4>
                 <p className="text-sm text-muted-foreground text-center font-semibold">Select Date & Time (Today)</p>
                 <div className="grid grid-cols-3 gap-2">
-                    {doctor.availableSlots.map(slot => (
+                    {doctor.availability.map(slot => (
                         <Button 
-                            key={slot.time}
-                            variant={slot.isAvailable ? (selectedSlot === slot.time ? 'default' : 'outline') : 'secondary'}
-                            disabled={!slot.isAvailable}
-                            onClick={() => slot.isAvailable && setSelectedSlot(slot.time)}
+                            key={slot}
+                            variant={selectedSlot === slot ? 'default' : 'outline'}
+                            onClick={() => setSelectedSlot(slot)}
                         >
-                            {slot.time}
+                            {slot}
                         </Button>
                     ))}
                 </div>
@@ -218,7 +198,7 @@ export default function DoctorDetailPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Consultation Fee:</span>
-                  <span>₹{doctor.consultationFee.toFixed(2)}</span>
+                  <span>₹{consultationFee.toFixed(2)}</span>
                 </div>
                   <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Platform Fee:</span>
@@ -236,5 +216,3 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
-
-    

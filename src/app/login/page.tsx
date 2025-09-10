@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +35,7 @@ import Logo from "@/components/layout/Logo";
 import Image from "next/image";
 import { createUserInFirestore, getUserProfile } from "@/lib/data";
 
-const roleEnum = z.enum(["customer", "doctor", "clinic", "hospital", "diagnostics_centres"]);
+const roleEnum = z.enum(["patient", "doctor", "clinic", "diag_centre", "admin"]);
 export type Role = z.infer<typeof roleEnum>;
 
 const emailValidation = z.string().refine(
@@ -47,43 +48,31 @@ const signInSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-const baseSignUpSchema = z.object({
-  email: emailValidation,
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-});
-
-
-const customerSignUpSchema = baseSignUpSchema.extend({
-    fullName: z.string().min(2, "Name is required."),
+// Base schema for all users, goes into /users collection
+const baseUserSchema = z.object({
+    name: z.string().min(2, "Name is required."),
+    email: emailValidation,
     phone: z.string().min(10, "A valid phone number is required."),
+    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-const doctorSignUpSchema = baseSignUpSchema.extend({
-    fullName: z.string().min(2, "Name is required."),
-    address: z.string().min(5, "Address is required."),
-    phone: z.string().min(10, "A valid phone number is required."),
-    qualifications: z.string().min(2, "Qualifications are required."),
+// Schema for doctor-specific details, goes into /doctors collection
+const doctorDetailsSchema = z.object({
+    specialization: z.string().min(2, "Specialization is required."),
+    licenseNo: z.string().min(5, "A valid license number is required."),
 });
 
-const clinicSignUpSchema = baseSignUpSchema.extend({
-    name: z.string().min(2, "Clinic name is required."),
-    address: z.string().min(5, "Address is required."),
-    officePhone: z.string().min(10, "A valid office phone number is required."),
-    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+// Schema for clinic-specific details, goes into /clinics collection
+const clinicDetailsSchema = z.object({
+    address: z.string().min(10, "A valid address is required."),
+    licenseNo: z.string().min(5, "A valid license number is required."),
 });
 
-const hospitalSignUpSchema = baseSignUpSchema.extend({
-    name: z.string().min(2, "Hospital name is required."),
-    address: z.string().min(5, "Address is required."),
-    officePhone: z.string().min(10, "A valid office phone number is required."),
-    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
-});
-
-const diagnosticsSignUpSchema = baseSignUpSchema.extend({
-    name: z.string().min(2, "Center name is required."),
-    address: z.string().min(5, "Address is required."),
-    officePhone: z.string().min(10, "A valid office phone number is required."),
-    ownerPhone: z.string().min(10, "A valid owner phone number is required."),
+// Schema for diagnostics center-specific details, goes into /diagnosisCentres collection
+const diagCentreDetailsSchema = z.object({
+    address: z.string().min(10, "A valid address is required."),
+    licenseNo: z.string().min(5, "A valid license number is required."),
+    servicesOffered: z.string().min(5, "Please list at least one service."),
 });
 
 
@@ -95,26 +84,29 @@ const SignUpForm = () => {
     const form = useForm({
         // The resolver will be dynamically applied in the submit handler
         defaultValues: {
-            email: "",
-            password: "",
-            fullName: "",
             name: "",
-            address: "",
+            email: "",
             phone: "",
-            qualifications: "",
-            officePhone: "",
-            ownerPhone: "",
+            password: "",
+            specialization: "",
+            licenseNo: "",
+            address: "",
+            servicesOffered: "",
         },
     });
 
-    const getSignUpSchema = (role: Role | null) => {
+    const getValidationSchemas = (role: Role | null) => {
         switch (role) {
-            case 'customer': return customerSignUpSchema;
-            case 'doctor': return doctorSignUpSchema;
-            case 'clinic': return clinicSignUpSchema;
-            case 'hospital': return hospitalSignUpSchema;
-            case 'diagnostics_centres': return diagnosticsSignUpSchema;
-            default: return baseSignUpSchema;
+            case 'patient':
+                return { base: baseUserSchema, details: z.object({}) };
+            case 'doctor':
+                return { base: baseUserSchema, details: doctorDetailsSchema };
+            case 'clinic':
+                return { base: baseUserSchema, details: clinicDetailsSchema };
+            case 'diag_centre':
+                return { base: baseUserSchema, details: diagCentreDetailsSchema };
+            default:
+                return { base: z.object({}), details: z.object({}) };
         }
     };
 
@@ -123,51 +115,46 @@ const SignUpForm = () => {
         setIsLoading(true);
         
         if (!selectedRole) {
-            toast({
-                title: "Sign Up Failed",
-                description: "A role must be selected.",
-                variant: "destructive"
-            });
+            toast({ title: "Sign Up Failed", description: "A role must be selected.", variant: "destructive" });
             setIsLoading(false);
             return;
         }
         
-        const schema = getSignUpSchema(selectedRole);
+        const { base: baseSchema, details: detailsSchema } = getValidationSchemas(selectedRole);
         
-        // Data cleaning step: create a new object with only the fields relevant to the selected role's schema.
-        const relevantFields = Object.keys(schema.shape);
-        const cleanValues: Record<string, any> = {};
-        for (const key of relevantFields) {
-            if (values[key] !== undefined) {
-                cleanValues[key] = values[key];
+        // Extract keys for base user data and role-specific details
+        const baseKeys = Object.keys(baseSchema.shape);
+        const detailsKeys = Object.keys(detailsSchema.shape);
+
+        const baseData: Record<string, any> = {};
+        const detailsData: Record<string, any> = {};
+
+        for (const key in values) {
+            if (baseKeys.includes(key)) {
+                baseData[key] = values[key];
+            }
+            if (detailsKeys.includes(key)) {
+                detailsData[key] = values[key];
             }
         }
         
-        const validationResult = schema.safeParse(cleanValues);
-
-        if (!validationResult.success) {
-             toast({
-                title: "Sign Up Failed",
-                description: "Please fill all required fields correctly.",
-                variant: "destructive"
-            });
-            // This can be enhanced to show errors on specific fields
-            setIsLoading(false);
-            return;
+        const baseValidationResult = baseSchema.safeParse(baseData);
+        const detailsValidationResult = detailsSchema.safeParse(detailsData);
+        
+        if (!baseValidationResult.success || !detailsValidationResult.success) {
+             toast({ title: "Sign Up Failed", description: "Please fill all required fields correctly.", variant: "destructive" });
+             setIsLoading(false);
+             return;
         }
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, validationResult.data.email, validationResult.data.password);
+            const userCredential = await createUserWithEmailAndPassword(auth, baseValidationResult.data.email, baseValidationResult.data.password);
             
-            // Pass the validated and cleaned data to Firestore
-            await createUserInFirestore(userCredential.user, selectedRole, validationResult.data);
+            await createUserInFirestore(userCredential.user, selectedRole, baseValidationResult.data, detailsValidationResult.data);
 
             await signOut(auth);
 
-            toast({
-                title: "Account Created Successfully",
-                description: "Welcome! Please sign in to continue.",
-            });
+            toast({ title: "Account Created Successfully", description: "Welcome! Please sign in to continue." });
             form.reset();
             setSelectedRole(null);
 
@@ -198,11 +185,10 @@ const SignUpForm = () => {
                         <SelectValue placeholder="First, select your role..." />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="patient">Patient</SelectItem>
                         <SelectItem value="doctor">Doctor</SelectItem>
                         <SelectItem value="clinic">Clinic</SelectItem>
-                        <SelectItem value="hospital">Hospital</SelectItem>
-                        <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
+                        <SelectItem value="diag_centre">Diagnostics Centre</SelectItem>
                     </SelectContent>
                 </Select>
                  <p className="text-sm text-muted-foreground text-center">Select a role to see the required sign-up form.</p>
@@ -211,11 +197,11 @@ const SignUpForm = () => {
     }
     
     const roleTitles: Record<Role, string> = {
-        customer: 'Customer',
+        patient: 'Patient',
         doctor: 'Doctor',
         clinic: 'Clinic',
-        hospital: 'Hospital',
-        diagnostics_centres: 'Diagnostics Centre',
+        diag_centre: 'Diagnostics Centre',
+        admin: 'Admin'
     };
 
     return (
@@ -225,66 +211,57 @@ const SignUpForm = () => {
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedRole(null)}><ArrowLeft/></Button>
                     <h3 className="font-semibold text-lg text-foreground">Registering as a {roleTitles[selectedRole]}</h3>
                 </div>
+                 <FormField control={form.control} name="name" render={({ field }) => (
+                    <FormItem><FormLabel>Full Name / Organisation Name</FormLabel><FormControl><Input placeholder="John Doe or City Hospital" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
                  <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl><Input type="email" placeholder="your@email.com" {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
+                    <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" placeholder="your@email.com" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Your contact number" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 
-                {selectedRole === 'customer' && (
+                <hr className="my-4"/>
+
+                {selectedRole === 'doctor' && (
                      <>
-                         <FormField control={form.control} name="fullName" render={({ field }) => (
-                            <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormField control={form.control} name="specialization" render={({ field }) => (
+                            <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input placeholder="e.g. Cardiology" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                         <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input placeholder="Your contact number" {...field} /></FormControl><FormMessage /></FormItem>
+                         <FormField control={form.control} name="licenseNo" render={({ field }) => (
+                            <FormItem><FormLabel>Medical License Number</FormLabel><FormControl><Input placeholder="Your license number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </>
                 )}
 
-                {selectedRole === 'doctor' && (
-                    <>
-                         <FormField control={form.control} name="fullName" render={({ field }) => (
-                            <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Dr. John Doe" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
+                {selectedRole === 'clinic' && (
+                     <>
                          <FormField control={form.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="123 Medical Lane" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input placeholder="Clinic's full address" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                         <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input placeholder="Your personal phone number" {...field} /></FormControl><FormMessage /></FormItem>
+                         <FormField control={form.control} name="licenseNo" render={({ field }) => (
+                            <FormItem><FormLabel>Clinic License Number</FormLabel><FormControl><Input placeholder="Clinic's license number" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                         <FormField control={form.control} name="qualifications" render={({ field }) => (
-                            <FormItem><FormLabel>Qualifications</FormLabel><FormControl><Input placeholder="MD, MBBS, etc." {...field} /></FormControl><FormMessage /></FormItem>
+                    </>
+                )}
+
+                {selectedRole === 'diag_centre' && (
+                     <>
+                        <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input placeholder="Centre's full address" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="licenseNo" render={({ field }) => (
+                            <FormItem><FormLabel>Centre License Number</FormLabel><FormControl><Input placeholder="Centre's license number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="servicesOffered" render={({ field }) => (
+                            <FormItem><FormLabel>Services Offered (comma-separated)</FormLabel><FormControl><Input placeholder="Blood Test, X-Ray, MRI" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </>
                 )}
                 
-                {(selectedRole === 'clinic' || selectedRole === 'hospital' || selectedRole === 'diagnostics_centres') && (
-                     <>
-                        <FormField control={form.control} name="name" render={({ field }) => (
-                            <FormItem><FormLabel>{roleTitles[selectedRole]} Name</FormLabel><FormControl><Input placeholder={`Name of your ${roleTitles[selectedRole]}`} {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                         <FormField control={form.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Official Address" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                         <FormField control={form.control} name="officePhone" render={({ field }) => (
-                            <FormItem><FormLabel>Office Phone</FormLabel><FormControl><Input placeholder="Reception / Office number" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="ownerPhone" render={({ field }) => (
-                            <FormItem><FormLabel>Owner's Phone</FormLabel><FormControl><Input placeholder="Contact person's number" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </>
-                )}
-
                 <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
@@ -325,16 +302,16 @@ export default function LoginPage() {
       case 'clinic':
         router.push('/dashboard/clinic');
         break;
-      case 'hospital':
+      case 'hospital': // This role is not in the new schema, but we keep it for now
         router.push('/dashboard/hospital');
         break;
-       case 'diagnostics_centres':
+       case 'diag_centre':
         router.push('/dashboard/diagnostics');
         break;
       case 'admin':
         router.push('/dashboard/admin');
         break;
-      default:
+      default: // patient and others
         router.push('/');
         break;
     }
@@ -388,8 +365,8 @@ export default function LoginPage() {
       return;
     }
     
-    const emailValidation = z.string().email().safeParse(email);
-    if (!emailValidation.success) {
+    const emailValidationResult = z.string().email().safeParse(email);
+    if (!emailValidationResult.success) {
         signInForm.setError("email", { type: "manual", message: "Please enter a valid email address." });
         return;
     }
@@ -498,7 +475,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
-
-    

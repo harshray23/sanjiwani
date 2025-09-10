@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -22,14 +23,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
 import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/data';
-import type { Doctor } from '@/lib/types';
+import type { DoctorProfile } from '@/lib/types';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { createAppointment, createVideoConsultationAppointment } from '@/lib/data';
-import { createVideoConsultation } from '@/ai/flows/create-video-consult-flow';
+import { createAppointment } from '@/lib/data';
 import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
-import Link from 'next/link';
 
 const cardFormSchema = z.object({
   cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
@@ -52,15 +51,17 @@ function PaymentForm() {
   const [isDataLoading, setIsDataLoading] = useState(true);
   
   const [user, setUser] = useState<User | null>(null);
-  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
   
   const doctorId = searchParams.get('doctorId');
+  const clinicId = searchParams.get('clinicId');
   const selectedSlot = searchParams.get('slot');
-  const consultationType = searchParams.get('type') || 'clinic';
+  const consultationType = (searchParams.get('type') || 'clinic') as 'clinic' | 'video';
   
+  const consultationFee = 500; // Mock fee
   const platformFee = consultationType === 'video' ? 100 : 50;
-  const totalFee = (doctor?.consultationFee ?? 0) + platformFee;
+  const totalFee = consultationFee + platformFee;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -107,10 +108,10 @@ function PaymentForm() {
   });
 
   const handlePayment = async () => {
-    if (!user || !doctorId || !doctor) return;
+    if (!user || !doctorId) return;
 
-    if (consultationType === 'clinic' && !slot) {
-        toast({ title: "Booking Failed", description: "Time slot not selected for clinic visit.", variant: "destructive" });
+    if (consultationType === 'clinic' && (!slot || !clinicId)) {
+        toast({ title: "Booking Failed", description: "Time slot or clinic not selected for clinic visit.", variant: "destructive" });
         return;
     }
 
@@ -119,18 +120,13 @@ function PaymentForm() {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment gateway
       
-      let appointment;
-
-      if (consultationType === 'video') {
-        const videoConsultDetails = await createVideoConsultation({
-            patientName: user.displayName || 'Anonymous User',
-            doctorName: doctor.name,
-            doctorSpecialty: doctor.specialty
-        });
-        appointment = await createVideoConsultationAppointment(user.uid, user.displayName || 'Anonymous User', doctorId, videoConsultDetails);
-      } else {
-        appointment = await createAppointment(user.uid, user.displayName || "Anonymous User", doctorId, slot!);
-      }
+      const appointment = await createAppointment(
+        user.uid,
+        doctorId,
+        clinicId!,
+        slot!,
+        consultationType
+      );
       
       toast({
         title: "Payment Successful!",
@@ -150,14 +146,6 @@ function PaymentForm() {
       setIsLoading(false);
     }
   };
-
-  const handleUpiPayment = () => {
-      toast({
-          title: "Feature Coming Soon",
-          description: "UPI/QR Code payments are not yet available. Please use a card.",
-          variant: "default",
-      });
-  }
 
   const getCashbackAmount = () => {
       return consultationType === 'video' ? 40 : 25;
@@ -185,7 +173,7 @@ function PaymentForm() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Doctor:</span>
-                  <span className="font-medium">{doctor?.name}</span>
+                  <span className="font-medium">Dr. {doctor?.name}</span>
                 </div>
                  <div className="flex justify-between">
                   <span className="text-muted-foreground">Type:</span>
@@ -200,7 +188,7 @@ function PaymentForm() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Consultation Fee:</span>
-                  <span className="font-medium">₹{doctor?.consultationFee.toFixed(2)}</span>
+                  <span className="font-medium">₹{consultationFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Platform Fee:</span>
@@ -321,5 +309,3 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
-
-    

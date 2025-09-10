@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -59,12 +60,13 @@ function ConfirmationContent() {
     );
   }
   
-  const appointmentDate = new Date(appointment.date);
+  const appointmentDate = new Date(appointment.scheduledAt);
   if (isNaN(appointmentDate.getTime())) {
     // Handle invalid date string from mock data if necessary
     return <div>Invalid date format</div>;
   }
   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
+  const formattedTime = format(appointmentDate, 'p');
 
   return (
     <>
@@ -84,7 +86,7 @@ function ConfirmationContent() {
                 <p className="text-sm text-muted-foreground">Your Unique Token</p>
                 <p className="text-3xl font-bold text-primary flex items-center gap-2">
                   <Ticket className="h-8 w-8"/> 
-                  {appointment.token}
+                  {appointment.id.slice(-6).toUpperCase()}
                 </p>
              </div>
              <p className="text-sm text-center sm:text-right max-w-xs text-muted-foreground">Show this token at the clinic reception for a priority check-in.</p>
@@ -98,14 +100,14 @@ function ConfirmationContent() {
                 <Stethoscope className="h-5 w-5 text-primary"/>
                 <div>
                     <p className="text-muted-foreground">Doctor</p>
-                    <p className="font-semibold">{appointment.doctor.name}</p>
+                    <p className="font-semibold">{appointment.doctor?.name}</p>
                 </div>
             </div>
              <div className="flex items-center gap-3">
                 <Building className="h-5 w-5 text-primary"/>
                 <div>
                     <p className="text-muted-foreground">Clinic</p>
-                    <p className="font-semibold">{appointment.clinic.name}</p>
+                    <p className="font-semibold">{appointment.clinic?.name}</p>
                 </div>
             </div>
             <div className="flex items-center gap-3">
@@ -119,7 +121,7 @@ function ConfirmationContent() {
                 <Clock className="h-5 w-5 text-primary"/>
                 <div>
                     <p className="text-muted-foreground">Time</p>
-                    <p className="font-semibold">{appointment.time}</p>
+                    <p className="font-semibold">{formattedTime}</p>
                 </div>
             </div>
         </div>
@@ -131,15 +133,15 @@ function ConfirmationContent() {
             <div className="text-sm space-y-1">
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation Fee:</span>
-                    <span>₹{appointment.feeDetails.consultationFee.toFixed(2)}</span>
+                    <span>₹{500.00.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Platform Fee:</span>
-                    <span>₹{appointment.feeDetails.platformFee.toFixed(2)}</span>
+                    <span>₹{50.00.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-base">
                     <span className="text-foreground">Total Paid:</span>
-                    <span className="text-primary">₹{appointment.feeDetails.total.toFixed(2)}</span>
+                    <span className="text-primary">₹{550.00.toFixed(2)}</span>
                 </div>
             </div>
         </div>

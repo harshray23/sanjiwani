@@ -1,10 +1,11 @@
 
+
 "use client";
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { searchClinicsAndDoctors, comprehensiveSpecialties } from '@/lib/data';
-import type { Clinic, Doctor } from '@/lib/types';
+import type { ClinicProfile, DoctorProfile } from '@/lib/types';
 import { ClinicCard } from '@/components/ClinicCard';
 import { DoctorCard } from '@/components/DoctorCard';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ function SearchResults() {
   const query = searchParams.get('query') || '';
 
   const [isLoading, setIsLoading] = useState(true);
-  const [results, setResults] = useState<{ clinics: Clinic[]; doctors: Doctor[] }>({ clinics: [], doctors: [] });
+  const [results, setResults] = useState<{ clinics: ClinicProfile[]; doctors: DoctorProfile[] }>({ clinics: [], doctors: [] });
   const [searchQuery, setSearchQuery] = useState(query);
   const [activeDoctorSpecialty, setActiveDoctorSpecialty] = useState<string | null>(null);
   const [activeClinicSpecialty, setActiveClinicSpecialty] = useState<string | null>(null);
@@ -44,22 +45,24 @@ function SearchResults() {
     if (!activeDoctorSpecialty) {
       return results.doctors;
     }
-    return results.doctors.filter(doctor => doctor.specialty === activeDoctorSpecialty);
+    return results.doctors.filter(doctor => doctor.specialization === activeDoctorSpecialty);
   }, [results.doctors, activeDoctorSpecialty]);
   
   const filteredClinics = useMemo(() => {
     if (!activeClinicSpecialty) {
         return results.clinics;
     }
-    return results.clinics.filter(clinic => clinic.specialties.includes(activeClinicSpecialty));
+    // Note: Clinic specialty is not part of the new schema, so this won't work as expected.
+    // This needs to be refactored if clinic specialties are added back.
+    return results.clinics;
   }, [results.clinics, activeClinicSpecialty]);
 
   const doctorSpecialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
     results.doctors.forEach(doctor => {
-        if (counts[doctor.specialty] !== undefined) {
-            counts[doctor.specialty]++;
+        if (counts[doctor.specialization] !== undefined) {
+            counts[doctor.specialization]++;
         }
     });
     return counts;
@@ -67,14 +70,7 @@ function SearchResults() {
 
   const clinicSpecialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
-    results.clinics.forEach(clinic => {
-        clinic.specialties.forEach(spec => {
-            if (counts[spec] !== undefined) {
-                counts[spec]++;
-            }
-        });
-    });
+    // This is now invalid as clinics don't have specialties.
     return counts;
   }, [results.clinics]);
 
@@ -109,31 +105,7 @@ function SearchResults() {
           </TabsList>
           <TabsContent value="clinics">
             <div className="my-6">
-                <div className="flex items-center gap-4">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline">
-                                <Filter className="mr-2 h-4 w-4"/>
-                                {activeClinicSpecialty || "Filter by Specialization"}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto">
-                            <DropdownMenuLabel>Filter by Specialization</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuRadioGroup value={activeClinicSpecialty || "All"} onValueChange={(value) => setActiveClinicSpecialty(value === "All" ? null : value)}>
-                                <DropdownMenuRadioItem value="All">All ({results.clinics.length})</DropdownMenuRadioItem>
-                                {comprehensiveSpecialties.map(specialty => (
-                                    <DropdownMenuRadioItem key={specialty} value={specialty}>
-                                        {specialty} ({clinicSpecialtyCounts[specialty] || 0})
-                                    </DropdownMenuRadioItem>
-                                ))}
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    {activeClinicSpecialty && (
-                        <Button variant="ghost" onClick={() => setActiveClinicSpecialty(null)}>Clear Filter</Button>
-                    )}
-                </div>
+                {/* Clinic filtering is disabled as specialties are removed from clinic schema */}
             </div>
             {filteredClinics.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -141,10 +113,7 @@ function SearchResults() {
               </div>
             ) : (
               <p className="text-center py-12 text-muted-foreground">
-                {activeClinicSpecialty
-                    ? `No clinics found for the specialization "${activeClinicSpecialty}".`
-                    : "No clinics found matching your search."
-                }
+                No clinics found matching your search.
               </p>
             )}
           </TabsContent>
@@ -178,7 +147,7 @@ function SearchResults() {
             </div>
              {filteredDoctors.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {filteredDoctors.map(doctor => <DoctorCard key={doctor.id} doctor={doctor} />)}
+                {filteredDoctors.map(doctor => <DoctorCard key={doctor.uid} doctor={doctor} />)}
               </div>
             ) : (
               <p className="text-center py-12 text-muted-foreground">

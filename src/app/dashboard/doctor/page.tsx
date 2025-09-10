@@ -1,14 +1,15 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getAppointmentsForDoctor, getDoctorById, getClinicById, getUserProfile } from '@/lib/data';
-import type { Appointment, Doctor, Clinic, User as AppUser } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { getDoctorById, getUserProfile } from '@/lib/data';
+import type { DoctorProfile, ClinicProfile, Appointment, User as AppUser } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Loader2, User as UserIcon, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Home, MapPin, Pencil, Upload, LogIn, ShieldAlert } from "lucide-react";
+import { Calendar, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Pencil, Upload, LogIn, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -22,133 +23,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
 
 const profileFormSchema = z.object({
-  bio: z.string().min(10, "Bio must be at least 10 characters.").max(500, "Bio cannot exceed 500 characters."),
-  qualifications: z.string().min(2, "Please list at least one qualification."),
-  specialties: z.string().min(2, "Please list at least one specialty."),
+  specialization: z.string().min(2, "Please list at least one specialty."),
+  licenseNo: z.string().min(2, "License number is required."),
 });
-
-const availabilityFormSchema = z.object({
-    slots: z.array(z.string()).refine((value) => value.some((item) => item), {
-        message: "You have to select at least one time slot.",
-    }),
-});
-
-const availableTimeSlots = [
-  "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-  "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"
-];
-
-const LocationCard = ({ clinic, doctor }: { clinic: Clinic, doctor: Doctor }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const { toast } = useToast();
-    
-    const form = useForm<z.infer<typeof availabilityFormSchema>>({
-        resolver: zodResolver(availabilityFormSchema),
-        defaultValues: {
-            slots: doctor.availableSlots.filter(s => s.isAvailable).map(s => s.time),
-        }
-    });
-
-    const onSubmit = (values: z.infer<typeof availabilityFormSchema>) => {
-        console.log("Updating availability for", clinic.name, values);
-        toast({
-            title: "Availability Updated!",
-            description: `Your schedule for ${clinic.name} has been updated.`,
-        });
-        setIsEditing(false);
-    }
-    
-    return (
-        <Card className="bg-muted/30">
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="font-headline text-lg flex items-center gap-2">
-                           <Building className="h-5 w-5 text-primary"/> {clinic.name}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-2 pl-7 text-sm"><MapPin className="h-4 w-4"/> {clinic.contact.address}</CardDescription>
-                    </div>
-                    {!isEditing && (
-                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                            <Pencil className="mr-2 h-4 w-4"/> Edit
-                        </Button>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent>
-                {isEditing ? (
-                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                             <FormField
-                                control={form.control}
-                                name="slots"
-                                render={() => (
-                                    <FormItem>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                            {availableTimeSlots.map((item) => (
-                                                <FormField
-                                                key={item}
-                                                control={form.control}
-                                                name="slots"
-                                                render={({ field }) => (
-                                                    <FormItem key={item} className="flex items-center space-x-2 space-y-0">
-                                                        <FormControl>
-                                                            <Checkbox
-                                                                checked={field.value?.includes(item)}
-                                                                onCheckedChange={(checked) => {
-                                                                    return checked
-                                                                    ? field.onChange([...(field.value ?? []), item])
-                                                                    : field.onChange(field.value?.filter((value) => value !== item))
-                                                                }}
-                                                            />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal text-sm">{item}</FormLabel>
-                                                    </FormItem>
-                                                )}
-                                                />
-                                            ))}
-                                        </div>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                            <div className="flex gap-2 justify-end">
-                                <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
-                                <Button type="submit">Save Timings</Button>
-                            </div>
-                        </form>
-                    </Form>
-                ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {doctor.availableSlots.map(slot => (
-                            <Badge key={slot.time} variant={slot.isAvailable ? 'default' : 'secondary'} className="justify-center py-1">
-                                {slot.time}
-                            </Badge>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    )
-}
 
 const DoctorDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
-  const [doctor, setDoctor] = useState<Doctor | null | undefined>(undefined);
-  const [clinics, setClinics] = useState<Clinic[] | undefined>(undefined);
+  const [doctor, setDoctor] = useState<DoctorProfile | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      bio: "",
-      qualifications: "",
-      specialties: "",
+      specialization: "",
+      licenseNo: "",
     },
   });
 
@@ -160,37 +52,20 @@ const DoctorDashboard = () => {
           setUserProfile(profile);
 
           if (profile?.role === 'doctor') {
-            const mockDoctorId = 'doc-1'; 
-            
-            const [doctorProfile, doctorAppointments, clinicData] = await Promise.all([
-                getDoctorById(mockDoctorId),
-                getAppointmentsForDoctor(mockDoctorId),
-                getClinicById('clinic-1') 
-            ]);
-
+            const doctorProfile = await getDoctorById(profile.uid);
+            setDoctor(doctorProfile);
             if (doctorProfile) {
-                setDoctor(doctorProfile);
-                setAppointments(doctorAppointments);
-                if (clinicData) {
-                    setClinics([clinicData]);
-                } else {
-                    setClinics([]);
-                }
-                profileForm.reset({
-                    bio: doctorProfile.bio,
-                    qualifications: doctorProfile.qualifications.join(', '),
-                    specialties: doctorProfile.specialty
+                 profileForm.reset({
+                    specialization: doctorProfile.specialization,
+                    licenseNo: doctorProfile.licenseNo,
                 });
-            } else {
-                setDoctor(null);
-                setAppointments([]);
-                setClinics([]);
             }
+            // TODO: Fetch appointments for the doctor
+            setAppointments([]);
           }
         } catch (error) {
             console.error("Error fetching doctor data:", error);
             toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
-            setUserProfile(null); 
             setDoctor(null);
         }
       } else {
@@ -207,6 +82,7 @@ const DoctorDashboard = () => {
           description: "Your information has been saved successfully.",
       });
       console.log(values);
+      // TODO: Implement actual update logic
   };
   
   if (userProfile === undefined) {
@@ -225,7 +101,7 @@ const DoctorDashboard = () => {
             <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
             <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
             <p className="mt-2 text-muted-foreground">
-              You must be logged in as a doctor to view this page. Your current role is '{userProfile?.role || 'not logged in'}'.
+              You must be logged in as a doctor to view this page.
             </p>
             <Button asChild className="mt-6">
               <Link href="/login">
@@ -249,11 +125,10 @@ const DoctorDashboard = () => {
       )
   }
 
-
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
       <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline text-accent">Welcome, {doctor.name}</h1>
+        <h1 className="text-3xl font-bold font-headline text-accent">Welcome, Dr. {doctor.name}</h1>
         <p className="text-lg text-muted-foreground">Manage your appointments, profile, and availability.</p>
       </div>
 
@@ -264,7 +139,6 @@ const DoctorDashboard = () => {
           <TabsTrigger value="availability">Availability & Locations</TabsTrigger>
         </TabsList>
         
-        {/* Appointments Tab */}
         <TabsContent value="appointments">
           <Card>
             <CardHeader>
@@ -276,13 +150,13 @@ const DoctorDashboard = () => {
                   {appointments.map(app => (
                     <Card key={app.id} className="p-4 flex justify-between items-center">
                       <div>
-                        <p className="font-semibold">{app.patientName}</p>
+                        <p className="font-semibold">{app.patient?.name}</p>
                         <p className="text-sm text-muted-foreground flex items-center gap-4">
-                          <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4"/> {format(new Date(app.date), 'PP')}</span>
-                          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4"/> {app.time}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4"/> {format(new Date(app.scheduledAt), 'PP')}</span>
+                          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4"/> {format(new Date(app.scheduledAt), 'p')}</span>
                         </p>
                       </div>
-                       <Badge variant={app.status === 'Completed' ? 'default' : 'secondary'} className={app.status === 'Completed' ? 'bg-green-600' : ''}>
+                       <Badge variant={app.status === 'completed' ? 'default' : 'secondary'} className={app.status === 'completed' ? 'bg-green-600' : ''}>
                           {app.status}
                        </Badge>
                     </Card>
@@ -295,7 +169,6 @@ const DoctorDashboard = () => {
           </Card>
         </TabsContent>
 
-        {/* Profile Tab */}
         <TabsContent value="profile">
            <Card>
             <CardHeader>
@@ -308,7 +181,7 @@ const DoctorDashboard = () => {
                          <h4 className="font-semibold">Profile Picture</h4>
                          <div className="relative w-40 h-40 mx-auto">
                             <Image
-                                src={doctor.imageUrl}
+                                src={`https://i.pravatar.cc/150?u=${doctor.uid}`}
                                 alt={doctor.name}
                                 width={160}
                                 height={160}
@@ -325,38 +198,25 @@ const DoctorDashboard = () => {
                             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
                                 <FormField
                                     control={profileForm.control}
-                                    name="bio"
+                                    name="specialization"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Your Bio</FormLabel>
-                                            <FormControl>
-                                                <Textarea placeholder="Tell patients a little about yourself..." {...field} rows={5}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={profileForm.control}
-                                    name="qualifications"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Qualifications</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., MD, MBBS, FACC" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={profileForm.control}
-                                    name="specialties"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Specialties & Skills</FormLabel>
+                                            <FormLabel>Specialization</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="e.g., Cardiology, Pediatric Care" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                 <FormField
+                                    control={profileForm.control}
+                                    name="licenseNo"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>License Number</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Your medical license number" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -371,7 +231,6 @@ const DoctorDashboard = () => {
            </Card>
         </TabsContent>
 
-        {/* Availability Tab */}
         <TabsContent value="availability">
              <Card>
                 <CardHeader>
@@ -379,12 +238,11 @@ const DoctorDashboard = () => {
                     <CardDescription>View and edit your available time slots at your practice locations.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {clinics && clinics.map(clinic => (
-                        <LocationCard key={clinic.id} clinic={clinic} doctor={doctor} />
-                    ))}
+                    {/* Location and availability editing to be implemented */}
                      <Card className="border-dashed">
                         <CardContent className="p-6 text-center">
-                            <Button variant="outline">
+                             <p className="text-muted-foreground">Availability management is coming soon.</p>
+                            <Button variant="outline" className="mt-4">
                                 <PlusCircle className="mr-2 h-4 w-4"/>
                                 Add a New Practice Location
                             </Button>
@@ -399,5 +257,3 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
-
-    

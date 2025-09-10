@@ -1,12 +1,13 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { getClinicById } from '@/lib/data';
-import type { Clinic } from '@/lib/types';
+import type { ClinicProfile, DoctorProfile } from '@/lib/types';
 import Image from 'next/image';
 import { DoctorCard } from '@/components/DoctorCard';
-import { Loader2, MapPin, Phone, Star, MapIcon } from 'lucide-react';
+import { MapPin, Phone, Star, MapIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useParams } from 'next/navigation';
@@ -17,7 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 export default function ClinicDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const [clinic, setClinic] = useState<Clinic | null>(null);
+  const [clinic, setClinic] = useState<ClinicProfile | null>(null);
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -28,6 +30,9 @@ export default function ClinicDetailPage() {
       const data = await getClinicById(id);
       if (data) {
         setClinic(data);
+        // TODO: Fetch doctors associated with this clinic
+        // For now, this will be empty.
+        setDoctors([]);
       }
       setIsLoading(false);
     };
@@ -35,8 +40,8 @@ export default function ClinicDetailPage() {
   }, [id]);
 
   const handleViewOnMap = () => {
-    if (clinic?.contact.address) {
-      const query = encodeURIComponent(clinic.contact.address);
+    if (clinic?.address) {
+      const query = encodeURIComponent(clinic.address);
       const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
       window.open(mapUrl, '_blank', 'noopener,noreferrer');
     } else {
@@ -65,31 +70,27 @@ export default function ClinicDetailPage() {
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="w-full md:w-1/3 h-48 md:h-auto relative">
                       <Image
-                          src={clinic.imageUrl}
+                          src={`https://i.pravatar.cc/400?u=${clinic.id}`}
                           alt={clinic.name}
                           fill
                           className="rounded-lg object-cover"
-                          data-ai-hint={clinic.dataAiHint}
                       />
                     </div>
                     <div className="flex-1">
                         <h1 className="text-2xl md:text-4xl font-bold font-headline text-accent mb-2">{clinic.name}</h1>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-muted-foreground mb-4">
                             <span className="flex items-center gap-1">
-                                <Star className="h-5 w-5 text-yellow-400 fill-yellow-400"/> {clinic.rating.toFixed(1)}
+                                <MapPin className="h-5 w-5"/> {clinic.address}
                             </span>
                             <span className="flex items-center gap-1">
-                                <MapPin className="h-5 w-5"/> {clinic.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                                <Phone className="h-5 w-5"/> {clinic.contact.phone}
+                                <Phone className="h-5 w-5"/> {clinic.phone}
                             </span>
                         </div>
-                        <p className="mb-4 text-foreground/80">{clinic.about}</p>
+                        <p className="mb-4 text-foreground/80">License: {clinic.licenseNo}</p>
                         <div className="flex flex-wrap gap-2">
-                            {clinic.specialties.map(specialty => (
-                                <Badge key={specialty} variant="outline">{specialty}</Badge>
-                            ))}
+                            <Badge variant={clinic.verified ? 'default' : 'destructive'}>
+                                {clinic.verified ? 'Verified' : 'Not Verified'}
+                            </Badge>
                         </div>
                     </div>
                 </div>
@@ -97,10 +98,10 @@ export default function ClinicDetailPage() {
 
             <div className="mt-8">
                 <h2 className="text-2xl font-bold font-headline text-accent mb-6">Doctors at {clinic.name}</h2>
-                {clinic.doctors.length > 0 ? (
+                {doctors.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {clinic.doctors.map(doctor => (
-                            <DoctorCard key={doctor.id} doctor={doctor} />
+                        {doctors.map(doctor => (
+                            <DoctorCard key={doctor.uid} doctor={doctor} />
                         ))}
                     </div>
                 ) : (
@@ -116,7 +117,7 @@ export default function ClinicDetailPage() {
                      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
                         <p className="text-muted-foreground">Map will be shown here.</p>
                     </div>
-                    <p className="mt-4 text-sm text-muted-foreground">{clinic.contact.address}</p>
+                    <p className="mt-4 text-sm text-muted-foreground">{clinic.address}</p>
                     <Button variant="outline" className="w-full mt-4" onClick={handleViewOnMap}>
                         <MapIcon className="w-4 h-4 mr-2" /> View on Map
                     </Button>
@@ -127,5 +128,3 @@ export default function ClinicDetailPage() {
     </div>
   );
 }
-
-    
