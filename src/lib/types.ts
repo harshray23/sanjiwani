@@ -23,6 +23,9 @@ export interface DoctorDetails {
   consultationFee: number;
   availability: string[]; // Array of time slots
   clinicId?: string;
+  verified?: boolean; // Now part of the details
+  imageUrl?: string;
+  phone?: string;
 }
 
 // A complete Doctor profile, combining User and DoctorDetails

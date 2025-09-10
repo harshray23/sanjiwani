@@ -1,14 +1,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import type { DoctorProfile } from '@/lib/types';
+import type { DoctorDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Briefcase, GraduationCap, BadgeCheck } from 'lucide-react';
 
 interface DoctorCardProps {
-  doctor: DoctorProfile;
+  doctor: DoctorDetails;
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
@@ -16,7 +16,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-4 flex-row gap-4 items-start">
         <Image
-          src={doctor.imageUrl || `https://i.pravatar.cc/80?u=${doctor.uid}`}
+          src={doctor.imageUrl || `https://i.pravatar.cc/80?u=${doctor.id}`}
           alt={doctor.name || 'Doctor profile picture'}
           width={80}
           height={80}
@@ -49,7 +49,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button asChild className="w-full">
-          <Link href={`/doctors/${doctor.uid}`}>Book Appointment</Link>
+          <Link href={`/doctors/${doctor.id}`}>Book Appointment</Link>
         </Button>
       </CardFooter>
     </Card>

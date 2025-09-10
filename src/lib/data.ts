@@ -102,12 +102,12 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
     switch (role) {
         case 'doctor':
             detailsCollectionName = 'doctors';
-            if (typeof detailsData.qualifications === 'string') {
+             if (typeof detailsData.qualifications === 'string') {
                 detailsData.qualifications = detailsData.qualifications.split(',').map((s: string) => s.trim()).filter(Boolean);
             }
             detailsData.consultationFee = 500; // Default fee
-            detailsData.name = baseData.name;
             detailsData.availability = ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"];
+            detailsData.name = baseData.name;
             break;
         case 'clinic':
             detailsCollectionName = 'clinics';
@@ -143,19 +143,34 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 
 export const getDoctors = async (): Promise<DoctorDetails[]> => {
     const doctors = await getCollection<DoctorDetails>('doctors');
-    return doctors.map(doc => ({ ...doc, uid: doc.id }));
+    // Ensure the ID from the document is mapped to the object
+    return doctors.map(doc => ({ ...doc, id: doc.id, uid: doc.id }));
 };
-
 
 export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
     const userProfile = await getDocumentById<User>('users', id);
-    if (!userProfile || userProfile.role !== 'doctor') return undefined;
+    if (!userProfile) return undefined;
     
-    const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
-    if (!doctorDetails) return undefined;
-
-    return { ...userProfile, ...doctorDetails, id: userProfile.uid };
+    // For a doctor, merge with details from the 'doctors' collection
+    if (userProfile.role === 'doctor') {
+      const doctorDetails = await getDocumentById<DoctorDetails>('doctors', id);
+      if (!doctorDetails) return undefined; // Or handle as a partial profile
+      return { ...userProfile, ...doctorDetails, id: userProfile.uid };
+    }
+    
+    // For other roles, just return the base user profile cast as DoctorProfile for type safety
+    // This part might need adjustment based on how you want to handle non-doctor profiles
+    return { 
+        ...userProfile,
+        specialization: '', // Provide default values for Doctor-specific fields
+        licenseNo: '',
+        consultationFee: 0,
+        availability: [],
+        clinicId: '',
+        userId: userProfile.uid
+    };
 };
+
 
 export const getClinics = async (): Promise<ClinicProfile[]> => {
     const clinicDetailsList = await getCollection<ClinicDetails>('clinics');
@@ -361,3 +376,37 @@ export const updateUserVerification = async (uid: string, verified: boolean): Pr
     await updateDoc(userRef, { verified });
 };
 
+export const updateUserProfile = async (uid: string, role: Role, data: Partial<User>) => {
+    if (!db) throw new Error("Firestore not initialized");
+    
+    // 1. Update the /users document
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, data);
+
+    // 2. If the user has a role-specific profile, update that as well
+    // We only need to update fields that might be shared, like 'name'
+    const detailsToUpdate: { name?: string, phone?: string } = {};
+    if (data.name) detailsToUpdate.name = data.name;
+    if (data.phone) detailsToUpdate.phone = data.phone;
+    
+    let detailsCollectionName: string | null = null;
+    switch (role) {
+        case 'doctor':
+            detailsCollectionName = 'doctors';
+            break;
+        case 'clinic':
+            detailsCollectionName = 'clinics';
+            break;
+        case 'diag_centre':
+            detailsCollectionName = 'diagnosisCentres';
+            break;
+    }
+
+    if (detailsCollectionName && Object.keys(detailsToUpdate).length > 0) {
+        const detailsRef = doc(db, detailsCollectionName, uid);
+        const detailsDoc = await getDoc(detailsRef);
+        if (detailsDoc.exists()) {
+            await updateDoc(detailsRef, detailsToUpdate);
+        }
+    }
+};

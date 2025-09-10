@@ -21,28 +21,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
-import { getUserProfile } from '@/lib/data';
+import { getUserProfile, updateUserProfile } from '@/lib/data';
 import type { User as AppUser } from '@/lib/types';
 
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number." }),
-  // dob: z.date({
-  //   required_error: "A date of birth is required.",
-  // }),
-  // gender: z.enum(["male", "female", "other"], {
-  //   required_error: "Please select a gender.",
-  // }),
 });
 
 export default function ProfilePage() {
@@ -79,16 +67,23 @@ export default function ProfilePage() {
   }, [form]);
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
+    if (!user || !userProfile) {
+        toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive"});
+        return;
+    }
     setIsSubmitting(true);
-    console.log("Profile update submitted:", values);
-    // In a real app, you would call a function to update Firestore here.
-    // e.g., await updateUserProfile(user.uid, values);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({
-      title: "Profile Updated",
-      description: "Your information has been saved successfully.",
-    });
-    setIsSubmitting(false);
+    try {
+        await updateUserProfile(user.uid, userProfile.role, values);
+        toast({
+            title: "Profile Updated",
+            description: "Your information has been saved successfully.",
+        });
+    } catch(error) {
+        console.error("Profile update failed:", error);
+        toast({ title: "Update Failed", description: "Could not save your changes. Please try again.", variant: "destructive"});
+    } finally {
+        setIsSubmitting(false);
+    }
   }
   
   const dashboardLink = {
