@@ -182,7 +182,7 @@ const DoctorDashboard = () => {
                          <div className="relative w-40 h-40 mx-auto">
                             <Image
                                 src={`https://i.pravatar.cc/150?u=${doctor.uid}`}
-                                alt={doctor.name}
+                                alt={doctor.name || 'Doctor profile picture'}
                                 width={160}
                                 height={160}
                                 className="rounded-full object-cover border-4 border-primary/20"
