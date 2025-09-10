@@ -88,7 +88,6 @@ const SignUpForm = () => {
     const { toast } = useToast();
 
     const form = useForm({
-        // A base schema is used initially, the specific schema is validated in the submit handler
         resolver: zodResolver(baseSignUpSchema),
         defaultValues: {
             email: "",
@@ -118,8 +117,28 @@ const SignUpForm = () => {
     const handleSignUp = async (values: any) => {
         setIsLoading(true);
         
+        if (!selectedRole) {
+            toast({
+                title: "Sign Up Failed",
+                description: "A role must be selected.",
+                variant: "destructive"
+            });
+            setIsLoading(false);
+            return;
+        }
+        
         const schema = getSignUpSchema(selectedRole);
-        const validationResult = schema.safeParse(values);
+        
+        // **THE FIX**: Create a clean data object with only the fields relevant to the selected role.
+        const relevantFields = Object.keys(schema.shape);
+        const cleanValues: Record<string, any> = {};
+        for (const key of relevantFields) {
+            if (values[key] !== undefined) {
+                cleanValues[key] = values[key];
+            }
+        }
+        
+        const validationResult = schema.safeParse(cleanValues);
 
         if (!validationResult.success) {
              toast({
@@ -133,16 +152,6 @@ const SignUpForm = () => {
         }
 
         try {
-            if (!selectedRole) {
-                toast({
-                    title: "Sign Up Failed",
-                    description: "A role must be selected.",
-                    variant: "destructive"
-                });
-                setIsLoading(false);
-                return;
-            }
-
             const userCredential = await createUserWithEmailAndPassword(auth, validationResult.data.email, validationResult.data.password);
             
             // Save user details to Firestore
@@ -485,10 +494,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
-
-    
-
-
-
