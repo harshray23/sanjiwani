@@ -1,6 +1,5 @@
 
 
-
 import {
   collection,
   addDoc,
@@ -24,7 +23,10 @@ import type {
     ClinicDetails,
     DiagnosisCentreProfile,
     DiagnosisCentreDetails,
-    Appointment
+    Appointment,
+    Hospital,
+    DiagnosticsCentre,
+    TestAppointment
 } from './types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { Role } from '@/app/login/page';
@@ -77,6 +79,7 @@ async function getDocumentById<T>(collectionName:string, id: string): Promise<T 
 // --- USER MANAGEMENT ---
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
+    if(!uid) return null;
     return getDocumentById<User>('users', uid);
 };
 
@@ -99,16 +102,15 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
     switch (role) {
         case 'doctor':
             detailsCollectionName = 'doctors';
+            if (typeof detailsData.qualifications === 'string') {
+                detailsData.qualifications = detailsData.qualifications.split(',').map((s: string) => s.trim()).filter(Boolean);
+            }
             break;
         case 'clinic':
             detailsCollectionName = 'clinics';
-            // Use clinic name from details for the main user doc name
-            await updateDoc(userRef, { name: detailsData.name });
             break;
         case 'diag_centre':
             detailsCollectionName = 'diagnosisCentres';
-             // Use centre name from details for the main user doc name
-            await updateDoc(userRef, { name: detailsData.name });
             if (typeof detailsData.servicesOffered === 'string') {
                 detailsData.servicesOffered = detailsData.servicesOffered.split(',').map((s: string) => s.trim()).filter(Boolean);
             }
@@ -125,6 +127,7 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
         const detailsRef = doc(db, detailsCollectionName, user.uid);
         await setDoc(detailsRef, {
             ...detailsData,
+            name: baseData.name, // Add name to details for easier querying
             userId: user.uid,
         });
     }
@@ -138,6 +141,10 @@ export const createUserInFirestore = async (user: FirebaseUser, role: Role, base
 export const getDoctors = async (): Promise<DoctorProfile[]> => {
     const doctorDetailsList = await getCollection<DoctorDetails>('doctors');
     const doctorProfiles = await Promise.all(doctorDetailsList.map(async (details) => {
+        if (!details.userId) { // Check if userId exists
+          console.warn(`Doctor detail document ${details.id} is missing a userId.`);
+          return null;
+        }
         const userProfile = await getDocumentById<User>('users', details.userId);
         if (!userProfile) return null;
         return { ...userProfile, ...details, id: userProfile.uid } as DoctorProfile;
@@ -173,7 +180,7 @@ export const getClinicById = async (id: string): Promise<ClinicProfile | undefin
     const clinicDetails = await getDocumentById<ClinicDetails>('clinics', id);
     if (!clinicDetails) return undefined;
 
-    return { ...userProfile, ...clinicDetails, id: userProfile.uid };
+    return { ...userProfile, ...details, id: userProfile.uid };
 }
 
 
@@ -201,26 +208,20 @@ export const createAppointment = async (
     
     const docRef = await addDoc(collection(db, "appointments"), newAppointmentData);
     
-    return {
+    const createdAppointment = {
         id: docRef.id,
         ...newAppointmentData,
         scheduledAt: newAppointmentData.scheduledAt.toDate().toISOString(),
         createdAt: new Date().toISOString() // Approximate for immediate return
     } as Appointment;
+    
+    // We don't need to populate related data here, let's keep it simple
+    return createdAppointment;
 };
 
-// ... other data functions to be refactored ...
 
-// The following are legacy functions that need to be updated or removed.
-// They are kept temporarily to avoid breaking the parts of the app that haven't been refactored yet.
-
-export const comprehensiveSpecialties = [
-    "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
-    "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
-    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology"
-];
-
-export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: any[], doctors: any[] }> => {
+// --- Legacy or Combined Functions ---
+export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicProfile[], doctors: DoctorProfile[] }> => {
     const [doctors, clinics] = await Promise.all([getDoctors(), getClinics()]);
     
     if (!queryText) {
@@ -231,12 +232,12 @@ export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clin
 
     const filteredClinics = clinics.filter(clinic =>
         clinic.name.toLowerCase().includes(lowerCaseQuery) ||
-        clinic.address.toLowerCase().includes(lowerCaseQuery)
+        (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery))
     );
 
     const filteredDoctors = doctors.filter(doctor =>
         doctor.name.toLowerCase().includes(lowerCaseQuery) ||
-        doctor.specialization.toLowerCase().includes(lowerCaseQuery)
+        (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery))
     );
 
     return { clinics: filteredClinics, doctors: filteredDoctors };
@@ -253,14 +254,15 @@ export const getAppointmentsForUser = async (patientId: string): Promise<Appoint
   const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
 
   return Promise.all(appointments.map(async (app) => {
-      if (app.doctorId) {
-          app.doctor = await getDoctorById(app.doctorId);
+      const populatedApp = { ...app };
+      if (populatedApp.doctorId) {
+          populatedApp.doctor = await getDoctorById(populatedApp.doctorId);
       }
-      if (app.clinicId) {
-          app.clinic = await getClinicById(app.clinicId);
+      if (populatedApp.clinicId) {
+          populatedApp.clinic = await getClinicById(populatedApp.clinicId);
       }
-      app.patient = await getUserProfile(app.patientId) || undefined;
-      return convertTimestamps(app);
+      populatedApp.patient = await getUserProfile(populatedApp.patientId) || undefined;
+      return convertTimestamps(populatedApp);
   }));
 };
 
@@ -273,4 +275,78 @@ export const getAppointmentById = async (id: string): Promise<Appointment | unde
        if (appointment.patientId) appointment.patient = await getUserProfile(appointment.patientId) || undefined;
    }
    return convertTimestamps(appointment);
+};
+
+export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
+  if (!db) return [];
+  const q = query(
+    collection(db, 'appointments'),
+    where('clinicId', '==', clinicId),
+    orderBy('createdAt', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  const appointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Appointment);
+
+  return Promise.all(appointments.map(async (app) => {
+      if (app.doctorId) app.doctor = await getDoctorById(app.doctorId);
+      if (app.patientId) app.patient = await getUserProfile(app.patientId) || undefined;
+      return convertTimestamps(app);
+  }));
+};
+
+export const getUsers = async (): Promise<User[]> => getCollection<User>('users');
+
+
+// --- LEGACY FUNCTIONS (To be refactored or are using old types) ---
+
+export const comprehensiveSpecialties = [
+    "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
+    "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
+    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology"
+];
+
+export const comprehensiveHospitalDepartments = [
+    'Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics',
+    'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
+];
+
+export const comprehensiveTests = [
+  { id: 'test-1', name: 'Complete Blood Count (CBC)', category: 'Pathology' },
+  { id: 'test-2', name: 'Lipid Profile', category: 'Pathology' },
+  { id: 'test-3', name: 'Liver Function Test (LFT)', category: 'Pathology' },
+  { id: 'test-4', name: 'Kidney Function Test (KFT)', category: 'Pathology' },
+  { id: 'test-5', name: 'Thyroid Profile', category: 'Hormonal' },
+  { id: 'test-6', name: 'X-Ray Chest', category: 'Radiology' },
+  { id: 'test-7', name: 'Ultrasound Abdomen', category: 'Radiology' },
+];
+
+// NOTE: The following functions use legacy/mocked types and data structures.
+// They need to be refactored to use the new Firestore-based data model.
+
+export const getHospitals = async (): Promise<Hospital[]> => getCollection<Hospital>('hospitals');
+
+export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
+  const hospitals = await getHospitals();
+  if (!queryText) return hospitals;
+  const lowerCaseQuery = queryText.toLowerCase();
+  return hospitals.filter(h =>
+    h.name.toLowerCase().includes(lowerCaseQuery) ||
+    h.location.address.toLowerCase().includes(lowerCaseQuery) ||
+    h.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery))
+  );
+};
+
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => getCollection<DiagnosticsCentre>('diagnostics');
+
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => getDocumentById<DiagnosticsCentre>('diagnostics', id);
+
+export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
+  if (!db) return [];
+  const q = query(
+    collection(db, 'testAppointments'), // This collection doesn't exist in the new model. Needs refactor.
+    where('centreId', '==', centreId),
+    orderBy('date', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() } as TestAppointment));
 };
