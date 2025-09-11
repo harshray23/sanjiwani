@@ -27,6 +27,7 @@ const mockUsers: User[] = [
   { uid: 'admin-1', name: 'Admin User', email: 'admin@test.com', phone: '000-000-0000', role: 'admin', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'diag-1', name: 'City Diagnostics', email: 'diag@test.com', phone: '555-444-3333', role: 'diagnostics_centres', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'hospital-1', name: 'Metro General Hospital', email: 'hospital@test.com', phone: '123-123-1234', role: 'hospital', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doctor-test', name: 'Dr. Test Doctor', email: 'doctor@test.com', phone: '123-123-1234', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 
 ];
 
@@ -34,6 +35,7 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doctor-1', userId: 'doctor-1', name: 'Dr. Emily Carter', email: 'emily.carter@test.com', specialization: 'Cardiology', licenseNo: 'DOC-L12345', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "02:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor-1', phone: '111-222-3333', clinicName: 'Sunnyvale Clinic' },
   { id: 'doctor-2', userId: 'doctor-2', name: 'Dr. John Smith', email: 'john.smith@test.com', specialization: 'Dermatology', licenseNo: 'DOC-L67890', consultationFee: 700, availability: ["09:00 AM", "11:30 AM"], clinicId: 'clinic-2', verified: false, imageUrl: 'https://i.pravatar.cc/150?u=doctor-2', phone: '444-555-6666', clinicName: 'Oakwood Medical' },
   { id: 'doctor-3', userId: 'doctor-3', name: 'Dr. Sarah Lee', email: 'sarah.lee@test.com', specialization: 'Pediatrics', licenseNo: 'DOC-L54321', consultationFee: 600, availability: ["10:00 AM", "01:00 PM", "03:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor-3', phone: '777-888-9999', clinicName: 'Sunnyvale Clinic' },
+  { id: 'doctor-test', userId: 'doctor-test', name: 'Dr. Test Doctor', email: 'doctor@test.com', specialization: 'General Practice', licenseNo: 'DOC-TEST', consultationFee: 500, availability: ["09:00 AM", "10:00 AM", "11:00 AM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor-test', phone: '123-123-1234', clinicName: 'Sunnyvale Clinic' },
 ];
 
 const mockClinics: ClinicDetails[] = [
@@ -140,10 +142,14 @@ export const getDoctorById = async (id: string): Promise<DoctorProfile | undefin
     const doctorDetails = mockDoctors.find(d => d.id === id);
     if (!doctorDetails) return undefined;
     
+    // Find the base user info, but don't fail if it's missing (it might be a doctor-only signup)
+    const baseUser = mockUsers.find(u => u.uid === id);
+
     return Promise.resolve({
-        ...mockUsers.find(u => u.uid === id)!,
-        ...doctorDetails
-    });
+        ...baseUser, // Spread base user (could be undefined, which is fine)
+        uid: id, // Ensure uid is from the doctor's id
+        ...doctorDetails // Spread all details from the doctor record
+    } as DoctorProfile);
 };
 
 export const getClinics = async (): Promise<ClinicDetails[]> => {
@@ -153,7 +159,12 @@ export const getClinics = async (): Promise<ClinicDetails[]> => {
 
 export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
     console.log(`MOCK: getClinicById for id: ${id}`);
-    return Promise.resolve(mockClinics.find(c => c.id === id));
+    const clinic = mockClinics.find(c => c.id === id);
+    if (clinic) {
+        // Hydrate doctor details within the clinic
+        clinic.doctors = clinic.doctors.map(doc => mockDoctors.find(d => d.id === (doc as any).id) || doc);
+    }
+    return Promise.resolve(clinic);
 };
 
 
@@ -207,7 +218,12 @@ export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clin
 
 export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
   console.log(`MOCK: getAppointmentsForUser for patientId: ${patientId}`);
-  return Promise.resolve(mockAppointments.filter(app => app.patientId === patientId));
+  const appointments = mockAppointments.filter(app => app.patientId === patientId);
+  for (const app of appointments) {
+      if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
+      if (app.clinicId && !app.clinic) app.clinic = await getClinicById(app.clinicId) as ClinicProfile;
+  }
+  return Promise.resolve(appointments);
 };
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
@@ -223,7 +239,11 @@ export const getAppointmentById = async (id: string): Promise<Appointment | unde
 
 export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
   console.log(`MOCK: getAppointmentsForClinic for clinicId: ${clinicId}`);
-  return Promise.resolve(mockAppointments.filter(app => app.clinicId === clinicId));
+  const appointments = mockAppointments.filter(app => app.clinicId === clinicId);
+   for (const app of appointments) {
+      if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
+  }
+  return Promise.resolve(appointments);
 };
 
 export const getUsers = async (): Promise<User[]> => {
