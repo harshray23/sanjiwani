@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { getDoctorById, getClinicById } from '@/lib/data';
-import type { DoctorProfile, ClinicProfile } from '@/lib/types';
+import type { DoctorProfile, ClinicProfile, User } from '@/lib/types';
 import Image from 'next/image';
 import { Loader2, Star, Briefcase, GraduationCap, Calendar, Clock, Sparkles, IndianRupee, Medal, Video } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +13,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { useRouter, useParams } from 'next/navigation';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import Lottie from "lottie-react";
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
@@ -33,11 +31,11 @@ export default function DoctorDetailPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
-    });
-    return () => unsubscribe();
+    const storedUser = localStorage.getItem('mockUser');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    }
+    setIsAuthLoading(false);
   }, []);
 
   useEffect(() => {

@@ -3,10 +3,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getAppointmentsForUser } from '@/lib/data';
-import type { Appointment } from '@/lib/types';
+import type { Appointment, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Calendar, Loader2, LogIn, Building, Clock, Stethoscope, Ticket, CheckCircle, Video } from "lucide-react";
@@ -81,15 +79,18 @@ export default function AppointmentsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const userAppointments = await getAppointmentsForUser(currentUser.uid);
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    
+    setUser(currentUser);
+    if (currentUser) {
+      getAppointmentsForUser(currentUser.uid).then(userAppointments => {
         setAppointments(userAppointments);
-      }
+        setIsLoading(false);
+      });
+    } else {
       setIsLoading(false);
-    });
-    return () => unsubscribe();
+    }
   }, []);
 
   const renderContent = () => {

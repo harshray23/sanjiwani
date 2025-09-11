@@ -1,9 +1,8 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getDiagnosticsCentreById, getTestAppointmentsForCentre, getUserProfile } from '@/lib/data';
 import type { DiagnosticsCentre, TestAppointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +27,15 @@ const DiagnosticsDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
-            const profile = await getUserProfile(currentUser.uid);
-            setUserProfile(profile);
-
-            if (profile?.role === 'diagnostics_centres') {
-                const centreId = 'diag-1'; // Mock: Assume user's diagnostics centre is 'diag-1'
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    setUserProfile(currentUser);
+    
+    const fetchData = async () => {
+        if (currentUser && currentUser.role === 'diagnostics_centres') {
+            try {
+                // Mock: Assume user's diagnostics centre is their UID
+                const centreId = currentUser.uid; 
                 const [centreData, appointmentData] = await Promise.all([
                   getDiagnosticsCentreById(centreId),
                   getTestAppointmentsForCentre(centreId)
@@ -48,22 +48,14 @@ const DiagnosticsDashboard = () => {
                   setCentre(null);
                   setAppointments([]);
                 }
-            } else if (profile) {
-                // User has a profile, but not the correct role
+            } catch(error) {
+                console.error("Error fetching diagnostics data:", error);
+                toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
                 setCentre(null);
             }
-        } catch(error) {
-            console.error("Error fetching diagnostics data:", error);
-            toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
-            setUserProfile(null);
-            setCentre(null);
         }
-      } else {
-        setUserProfile(null);
-        setCentre(null);
-      }
-    });
-    return () => unsubscribe();
+    };
+    fetchData();
   }, [toast]);
   
   const handleAction = (action: string, entity: string, id: string) => {

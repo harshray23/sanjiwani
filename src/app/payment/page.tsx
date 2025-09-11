@@ -23,9 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
 import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/data';
-import type { DoctorProfile } from '@/lib/types';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import type { DoctorProfile, User } from '@/lib/types';
 import { createAppointment } from '@/lib/data';
 import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
@@ -64,14 +62,13 @@ function PaymentForm() {
   const totalFee = consultationFee + platformFee;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
-      if (!currentUser) {
-         router.push('/login');
-      }
-    });
-    return () => unsubscribe();
+    const storedUser = localStorage.getItem('mockUser');
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    } else {
+        router.push('/login');
+    }
+    setIsAuthLoading(false);
   }, [router]);
 
   useEffect(() => {

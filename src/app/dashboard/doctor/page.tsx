@@ -3,13 +3,11 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { getDoctorById, getUserProfile, updateDoctorProfile } from '@/lib/data';
-import type { DoctorProfile, ClinicProfile, Appointment, User as AppUser } from '@/lib/types';
+import { getDoctorById, updateDoctorProfile } from '@/lib/data';
+import type { DoctorProfile, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Calendar, Building, Clock, BadgeCheck, Briefcase, PlusCircle, Pencil, Upload, LogIn, ShieldAlert, IndianRupee } from "lucide-react";
+import { Calendar, Clock, PlusCircle, Pencil, Upload, LogIn, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -48,40 +46,34 @@ const DoctorDashboard = () => {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
-          const profile = await getUserProfile(currentUser.uid);
-          setUserProfile(profile);
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    setUserProfile(currentUser);
 
-          if (profile?.role === 'doctor') {
-            const doctorProfile = await getDoctorById(profile.uid);
-            setDoctor(doctorProfile);
-            if (doctorProfile) {
-                 profileForm.reset({
-                    specialization: doctorProfile.specialization || '',
-                    licenseNo: doctorProfile.licenseNo || '',
-                    consultationFee: doctorProfile.consultationFee || 500,
-                });
+    const fetchData = async () => {
+        if (currentUser && currentUser.role === 'doctor') {
+            try {
+                const doctorProfile = await getDoctorById(currentUser.uid);
+                setDoctor(doctorProfile);
+                if (doctorProfile) {
+                     profileForm.reset({
+                        specialization: doctorProfile.specialization || '',
+                        licenseNo: doctorProfile.licenseNo || '',
+                        consultationFee: doctorProfile.consultationFee || 500,
+                    });
+                }
+                // TODO: Fetch appointments for the doctor
+                setAppointments([]);
+            } catch (error) {
+                console.error("Error fetching doctor data:", error);
+                toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
+                setDoctor(null);
             }
-            // TODO: Fetch appointments for the doctor
-            setAppointments([]);
-          } else {
-            setDoctor(null); // Explicitly set to null if role is not doctor
-          }
-        } catch (error) {
-            console.error("Error fetching doctor data:", error);
-            toast({ title: "Error", description: "Could not load doctor profile.", variant: "destructive"});
-            setDoctor(null);
         }
-      } else {
-        setUserProfile(null);
-        setDoctor(null);
-      }
-      setIsLoading(false);
-    });
+        setIsLoading(false);
+    };
 
-    return () => unsubscribe();
+    fetchData();
   }, [profileForm, toast]);
 
   const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {

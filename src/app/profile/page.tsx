@@ -3,8 +3,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Loader2, LogIn, User as UserIcon, Save, ArrowRight } from "lucide-react";
@@ -24,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
-import { getUserProfile, updateUserProfile } from '@/lib/data';
+import { updateUserProfile } from '@/lib/data';
 import type { User as AppUser } from '@/lib/types';
 
 
@@ -34,7 +32,6 @@ const profileFormSchema = z.object({
 });
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,33 +46,31 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if(currentUser) {
-        const profile = await getUserProfile(currentUser.uid);
-        setUserProfile(profile);
-        if (profile) {
-            form.reset({
-                name: profile.name || "",
-                phone: profile.phone || ""
-            });
-        }
-      }
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
+    const storedUser = localStorage.getItem('mockUser');
+    if(storedUser) {
+      const profile = JSON.parse(storedUser);
+      setUserProfile(profile);
+      form.reset({
+          name: profile.name || "",
+          phone: profile.phone || ""
+      });
+    }
+    setIsLoading(false);
   }, [form]);
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
-    if (!user) {
+    if (!userProfile) {
         toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive"});
         return;
     }
     setIsSubmitting(true);
     try {
-        // This function now only needs to update the /users collection.
-        // Your security rules allow this.
-        await updateUserProfile(user.uid, values);
+        await updateUserProfile(userProfile.uid, values);
+
+        const updatedProfile = { ...userProfile, ...values };
+        setUserProfile(updatedProfile);
+        localStorage.setItem('mockUser', JSON.stringify(updatedProfile));
+
         toast({
             title: "Profile Updated",
             description: "Your information has been saved successfully.",
@@ -109,7 +104,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user || !userProfile) {
+  if (!userProfile) {
     return (
        <div className="py-12 w-full text-center">
          <Card className="w-full max-w-md mx-auto shadow-xl p-8">

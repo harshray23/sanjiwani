@@ -2,10 +2,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getClinicById, getAppointmentsForClinic, getUserProfile } from '@/lib/data';
-import type { ClinicDetails, Appointment } from '@/lib/types';
+import type { ClinicDetails, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { UserPlus, Pencil, LogIn, Hourglass, Trash2, Upload, ShieldAlert } from "lucide-react";
@@ -21,22 +19,21 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const ClinicDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [clinic, setClinic] = useState<ClinicDetails | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        try {
-            const profile = await getUserProfile(currentUser.uid);
-            setUserProfile(profile);
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    setUserProfile(currentUser);
 
-            if (profile?.role === 'clinic') {
-                const clinicId = 'clinic-1'; // Mock: Assume this user's clinic is always 'clinic-1'
+    const fetchData = async () => {
+        if (currentUser && currentUser.role === 'clinic') {
+            try {
+                // Mock: Assume this user's clinic is always their UID
+                const clinicId = currentUser.uid; 
                 
                 const [clinicData, appointmentData] = await Promise.all([
                     getClinicById(clinicId),
@@ -50,22 +47,14 @@ const ClinicDashboard = () => {
                   setClinic(null);
                   setAppointments([]);
                 }
-            } else if (profile) {
-                // User has a profile, but not the correct role
+            } catch (error) {
+                console.error("Error fetching clinic data:", error);
+                toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
                 setClinic(null);
             }
-        } catch (error) {
-            console.error("Error fetching clinic data:", error);
-            toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
-            setUserProfile(null);
-            setClinic(null);
         }
-      } else {
-        setUserProfile(null);
-        setClinic(null);
-      }
-    });
-    return () => unsubscribe();
+    };
+    fetchData();
   }, [toast]);
   
   const handleUpdateTimings = () => {
@@ -92,7 +81,7 @@ const ClinicDashboard = () => {
     );
   }
 
-  if (!user || userProfile?.role !== 'clinic') {
+  if (!userProfile || userProfile?.role !== 'clinic') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">
@@ -209,7 +198,7 @@ const ClinicDashboard = () => {
                         <div className="md:col-span-1 space-y-2">
                              <label className="font-semibold">Clinic Picture</label>
                              <Image 
-                                src={clinic.imageUrl} 
+                                src={clinic.imageUrl || ''} 
                                 alt={clinic.name}
                                 width={200}
                                 height={200}

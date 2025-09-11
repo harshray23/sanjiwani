@@ -3,8 +3,6 @@
 
 import * as React from "react";
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,7 +10,7 @@ import Link from 'next/link';
 import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield, FlaskConical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { getUserProfile } from '@/lib/data';
+import type { User } from '@/lib/types';
 
 const avatarColors = [
   'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 
@@ -20,6 +18,7 @@ const avatarColors = [
 ];
 
 const getAvatarColor = (str: string) => {
+    if (!str) return avatarColors[0];
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -31,35 +30,25 @@ const getAvatarColor = (str: string) => {
 
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
 
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if(currentUser) {
-          const profile = await getUserProfile(currentUser.uid);
-          setUserRole(profile?.role || 'customer');
-      } else {
-          setUserRole(null);
-      }
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
+    // MOCK: Check localStorage for a logged-in user
+    const storedUser = localStorage.getItem('mockUser');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
   }, []);
 
   const handleLogout = async () => {
-    try {
-        await signOut(auth);
-        toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
-        router.push('/login');
-    } catch (error) {
-        console.error('Logout error:', error);
-        toast({ title: 'Logout Failed', description: 'Could not log you out. Please try again.', variant: 'destructive'});
-    }
+    // MOCK: Clear localStorage and redirect
+    localStorage.removeItem('mockUser');
+    setUser(null);
+    toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
+    router.push('/login');
   }
 
   if (isLoading) {
@@ -75,6 +64,7 @@ export function UserNav() {
   }
 
   const getInitials = (email: string) => {
+    if (!email) return 'U';
     const parts = email.split('@');
     return parts[0][0].toUpperCase();
   }
@@ -89,14 +79,13 @@ export function UserNav() {
     admin: { href: '/dashboard/admin', label: 'Admin Dashboard', icon: <Shield /> },
   }
 
-  const userDashboard = userRole ? dashboardLinks[userRole] : null;
+  const userDashboard = user.role ? dashboardLinks[user.role] : null;
 
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-             <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
             <AvatarFallback className={`${fallbackColor} text-white font-bold`}>
                 {user.email ? getInitials(user.email) : 'U'}
             </AvatarFallback>
@@ -121,7 +110,7 @@ export function UserNav() {
               </Link>
           </DropdownMenuItem>
 
-          {userRole === 'patient' && (
+          {user.role === 'patient' && (
               <DropdownMenuItem asChild>
                   <Link href="/appointments">
                       <LayoutDashboard className="mr-2 h-4 w-4" />

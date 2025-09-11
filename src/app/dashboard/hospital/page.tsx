@@ -1,10 +1,9 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { searchHospitals, getUserProfile } from '@/lib/data';
+import { searchHospitals } from '@/lib/data';
 import type { Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -19,21 +18,19 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 
 const HospitalDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-        setUser(currentUser)
-      if (currentUser) {
-        try {
-            const profile = await getUserProfile(currentUser.uid);
-            setUserProfile(profile);
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    setUserProfile(currentUser);
 
-            if (profile?.role === 'hospital') {
+    const fetchData = async () => {
+        if (currentUser && currentUser.role === 'hospital') {
+            try {
                 // In a real app, you'd fetch the hospital associated with this user
                 const [hospitalResults, appointmentData] = await Promise.all([
                     searchHospitals('Metro General Hospital'), // Mock fetch
@@ -47,21 +44,15 @@ const HospitalDashboard = () => {
                   setHospital(null);
                   setAppointments([]);
                 }
-            } else if (profile) {
+            } catch (error) {
+                console.error("Error fetching hospital data:", error);
+                toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
                 setHospital(null);
             }
-        } catch (error) {
-            console.error("Error fetching hospital data:", error);
-            toast({ title: "Error", description: "Could not load hospital data.", variant: "destructive"});
-            setUserProfile(null);
-            setHospital(null);
         }
-      } else {
-        setUserProfile(null);
-        setHospital(null);
-      }
-    });
-    return () => unsubscribe();
+    };
+    
+    fetchData();
   }, [toast]);
   
   const handleBedUpdate = () => {
@@ -87,7 +78,7 @@ const HospitalDashboard = () => {
     );
   }
 
-  if (!user || userProfile?.role !== 'hospital') {
+  if (!userProfile || userProfile?.role !== 'hospital') {
     return (
       <div className="text-center p-8">
         <Card className="max-w-md mx-auto p-8">

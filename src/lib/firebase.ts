@@ -1,3 +1,6 @@
+// This file is now mostly unused due to the mock data implementation.
+// It is kept for potential future re-integration with a live Firebase backend.
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
@@ -17,15 +20,15 @@ const firebaseConfig = {
 const isFirebaseConfigValid = Object.values(firebaseConfig).every(value => !!value);
 
 if (!isFirebaseConfigValid && process.env.NODE_ENV !== 'test') {
-  console.error("Firebase config is missing or incomplete. Please check your .env file.");
+  console.warn("Firebase config is missing or incomplete. The app is running on mock data, so this is expected. If you intend to connect to Firebase, please check your .env file.");
 }
 
 // Initialize Firebase
 // This guard prevents re-initialization on hot reloads
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app = !getApps().length && isFirebaseConfigValid ? initializeApp(firebaseConfig) : (getApps().length > 0 ? getApp() : null);
 
-const db = getFirestore(app);
-const auth = getAuth(app);
+const db = app ? getFirestore(app) : null;
+const auth = app ? getAuth(app) : null;
 
 
 // In a real app, you might connect to emulators in development.

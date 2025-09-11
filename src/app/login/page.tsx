@@ -20,20 +20,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, KeyRound, UserPlus, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
-import { auth } from '@/lib/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut,
-  AuthErrorCodes
-} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import Image from "next/image";
-import { createUserInFirestore, getUserProfile } from "@/lib/data";
+import { createUserInFirestore, getUserProfile, mockUsers } from "@/lib/data";
 
 const roleEnum = z.enum(["patient", "doctor", "clinic", "diag_centre", "admin"]);
 export type Role = z.infer<typeof roleEnum>;
@@ -148,28 +140,22 @@ const SignUpForm = () => {
         }
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, baseValidationResult.data.email, baseValidationResult.data.password);
-            
-            await createUserInFirestore(userCredential.user, selectedRole, baseValidationResult.data, detailsValidationResult.data);
-
-            await signOut(auth);
+            // MOCK: Simulate creating a user.
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log("MOCK: User would be created with:", {
+                role: selectedRole,
+                baseData: baseValidationResult.data,
+                detailsData: detailsValidationResult.data
+            });
 
             toast({ title: "Account Created Successfully", description: "Welcome! Please sign in to continue." });
             form.reset();
             setSelectedRole(null);
 
         } catch (error: any) {
-            let description = "An unknown error occurred. Please try again.";
-            if (error.code === AuthErrorCodes.EMAIL_EXISTS || error.code === 'auth/email-already-in-use') {
-                description = "An account with this email already exists. Please sign in instead.";
-            } else if (error.code === AuthErrorCodes.WEAK_PASSWORD) {
-                description = "The password is too weak. Please use at least 6 characters.";
-            } else if (error.code === 'auth/invalid-email') {
-                description = "The email address is not valid. Please check and try again.";
-            }
-            toast({
+             toast({
                 title: "Sign Up Failed",
-                description: description,
+                description: "An unknown error occurred during mock sign-up.",
                 variant: "destructive",
             });
         } finally {
@@ -284,15 +270,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     // If a user is already logged in when they visit this page, log them out.
-    if (auth.currentUser) {
-      signOut(auth).then(() => {
-        toast({
-          title: "You Have Been Logged Out",
-          description: "Please log in again to continue.",
-        });
-      });
-    }
-  }, [toast]);
+    localStorage.removeItem('mockUser');
+  }, []);
 
   const handleAuthSuccess = (role: string) => {
     switch (role) {
@@ -302,10 +281,10 @@ export default function LoginPage() {
       case 'clinic':
         router.push('/dashboard/clinic');
         break;
-      case 'hospital': // This role is not in the new schema, but we keep it for now
+      case 'hospital': 
         router.push('/dashboard/hospital');
         break;
-       case 'diag_centre':
+       case 'diagnostics_centres':
         router.push('/dashboard/diagnostics');
         break;
       case 'admin':
@@ -319,41 +298,32 @@ export default function LoginPage() {
 
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user;
+    
+    // MOCK AUTHENTICATION
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const user = mockUsers.find(u => u.email === values.email);
+    
+    // For mock purposes, any password is valid for a mock user.
+    // In a real app, you'd check a hashed password.
+    if (user && values.password === 'password') {
       
-      const profile = await getUserProfile(user.uid);
-
-      if (!profile) {
-        toast({
-          title: "Sign In Failed",
-          description: "Could not find a user profile for this account. Please sign up or contact support.",
-          variant: "destructive",
-        });
-        await signOut(auth);
-        setIsLoading(false);
-        return;
-      }
+      // Store user in localStorage to simulate session
+      localStorage.setItem('mockUser', JSON.stringify(user));
       
       toast({
         title: "Signed In Successfully",
         description: "Welcome back! Redirecting you now...",
       });
-      handleAuthSuccess(profile.role);
+      handleAuthSuccess(user.role);
       
-    } catch (error: any) {
-       let description = "An unknown error occurred. Please try again.";
-       if (error.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-           description = "Invalid email or password. Please check your credentials and try again.";
-       }
+    } else {
        toast({
           title: "Sign In Failed",
-          description: description,
+          description: "Invalid email or password. Please check your credentials and try again.",
           variant: "destructive",
        });
-    } finally {
-      setIsLoading(false);
+       setIsLoading(false);
     }
   }
 
@@ -372,21 +342,12 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({
-        title: "Password Reset Email Sent",
-        description: `If an account exists for ${email}, a password reset link has been sent to it.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error Sending Reset Email",
-        description: "Could not send password reset email. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    toast({
+      title: "Password Reset Email Sent",
+      description: `If an account exists for ${email}, a password reset link has been sent to it. (This is a mock response)`,
+    });
+    setIsLoading(false);
   };
 
   return (
@@ -475,5 +436,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    

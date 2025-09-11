@@ -1,9 +1,8 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { getClinics, getDoctors, getHospitals, getAppointmentsForUser, getUsers, getDiagnosticsCentres, updateUserVerification } from '@/lib/data';
 import type { Clinic, Doctor, Hospital, Appointment, User as AppUser, DiagnosticsCentre } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +28,7 @@ type AdminData = {
 };
 
 const AdminDashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [data, setData] = useState<AdminData | undefined>(undefined);
   const { toast } = useToast();
 
@@ -52,9 +51,11 @@ const AdminDashboard = () => {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
+    const storedUser = localStorage.getItem('mockUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    setUser(currentUser);
+
+    if (currentUser) {
         if (!currentUser.email?.startsWith('admin@')) {
           setData({ doctors: [], clinics: [], hospitals: [], appointments: [], users: [], diagnosticsCentres: [] });
           return;
@@ -63,8 +64,6 @@ const AdminDashboard = () => {
       } else {
         setData(undefined);
       }
-    });
-    return () => unsubscribe();
   }, [toast]);
   
   const handleRemove = (type: string, id: string) => {
