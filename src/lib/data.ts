@@ -19,7 +19,7 @@ import { Timestamp } from 'firebase/firestore';
 
 // --- MOCK DATA ---
 
-const mockUsers: User[] = [
+export const mockUsers: User[] = [
   { uid: 'patient-1', name: 'John Patient', email: 'patient@test.com', phone: '123-456-7890', role: 'patient', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doctor-1', name: 'Emily Carter', email: 'emily.carter@test.com', phone: '111-222-3333', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doctor-2', name: 'John Smith', email: 'john.smith@test.com', phone: '444-555-6666', role: 'doctor', verified: false, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
