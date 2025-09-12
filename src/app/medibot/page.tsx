@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, Loader2, Send, User } from 'lucide-react';
-import { streamChat } from '@/ai/flows/medibot-flow';
+import { streamChat } from '@/app/medibot/medibot-flow';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Lottie from 'lottie-react';
