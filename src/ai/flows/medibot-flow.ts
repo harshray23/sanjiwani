@@ -35,7 +35,7 @@ const mediBotPrompt = ai.definePrompt({
     name: 'mediBotPrompt',
     input: { schema: MediBotInputSchema },
     output: { schema: MediBotOutputSchema },
-    model: googleAI.model('gemini-1.5-flash-preview'),
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
 
