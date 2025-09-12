@@ -35,18 +35,31 @@ export function UserNav() {
   const router = useRouter();
 
   useEffect(() => {
-    // MOCK: Check localStorage for a logged-in user
-    const storedUser = localStorage.getItem('mockUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const checkUser = () => {
+      const storedUser = localStorage.getItem('mockUser');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+      setIsLoading(false);
     }
-    setIsLoading(false);
+
+    checkUser();
+
+    // Listen for storage changes to update the nav when user logs in/out from another tab
+    window.addEventListener('storage', checkUser);
+    
+    // Listen for the custom 'authChange' event
+    window.addEventListener('authChange', checkUser);
+
+    return () => {
+      window.removeEventListener('storage', checkUser);
+      window.removeEventListener('authChange', checkUser);
+    };
   }, []);
 
   const handleLogout = async () => {
     // MOCK: Clear localStorage and redirect
     localStorage.removeItem('mockUser');
     setUser(null);
+    window.dispatchEvent(new Event('authChange')); // Dispatch event on logout
     toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
     router.push('/login');
   }

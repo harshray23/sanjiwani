@@ -271,6 +271,7 @@ export default function LoginPage() {
   useEffect(() => {
     // If a user is already logged in when they visit this page, log them out.
     localStorage.removeItem('mockUser');
+    window.dispatchEvent(new Event('authChange')); // Notify header to update
   }, []);
 
   const handleAuthSuccess = (role: string) => {
@@ -310,7 +311,9 @@ export default function LoginPage() {
       
       // Store user in localStorage to simulate session
       localStorage.setItem('mockUser', JSON.stringify(user));
-      
+      // Dispatch a custom event to notify other components (like the header)
+      window.dispatchEvent(new Event('authChange'));
+
       toast({
         title: "Signed In Successfully",
         description: "Welcome back! Redirecting you now...",
