@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A streaming AI chatbot flow for the Medi+Bot assistant.
@@ -54,6 +55,15 @@ const mediBotStreamFlow = ai.defineFlow(
     inputSchema: MediBotInputSchema,
   },
   async function* (input) {
+    const normalizedQuery = input.query.trim().toLowerCase();
+    const greetings = ['hi', 'hlo', 'hello'];
+
+    // Check if it's the first user message and it's a greeting
+    if (input.history.length === 1 && greetings.includes(normalizedQuery)) {
+      yield 'Hlo, I am Medi+Bot, an AI assistant of Sanjiwini. How can I assist you today?';
+      return;
+    }
+
     const { stream } = ai.generateStream({
       model: googleAI.model('gemini-1.5-flash'),
       prompt: {
