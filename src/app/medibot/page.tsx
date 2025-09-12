@@ -11,10 +11,9 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { streamChat } from '@/ai/flows/medibot-flow';
 import type { MediBotInput } from '@/ai/flows/medibot-flow';
-import { Loader2, Bot, User, Send, Sparkles } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Loader2, Bot, User, Send } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import Logo from '@/components/layout/Logo';
 
 interface Message {
   role: 'user' | 'model';
@@ -44,10 +43,10 @@ export default function MediBotPage() {
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
+        const viewport = scrollAreaRef.current.children[0] as HTMLDivElement;
+        if (viewport) {
+             viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+        }
     }
   };
 
@@ -87,7 +86,7 @@ export default function MediBotPage() {
     } catch (error) {
       console.error('Error streaming chat:', error);
       setMessages((prev) => [
-        ...prev,
+        ...prev.slice(0, -1),
         {
           role: 'model',
           content: 'Sorry, I encountered an error. Please try again.',
@@ -108,8 +107,9 @@ export default function MediBotPage() {
           <CardTitle className="text-2xl font-headline text-accent">Medi+Bot</CardTitle>
           <CardDescription>Your AI Health Assistant</CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow p-0 flex flex-col">
-          <ScrollArea className="flex-grow p-6" ref={scrollAreaRef}>
+        
+        <CardContent className="flex-grow p-0 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
             <div className="space-y-6">
               {messages.map((message, index) => (
                 <div
@@ -154,6 +154,7 @@ export default function MediBotPage() {
               ))}
             </div>
           </ScrollArea>
+          
           <div className="p-4 border-t bg-muted/50">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
