@@ -61,10 +61,9 @@ const mediBotStreamFlow = ai.defineFlow(
     // No output schema is needed when we return a stream directly
   },
   async (input) => {
-    const { stream } = await ai.generate({
+    const { stream } = ai.generateStream({
         ...mediBotPrompt,
         input: input,
-        stream: true,
     });
     
     // We will return a ReadableStream of text chunks
