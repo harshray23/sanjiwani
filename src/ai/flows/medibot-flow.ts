@@ -3,14 +3,14 @@
 /**
  * @fileOverview An AI chatbot flow for Sanjiwani Health.
  *
- * - chatWithMediBot: A function to handle conversational chat.
+ * - streamChat: A function to handle conversational chat with streaming.
  * - MediBotInput: The input type for the chat flow.
- * - MediBotOutput: The return type for the chat flow.
  */
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
+import { streamToAsyncGenerator } from '@/lib/utils';
 
 const MediBotInputSchema = z.object({
   history: z.array(z.object({
@@ -21,20 +21,14 @@ const MediBotInputSchema = z.object({
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
-const MediBotOutputSchema = z.object({
-  response: z.string().describe('The AI bot\'s response.'),
-});
-export type MediBotOutput = z.infer<typeof MediBotOutputSchema>;
-
-
-export async function chatWithMediBot(input: MediBotInput): Promise<MediBotOutput> {
-  return await mediBotFlow(input);
+export async function streamChat(input: MediBotInput): Promise<AsyncGenerator<string>> {
+  const stream = await mediBotStreamFlow(input);
+  return streamToAsyncGenerator(stream);
 }
 
-const mediBotPrompt = ai.definePrompt({
+const mediBotPrompt = {
     name: 'mediBotPrompt',
     input: { schema: MediBotInputSchema },
-    output: { schema: MediBotOutputSchema },
     model: googleAI.model('gemini-1.5-flash'),
     prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
@@ -58,19 +52,30 @@ Your goal is to answer user questions about the app's services, help them naviga
 **Your Task:**
 Based on the conversation history and the new user question, generate a helpful and relevant response. Address the user's query directly and courteously.
 `,
-});
+};
 
-const mediBotFlow = ai.defineFlow(
+const mediBotStreamFlow = ai.defineFlow(
   {
-    name: 'mediBotFlow',
+    name: 'mediBotStreamFlow',
     inputSchema: MediBotInputSchema,
-    outputSchema: MediBotOutputSchema,
+    outputSchema: z.string(), // We're streaming a string now
   },
   async (input) => {
-    const { output } = await mediBotPrompt(input);
-    if (!output) {
-      return { response: "I'm sorry, I couldn't process that. Could you please rephrase?" };
-    }
-    return output;
+    const { stream } = ai.generateStream({
+        ...mediBotPrompt,
+        prompt: mediBotPrompt.prompt, // Pass the prompt template string
+        input: input, // Pass the actual data
+        stream: true,
+    });
+    
+    // We will return a ReadableStream of text chunks
+    return new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(chunk.text);
+        }
+        controller.close();
+      },
+    });
   }
 );

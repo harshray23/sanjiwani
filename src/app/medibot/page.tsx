@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, Loader2, Send, User } from 'lucide-react';
-import { chatWithMediBot } from '@/ai/flows/medibot-flow';
+import { streamChat } from '@/ai/flows/medibot-flow';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Lottie from 'lottie-react';
@@ -35,24 +35,40 @@ export default function MediBotPage() {
         if (!input.trim()) return;
 
         const userMessage: Message = { role: 'user', content: input };
-        setMessages((prev) => [...prev, userMessage]);
+        const currentInput = input;
+        
+        // Add user message and an empty bot message
+        setMessages((prev) => [...prev, userMessage, { role: 'model', content: '' }]);
         setInput('');
         setIsLoading(true);
 
         try {
-            const response = await chatWithMediBot({
+            const stream = await streamChat({
                 history: messages,
-                query: input,
+                query: currentInput,
             });
-            const botMessage: Message = { role: 'model', content: response.response };
-            setMessages((prev) => [...prev, botMessage]);
+
+            for await (const chunk of stream) {
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    if (lastMessage.role === 'model') {
+                        lastMessage.content += chunk;
+                    }
+                    return newMessages;
+                });
+            }
+
         } catch (error) {
             console.error("Error calling MediBot flow:", error);
-            const errorMessage: Message = {
-                role: 'model',
-                content: "I'm sorry, something went wrong on my end. Please try again in a moment.",
-            };
-            setMessages((prev) => [...prev, errorMessage]);
+            setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage.role === 'model') {
+                    lastMessage.content = "I'm sorry, something went wrong on my end. Please try again in a moment.";
+                }
+                return newMessages;
+            });
         } finally {
             setIsLoading(false);
         }
@@ -98,10 +114,15 @@ export default function MediBotPage() {
                                             "p-3 rounded-lg max-w-md",
                                             message.role === 'user'
                                                 ? "bg-primary text-primary-foreground"
-                                                : "bg-muted"
+                                                : "bg-muted",
+                                            message.role === 'model' && message.content === '' && "flex items-center justify-center"
                                         )}
                                     >
-                                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                        {message.role === 'model' && message.content === '' ? (
+                                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                        ) : (
+                                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                        )}
                                     </div>
                                     {message.role === 'user' && (
                                         <Avatar>
@@ -110,17 +131,6 @@ export default function MediBotPage() {
                                     )}
                                 </div>
                             ))}
-
-                            {isLoading && (
-                                <div className="flex items-start gap-3">
-                                    <Avatar className="border-2 border-primary/50">
-                                        <AvatarFallback className="bg-primary/20"><Bot className="text-primary" /></AvatarFallback>
-                                    </Avatar>
-                                    <div className="bg-muted p-3 rounded-lg flex items-center justify-center">
-                                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </ScrollArea>
                 </CardContent>
