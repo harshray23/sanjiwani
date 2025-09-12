@@ -10,27 +10,31 @@
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
-import type {GenerateResultChunk} from 'genkit';
-
 
 const MediBotInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(),
-  })).describe('The conversation history.'),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'model']),
+        content: z.string(),
+      })
+    )
+    .describe('The conversation history.'),
   query: z.string().describe('The latest user query.'),
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
-export async function streamChat(input: MediBotInput): Promise<AsyncGenerator<string>> {
+export async function streamChat(
+  input: MediBotInput
+): Promise<AsyncGenerator<string>> {
   return mediBotStreamFlow(input);
 }
 
 const mediBotPrompt = {
-    name: 'mediBotPrompt',
-    input: { schema: MediBotInputSchema },
-    model: googleAI.model('gemini-1.5-flash'),
-    prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
+  name: 'mediBotPrompt',
+  input: { schema: MediBotInputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
+  prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
 
 **Response Rules:**
@@ -66,10 +70,10 @@ const mediBotStreamFlow = ai.defineFlow(
   },
   async function* (input) {
     const { stream } = ai.generateStream({
-        ...mediBotPrompt,
-        input: input,
+      ...mediBotPrompt,
+      input: input,
     });
-    
+
     for await (const chunk of stream) {
       yield chunk.text;
     }
