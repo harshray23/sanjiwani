@@ -33,6 +33,7 @@ export async function streamChat(
 const mediBotPrompt = ai.definePrompt({
   name: 'mediBotPrompt',
   input: { schema: MediBotInputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
 
@@ -60,11 +61,8 @@ const mediBotStreamFlow = ai.defineFlow(
   },
   async function* (input) {
     const { stream } = ai.generateStream({
-      model: googleAI.model('gemini-1.5-flash'),
-      prompt: {
-        template: mediBotPrompt.prompt,
-        input: input,
-      },
+      prompt: mediBotPrompt,
+      input: input,
     });
 
     for await (const chunk of stream) {
