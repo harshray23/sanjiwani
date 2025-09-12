@@ -55,19 +55,26 @@ export const comprehensiveTests: DiagnosticTest[] = [
   { id: 'test-2', name: 'Lipid Profile', category: 'Pathology', price: 600 },
   { id: 'test-3', name: 'Liver Function Test (LFT)', category: 'Pathology', price: 550 },
   { id: 'test-4', name: 'Kidney Function Test (KFT)', category: 'Pathology', price: 500 },
-  { id: 'test-5', name: 'Thyroid Profile', category: 'Hormonal', price: 700 },
-  { id: 'test-6', name: 'X-Ray Chest', category: 'Radiology', price: 400 },
-  { id: 'test-7', name: 'Ultrasound Abdomen', category: 'Radiology', price: 1200 },
+  { id: 'test-5', name: 'Thyroid Profile (T3, T4, TSH)', category: 'Hormonal', price: 700 },
+  { id: 'test-6', name: 'X-Ray Chest PA View', category: 'Radiology', price: 400 },
+  { id: 'test-7', name: 'Ultrasound Abdomen & Pelvis', category: 'Radiology', price: 1200 },
+  { id: 'test-8', name: 'ECG', category: 'Cardiology', price: 250 },
+  { id: 'test-9', name: 'HbA1c (Glycated Hemoglobin)', category: 'Pathology', price: 450 },
+  { id: 'test-10', name: 'Vitamin D, 25-Hydroxy', category: 'Vitamins', price: 1400 },
+  { id: 'test-11', name: 'Vitamin B12', category: 'Vitamins', price: 800 },
+  { id: 'test-12', name: 'Urine Routine & Microscopy', category: 'Pathology', price: 150 },
 ];
 
 const mockPathologists: Pathologist[] = [
     { id: 'path-1', name: 'Dr. Alan Grant', qualifications: ['MD Pathology'], imageUrl: 'https://i.pravatar.cc/150?u=path-1'},
     { id: 'path-2', name: 'Dr. Ellie Sattler', qualifications: ['MBBS, DNB'], imageUrl: 'https://i.pravatar.cc/150?u=path-2'},
+    { id: 'path-3', name: 'Dr. Ian Malcolm', qualifications: ['MD, FRCPath'], imageUrl: 'https://i.pravatar.cc/150?u=path-3'},
 ]
 
 const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-1', name: 'City Diagnostics', location: '789 Test Ave, Lab City', contact: { phone: '555-444-3333', email: 'contact@citydiag.com' }, rating: 4.7, imageUrl: 'https://picsum.photos/seed/diag-1/400/200', dataAiHint: 'laboratory microscope', tests: comprehensiveTests.slice(0,4), pathologists: [mockPathologists[0]] },
-  { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-2/400/200', dataAiHint: 'mri machine', tests: comprehensiveTests.slice(4), pathologists: [mockPathologists[1]] },
+  { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-2/400/200', dataAiHint: 'mri machine', tests: [comprehensiveTests[5], comprehensiveTests[6]], pathologists: [mockPathologists[1]] },
+  { id: 'diag-3', name: 'Care Scans & Labs', location: '202 Health Blvd, Wellness City', contact: { phone: '555-666-7777', email: 'support@carescan.com' }, rating: 4.8, imageUrl: 'https://picsum.photos/seed/diag-3/400/200', dataAiHint: 'health clinic', tests: comprehensiveTests, pathologists: [mockPathologists[0], mockPathologists[2]] },
 ];
 
 const mockHospitals: Hospital[] = [
@@ -78,7 +85,8 @@ const mockHospitals: Hospital[] = [
 const mockTestAppointments: TestAppointment[] = [
     { id: 't-appt-1', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-1', test: comprehensiveTests[0], date: new Date().toISOString(), time: '10:00 AM', status: 'Report Ready', reportUrl: '#' },
     { id: 't-appt-2', patientId: 'patient-2', patientName: 'Jane Doe', centreId: 'diag-1', test: comprehensiveTests[1], date: new Date().toISOString(), time: '11:00 AM', status: 'Completed' },
-    { id: 't-appt-3', patientId: 'patient-3', patientName: 'Peter Pan', centreId: 'diag-1', test: comprehensiveTests[2], date: new Date(Date.now() + 86400000).toISOString(), time: '09:00 AM', status: 'Scheduled' },
+    { id: 't-appt-3', patientId: 'patient-3', patientName: 'Peter Pan', centreId: 'diag-3', test: comprehensiveTests[2], date: new Date(Date.now() + 86400000).toISOString(), time: '09:00 AM', status: 'Scheduled' },
+    { id: 't-appt-4', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-3', test: comprehensiveTests[7], date: new Date(Date.now() + 2 * 86400000).toISOString(), time: '12:00 PM', status: 'Scheduled' },
 ]
 
 // --- USER MANAGEMENT ---
@@ -295,3 +303,6 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     console.log(`MOCK: getTestAppointmentsForCentre for centreId: ${centreId}`);
     return Promise.resolve(mockTestAppointments.filter(app => app.centreId === centreId));
 };
+
+
+    
