@@ -19,7 +19,9 @@ interface Message {
 }
 
 export default function MediBotPage() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([
+        { role: 'model', content: "Hello! I'm MediBot. How can I assist you with Sanjiwani Health services today?" }
+    ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -37,14 +39,15 @@ export default function MediBotPage() {
         const userMessage: Message = { role: 'user', content: input };
         const currentInput = input;
         
-        // Add user message and an empty bot message
+        // Add user message and an empty bot message for the loading state
         setMessages((prev) => [...prev, userMessage, { role: 'model', content: '' }]);
         setInput('');
         setIsLoading(true);
 
         try {
+            const historyWithoutWelcome = messages.slice(1); // Exclude initial hardcoded message
             const stream = await streamChat({
-                history: messages,
+                history: historyWithoutWelcome,
                 query: currentInput,
             });
 
@@ -87,15 +90,6 @@ export default function MediBotPage() {
                 <CardContent className="flex-grow p-0 overflow-hidden">
                     <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
                         <div className="space-y-6">
-                            <div className="flex items-start gap-3">
-                                <Avatar className="border-2 border-primary/50">
-                                    <AvatarFallback className="bg-primary/20"><Bot className="text-primary" /></AvatarFallback>
-                                </Avatar>
-                                <div className="bg-muted p-3 rounded-lg max-w-md">
-                                    <p className="text-sm">Hello! I'm MediBot. How can I assist you with Sanjiwani Health services today?</p>
-                                </div>
-                            </div>
-
                             {messages.map((message, index) => (
                                 <div
                                     key={index}
