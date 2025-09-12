@@ -10,7 +10,8 @@
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
-import { streamToAsyncGenerator } from '@/lib/utils';
+import type {GenerateResultChunk} from 'genkit';
+
 
 const MediBotInputSchema = z.object({
   history: z.array(z.object({
@@ -22,8 +23,7 @@ const MediBotInputSchema = z.object({
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
 export async function streamChat(input: MediBotInput): Promise<AsyncGenerator<string>> {
-  const stream = await mediBotStreamFlow(input);
-  return streamToAsyncGenerator(stream);
+  return mediBotStreamFlow(input);
 }
 
 const mediBotPrompt = {
@@ -58,22 +58,15 @@ const mediBotStreamFlow = ai.defineFlow(
   {
     name: 'mediBotStreamFlow',
     inputSchema: MediBotInputSchema,
-    // No output schema is needed when we return a stream directly
   },
-  async (input) => {
+  async function* (input) {
     const { stream } = ai.generateStream({
         ...mediBotPrompt,
         input: input,
     });
     
-    // We will return a ReadableStream of text chunks
-    return new ReadableStream({
-      async start(controller) {
-        for await (const chunk of stream) {
-          controller.enqueue(chunk.text);
-        }
-        controller.close();
-      },
-    });
+    for await (const chunk of stream) {
+      yield chunk.text;
+    }
   }
 );
