@@ -30,38 +30,29 @@ export async function streamChat(
   return mediBotStreamFlow(input);
 }
 
-const mediBotPrompt = {
+const mediBotPrompt = ai.definePrompt({
   name: 'mediBotPrompt',
   input: { schema: MediBotInputSchema },
   model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are MediBot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
 
-**Response Rules:**
-1.  If the user's query is a simple greeting like "Hi", "Hlo", "Hello", etc. (case-insensitive), your response MUST be: "Hlo, I am MediBot, an AI assistant of Sanjiwani. How can I help you today?"
-2.  If the user asks about the services of Sanjiwani Health (e.g., "Tell me about your services", "what services do you provide?"), provide a summary of the following services: Finding Doctors & Clinics, Booking Appointments (in-clinic and video), Locating Hospitals with bed availability, Finding Diagnostics Centers for tests, and Emergency Service guidance.
-3.  For all other questions, use your general capabilities.
+When asked about the services of Sanjiwani Health (e.g., "Tell me about your services", "what services do you provide?"), provide a summary of the following services: Finding Doctors & Clinics, Booking Appointments (in-clinic and video), Locating Hospitals with bed availability, Finding Diagnostics Centers for tests, and Emergency Service guidance.
 
-**Your General Capabilities:**
-- Answer questions about finding doctors, clinics, hospitals, and diagnostic centers.
-- Explain how to book appointments, including video consultations and in-clinic visits.
-- Provide information on emergency services and how to find them.
-- Explain features like prescription cashback and setting medicine reminders.
-- Offer general, non-prescriptive health and wellness advice. **Never provide a diagnosis or medical advice.** Always advise users to consult a qualified doctor for medical concerns.
-- Be empathetic, clear, and concise.
+For all other questions, use your general capabilities to be helpful. Never provide a medical diagnosis; always advise users to consult a qualified doctor.
 
-**Conversation History:**
+Conversation History:
 {{#each history}}
-- **{{role}}**: {{{content}}}
+- {{role}}: {{{content}}}
 {{/each}}
 
-**New User Question:**
-- **user**: {{{query}}}
+New User Question:
+- user: {{{query}}}
 
-**Your Task:**
-Based on the rules, conversation history, and the new user question, generate a helpful and relevant response. Address the user's query directly and courteously.
+Your Task:
+Based on the conversation history and the new user question, generate a helpful and relevant response. Address the user's query directly and courteously.
 `,
-};
+});
 
 const mediBotStreamFlow = ai.defineFlow(
   {
@@ -69,8 +60,18 @@ const mediBotStreamFlow = ai.defineFlow(
     inputSchema: MediBotInputSchema,
   },
   async function* (input) {
+    const simplifiedQuery = input.query.trim().toLowerCase();
+    const greetings = ['hi', 'hlo', 'hello', 'hey'];
+
+    // Rule 1: Handle simple greetings directly in code for reliability
+    if (greetings.includes(simplifiedQuery)) {
+      yield "Hello, I am MediBot, an AI assistant of Sanjiwani. How can I help you today?";
+      return;
+    }
+
+    // For all other queries, use the AI model
     const { stream } = ai.generateStream({
-      ...mediBotPrompt,
+      prompt: mediBotPrompt,
       input: input,
     });
 
