@@ -112,7 +112,7 @@ export default function DoctorDetailPage() {
           <Card className="shadow-lg">
             <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <Image
-                    src={`https://i.pravatar.cc/150?u=${doctor.uid}`}
+                    src={doctor.imageUrl || `https://i.pravatar.cc/150?u=${doctor.uid}`}
                     alt={doctor.name || 'Doctor profile picture'}
                     width={150}
                     height={150}

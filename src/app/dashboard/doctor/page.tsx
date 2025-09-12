@@ -189,7 +189,7 @@ const DoctorDashboard = () => {
                          <h4 className="font-semibold">Profile Picture</h4>
                          <div className="relative w-40 h-40 mx-auto">
                             <Image
-                                src={`https://i.pravatar.cc/150?u=${doctor.uid}`}
+                                src={doctor.imageUrl || `https://i.pravatar.cc/150?u=${doctor.uid}`}
                                 alt={doctor.name || 'Doctor profile picture'}
                                 width={160}
                                 height={160}
