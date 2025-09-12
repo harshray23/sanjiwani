@@ -58,13 +58,12 @@ const mediBotStreamFlow = ai.defineFlow(
   {
     name: 'mediBotStreamFlow',
     inputSchema: MediBotInputSchema,
-    outputSchema: z.string(), // We're streaming a string now
+    // No output schema is needed when we return a stream directly
   },
   async (input) => {
-    const { stream } = ai.generateStream({
+    const { stream } = await ai.generate({
         ...mediBotPrompt,
-        prompt: mediBotPrompt.prompt, // Pass the prompt template string
-        input: input, // Pass the actual data
+        input: input,
         stream: true,
     });
     
