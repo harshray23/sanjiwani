@@ -60,7 +60,6 @@ const mediBotStreamFlow = ai.defineFlow(
     inputSchema: MediBotInputSchema,
   },
   async function* (input) {
-    // AI model is now responsible for all responses, including greetings.
     const { stream } = ai.generateStream({
       prompt: mediBotPrompt,
       input: input,
