@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, Bot } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -18,7 +18,6 @@ export function Header() {
     { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital/> },
     { href: '/search', label: 'Find Clinics', icon: <Building/> },
     { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical/> },
-    { href: '/medibot', label: 'MediBot AI', icon: <Bot /> },
   ];
 
   const navItems = [
