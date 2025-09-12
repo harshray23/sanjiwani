@@ -60,16 +60,7 @@ const mediBotStreamFlow = ai.defineFlow(
     inputSchema: MediBotInputSchema,
   },
   async function* (input) {
-    const simplifiedQuery = input.query.trim().toLowerCase();
-    const greetings = ['hi', 'hlo', 'hello', 'hey'];
-
-    // Rule 1: Handle simple greetings directly in code for reliability
-    if (greetings.includes(simplifiedQuery)) {
-      yield "Hello, I am MediBot, an AI assistant of Sanjiwani. How can I help you today?";
-      return;
-    }
-
-    // For all other queries, use the AI model
+    // AI model is now responsible for all responses, including greetings.
     const { stream } = ai.generateStream({
       prompt: mediBotPrompt,
       input: input,
