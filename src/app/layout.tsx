@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: 'Sanjiwani Health - Video Consultations & Doctor Appointments',
   description: 'Book doctor appointments and video consultations. Get e-prescriptions and discounts on medicines.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.ico?v=2',
   },
 };
 
