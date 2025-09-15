@@ -72,6 +72,9 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-11', userId: 'clinic-11', name: "Dr. C.N. Gupta's Clinic", address: 'RC Das Road, Burdwan', licenseNo: 'CLN-K123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-11/400/200', doctors: [] },
   { id: 'clinic-12', userId: 'clinic-12', name: 'Chittaranjan Clinic Pvt ltd', address: 'Ramkrishna Road, Burdwan', licenseNo: 'CLN-L456', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-12/400/200', doctors: [] },
   { id: 'clinic-13', userId: 'clinic-13', name: 'Astha Medical Centre', address: '6VW6+WJX, Burdwan', licenseNo: 'CLN-M789', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-13/400/200', doctors: [] },
+  { id: 'clinic-14', userId: 'clinic-14', name: "Petals Woman's Clinic", address: '11 A, Sarojini Naidu Sarani, Rawdon St, Kolkata', licenseNo: 'CLN-N012', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-14/400/200', doctors: [] },
+  { id: 'clinic-15', userId: 'clinic-15', name: 'Apollo Clinic Beliaghata', address: '13A, Hem Chandra Naskar Rd, Kolkata', licenseNo: 'CLN-O345', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-15/400/200', doctors: [] },
+  { id: 'clinic-16', userId: 'clinic-16', name: 'Apollo Clinic Park Circus', address: '8, Circus Row, Kolkata', licenseNo: 'CLN-P678', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-16/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -363,4 +366,5 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
+
 
