@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getDiagnosticsCentreById } from '@/lib/data';
-import type { DiagnosticsCentre, DiagnosticTest } from '@/lib/types';
+import type { DiagnosticsCentre, DiagnosticTest, User } from '@/lib/types';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ export default function DiagnosticsCentrePage() {
     const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTest, setSelectedTest] = useState<DiagnosticTest | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const { toast } = useToast();
     
     useEffect(() => {
@@ -35,16 +36,28 @@ export default function DiagnosticsCentrePage() {
             setIsLoading(false);
         };
         fetchCentre();
+        
+        const storedUser = localStorage.getItem('mockUser');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
     }, [id]);
 
     const handleBookNow = (test: DiagnosticTest) => {
-        // In a real app, this would likely go to a booking/payment page
-        toast({
-            title: "Booking Initiated",
-            description: `You have selected to book the "${test.name}" test.`,
-        });
-        // For now, just a toast message
-        setSelectedTest(test);
+        if (user && centre) {
+            const queryParams = new URLSearchParams({
+                centreId: centre.id,
+                testId: test.id
+            });
+            router.push(`/diagnostics/book?${queryParams.toString()}`);
+        } else {
+             toast({
+                title: "Login Required",
+                description: "Please log in to book a test.",
+            });
+            router.push('/login');
+        }
     };
 
     if (isLoading) {

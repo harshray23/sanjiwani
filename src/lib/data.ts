@@ -368,31 +368,50 @@ export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsC
     return Promise.resolve(mockDiagnostics.find(d => d.id === id));
 };
 
+export const getTestById = async (id: string): Promise<DiagnosticTest | undefined> => {
+    console.log(`MOCK: getTestById for id: ${id}`);
+    return Promise.resolve(comprehensiveTests.find(t => t.id === id));
+}
+
+export const createTestAppointment = async (
+    patientId: string,
+    centreId: string,
+    testId: string
+): Promise<TestAppointment> => {
+    const patient = await getUserProfile(patientId);
+    const test = await getTestById(testId);
+    if (!patient || !test) {
+        throw new Error("Patient or Test not found");
+    }
+
+    const newAppt: TestAppointment = {
+        id: `t-appt-${Date.now()}`,
+        patientId,
+        patientName: patient.name,
+        centreId,
+        test,
+        date: new Date().toISOString(),
+        time: "10:00 AM", // Mock time
+        status: "Scheduled"
+    };
+    mockTestAppointments.push(newAppt);
+    return Promise.resolve(newAppt);
+}
+
+export const getTestAppointmentById = async (id: string): Promise<TestAppointment | undefined> => {
+   console.log(`MOCK: getTestAppointmentById for id: ${id}`);
+   const appointment = mockTestAppointments.find(app => app.id === id);
+   if(appointment) {
+       if (!appointment.test) {
+           const foundTest = comprehensiveTests.find(t => t.id === (appointment.test as any));
+           if(foundTest) appointment.test = foundTest;
+       }
+   }
+   return Promise.resolve(appointment);
+};
+
+
 export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
     console.log(`MOCK: getTestAppointmentsForCentre for centreId: ${centreId}`);
     return Promise.resolve(mockTestAppointments.filter(app => app.centreId === centreId));
 };
-
-
-    
-
-    
-
-
-
-
-
-
-
-    
-
-    
-
-    
-
-
-
-
-
-
-    
