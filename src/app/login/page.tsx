@@ -26,6 +26,7 @@ import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import Image from "next/image";
 import { createUserInFirestore, getUserProfile, mockUsers } from "@/lib/data";
+import type { User } from "@/lib/types";
 
 const roleEnum = z.enum(["patient", "doctor", "clinic", "diag_centre", "admin"]);
 export type Role = z.infer<typeof roleEnum>;
@@ -44,8 +45,8 @@ const signInSchema = z.object({
 const baseUserSchema = z.object({
     name: z.string().min(2, "Name is required."),
     email: emailValidation,
-    phone: z.string().min(10, "A valid phone number is required."),
-    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+    phone: z.string().min(1, "A phone number is required."),
+    password: z.string().min(1, { message: "Password is required." }),
 });
 
 // Schema for doctor-specific details, goes into /doctors collection
@@ -72,9 +73,9 @@ const SignUpForm = () => {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
+     const router = useRouter();
 
     const form = useForm({
-        // The resolver will be dynamically applied in the submit handler
         defaultValues: {
             name: "",
             email: "",
@@ -87,21 +88,16 @@ const SignUpForm = () => {
         },
     });
 
-    const getValidationSchemas = (role: Role | null) => {
+    const handleAuthSuccess = (role: string) => {
         switch (role) {
-            case 'patient':
-                return { base: baseUserSchema, details: z.object({}) };
-            case 'doctor':
-                return { base: baseUserSchema, details: doctorDetailsSchema };
-            case 'clinic':
-                return { base: baseUserSchema, details: clinicDetailsSchema };
-            case 'diag_centre':
-                return { base: baseUserSchema, details: diagCentreDetailsSchema };
-            default:
-                return { base: z.object({}), details: z.object({}) };
+            case 'doctor': router.push('/dashboard/doctor'); break;
+            case 'clinic': router.push('/dashboard/clinic'); break;
+            case 'hospital': router.push('/dashboard/hospital'); break;
+            case 'diagnostics_centres': router.push('/dashboard/diagnostics'); break;
+            case 'admin': router.push('/dashboard/admin'); break;
+            default: router.push('/'); break;
         }
-    };
-
+    }
 
     const handleSignUp = async (values: any) => {
         setIsLoading(true);
@@ -112,55 +108,26 @@ const SignUpForm = () => {
             return;
         }
         
-        const { base: baseSchema, details: detailsSchema } = getValidationSchemas(selectedRole);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Extract keys for base user data and role-specific details
-        const baseKeys = Object.keys(baseSchema.shape);
-        const detailsKeys = Object.keys(detailsSchema.shape);
+        // MOCK SIGN-UP: Assume any valid-looking email/password is fine
+        const newUser: User = {
+            uid: `user-${Date.now()}`,
+            name: values.name || 'New User',
+            email: values.email,
+            phone: values.phone || 'N/A',
+            role: selectedRole,
+            verified: true, // Auto-verify for mock purposes
+            createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
+        };
 
-        const baseData: Record<string, any> = {};
-        const detailsData: Record<string, any> = {};
+        localStorage.setItem('mockUser', JSON.stringify(newUser));
+        window.dispatchEvent(new Event('authChange'));
 
-        for (const key in values) {
-            if (baseKeys.includes(key)) {
-                baseData[key] = values[key];
-            }
-            if (detailsKeys.includes(key)) {
-                detailsData[key] = values[key];
-            }
-        }
-        
-        const baseValidationResult = baseSchema.safeParse(baseData);
-        const detailsValidationResult = detailsSchema.safeParse(detailsData);
-        
-        if (!baseValidationResult.success || !detailsValidationResult.success) {
-             toast({ title: "Sign Up Failed", description: "Please fill all required fields correctly.", variant: "destructive" });
-             setIsLoading(false);
-             return;
-        }
+        toast({ title: "Account Created & Signed In", description: "Welcome! Redirecting you now..." });
+        handleAuthSuccess(newUser.role);
 
-        try {
-            // MOCK: Simulate creating a user.
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log("MOCK: User would be created with:", {
-                role: selectedRole,
-                baseData: baseValidationResult.data,
-                detailsData: detailsValidationResult.data
-            });
-
-            toast({ title: "Account Created Successfully", description: "Welcome! Please sign in to continue." });
-            form.reset();
-            setSelectedRole(null);
-
-        } catch (error: any) {
-             toast({
-                title: "Sign Up Failed",
-                description: "An unknown error occurred during mock sign-up.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        setIsLoading(false);
     };
 
     if (!selectedRole) {
@@ -207,7 +174,7 @@ const SignUpForm = () => {
                     <FormItem><FormLabel>Contact Phone</FormLabel><FormControl><Input placeholder="Your contact number" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Choose a strong password" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="Choose any password" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 
                 <hr className="my-4"/>
@@ -250,7 +217,7 @@ const SignUpForm = () => {
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Account
+                    Create Account & Sign In
                 </Button>
             </form>
         </Form>
@@ -269,9 +236,8 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    // If a user is already logged in when they visit this page, log them out.
     localStorage.removeItem('mockUser');
-    window.dispatchEvent(new Event('authChange')); // Notify header to update
+    window.dispatchEvent(new Event('authChange')); 
   }, []);
 
   const handleAuthSuccess = (role: string) => {
@@ -291,7 +257,7 @@ export default function LoginPage() {
       case 'admin':
         router.push('/dashboard/admin');
         break;
-      default: // patient and others
+      default: 
         router.push('/');
         break;
     }
@@ -299,35 +265,36 @@ export default function LoginPage() {
 
   async function onSignIn(values: z.infer<typeof signInSchema>) {
     setIsLoading(true);
-    
-    // MOCK AUTHENTICATION
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const user = mockUsers.find(u => u.email === values.email);
+    // MOCK AUTH: Check if user exists, otherwise create a temporary one.
+    let user = mockUsers.find(u => u.email === values.email);
     
-    // For mock purposes, any password is valid for a mock user.
-    // In a real app, you'd check a hashed password.
-    if (user && values.password === 'password') {
-      
-      // Store user in localStorage to simulate session
-      localStorage.setItem('mockUser', JSON.stringify(user));
-      // Dispatch a custom event to notify other components (like the header)
-      window.dispatchEvent(new Event('authChange'));
-
-      toast({
-        title: "Signed In Successfully",
-        description: "Welcome back! Redirecting you now...",
-      });
-      handleAuthSuccess(user.role);
-      
-    } else {
-       toast({
-          title: "Sign In Failed",
-          description: "Invalid email or password. Please check your credentials and try again.",
-          variant: "destructive",
-       });
-       setIsLoading(false);
+    if (!user) {
+        // Create a temporary new user if email is not found
+        user = {
+            uid: `user-${Date.now()}`,
+            name: 'New User',
+            email: values.email,
+            phone: 'N/A',
+            role: 'patient',
+            verified: true,
+            createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
+        };
+        toast({
+            title: "New User",
+            description: "Creating a temporary patient session for you.",
+        });
     }
+
+    localStorage.setItem('mockUser', JSON.stringify(user));
+    window.dispatchEvent(new Event('authChange'));
+
+    toast({
+        title: "Signed In Successfully",
+        description: "Welcome! Redirecting you now...",
+    });
+    handleAuthSuccess(user.role);
   }
 
 
@@ -345,7 +312,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
     toast({
       title: "Password Reset Email Sent",
       description: `If an account exists for ${email}, a password reset link has been sent to it. (This is a mock response)`,
@@ -409,7 +376,7 @@ export default function LoginPage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
-                                    <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                    <FormControl><Input type="password" placeholder="any password" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                                 )}
@@ -439,3 +406,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
