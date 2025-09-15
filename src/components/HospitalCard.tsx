@@ -137,7 +137,6 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         <Button 
           className="w-full" 
           asChild 
-          disabled={totalAvailableBeds === 0}
           variant={totalAvailableBeds > 0 ? "default" : "secondary"}
         >
           <Link href={`/hospitals/${hospital.id}`}> 
@@ -152,5 +151,3 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     </Card>
   );
 }
-
-    

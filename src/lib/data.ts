@@ -51,7 +51,7 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doc-amitabha', userId: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', specialization: 'General Physician', licenseNo: 'DOC-L76543', consultationFee: 850, availability: ["10:00 AM", "01:00 PM"], clinicId: 'clinic-15', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc6', phone: 'N/A', clinicName: 'Apollo Clinic Beliaghata' },
   { id: 'doc-rkgupta', userId: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', specialization: 'General Physician', licenseNo: 'DOC-L65432', consultationFee: 950, availability: ["05:00 PM", "06:00 PM", "07:00 PM"], clinicId: 'clinic-16', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc7', phone: '09331926111', clinicName: 'Apollo Clinic Park Circus' },
   { id: 'doc-saugat', userId: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', specialization: 'Doctor', licenseNo: 'DOC-L11223', consultationFee: 750, availability: ["06:00 PM", "07:00 PM", "08:00 PM"], clinicId: 'clinic-20', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc8', phone: '08336971217', clinicName: 'Seva Clinic' },
-  { id: 'doc-arvind', userId: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', specialization: 'Diabetologist', licenseNo: 'DOC-L22334', consultationFee: 800, availability: ["05:30 PM", "06:30 PM"], clinicId: 'hosp-9', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc9', phone: '07596878887', clinicName: 'Rainbow Specialty Hospital' },
+  { id: 'doc-arvind', userId: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', specialization: 'Diabetologist', licenseNo: 'DOC-L22334', consultationFee: 800, availability: ["05:30 PM", "06:30 PM"], clinicId: 'clinic-7', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc9', phone: '07596878887', clinicName: 'Dr. Arvind Kumar Clinic' },
   { id: 'doc-indranil', userId: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L33445', consultationFee: 1000, availability: ["03:00 PM", "04:00 PM"], clinicId: 'hosp-10', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc10', phone: 'N/A', clinicName: 'S.N.R Carnival Hospital' },
   { id: 'doc-tania', userId: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', specialization: 'ENT Specialist', licenseNo: 'DOC-L44556', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "04:00 PM", "05:00 PM"], clinicId: 'clinic-9', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc11', phone: 'N/A', clinicName: "Dr. Tania Mukherjee's Clinic" },
   { id: 'doc-saptarshi', userId: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', specialization: 'Gastroenterologist', licenseNo: 'DOC-L55667', consultationFee: 1200, availability: ["04:00 PM", "05:00 PM", "06:00 PM"], clinicId: 'clinic-12', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc12', phone: '09147023666', clinicName: "Chittaranjan Clinic Pvt ltd" },
@@ -341,6 +341,11 @@ export const getHospitals = async (): Promise<Hospital[]> => {
     console.log("MOCK: getHospitals called.");
     return Promise.resolve(mockHospitals);
 }
+
+export const getHospitalById = async (id: string): Promise<Hospital | undefined> => {
+  console.log(`MOCK: getHospitalById for id: ${id}`);
+  return Promise.resolve(mockHospitals.find(h => h.id === id));
+};
 
 export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
   console.log(`MOCK: searchHospitals for query: ${queryText}`);
