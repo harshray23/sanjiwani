@@ -117,6 +117,9 @@ const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-6', name: 'Kalyani Diagnostic Centre', location: 'XFC6+PJ9, 46, Road, near Vidyasagar Mancha JN, Kalyani', contact: { phone: 'N/A', email: 'contact@kalyanidiag.com' }, rating: 3.9, imageUrl: 'https://picsum.photos/seed/diag-6/400/200', dataAiHint: 'diagnostic center', tests: comprehensiveTests.slice(0,5), pathologists: [] },
   { id: 'diag-7', name: 'Suraksha Diagnostic Centre Kalyani', location: 'Central Park, B10/178, opposite SBI, Kalyani', contact: { phone: 'N/A', email: 'contact@surakshakalyani.com' }, rating: 5.0, imageUrl: 'https://picsum.photos/seed/diag-7/400/200', dataAiHint: 'modern clinic', tests: comprehensiveTests.slice(3,10), pathologists: [] },
   { id: 'diag-8', name: 'Lupin Diagnostics', location: 'D-19/15(S), (Opp Kalyani Spinning Mill Kalyani, P.O...', contact: { phone: 'N/A', email: 'contact@lupindiag.com' }, rating: 5.0, imageUrl: 'https://picsum.photos/seed/diag-8/400/200', dataAiHint: 'pathology lab', tests: comprehensiveTests.slice(1,8), pathologists: [] },
+  { id: 'diag-9', name: 'Suraksha Diagnostics - Asansol', location: '9/190, Anand Appartment, G.T. Road, Asansol', contact: { phone: 'N/A', email: 'contact@surakshaasansol.com' }, rating: 4.6, imageUrl: 'https://picsum.photos/seed/diag-9/400/200', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0,6), pathologists: [] },
+  { id: 'diag-10', name: 'Avishkar Diagnostic, Asansol', location: 'Ground Floor, Sarada Enclave, Grand Trunk Rd, Asansol', contact: { phone: 'N/A', email: 'contact@avishkarasansol.com' }, rating: 2.7, imageUrl: 'https://picsum.photos/seed/diag-10/400/200', dataAiHint: 'testing centre', tests: comprehensiveTests.slice(5,10), pathologists: [] },
+  { id: 'diag-11', name: 'Asansol Diagnostics', location: 'Burnpur Rd, Asansol', contact: { phone: '081455 55593', email: 'contact@asansoldiag.com' }, rating: 4.0, imageUrl: 'https://picsum.photos/seed/diag-11/400/200', dataAiHint: 'diagnostic imaging', tests: comprehensiveTests.slice(2,8), pathologists: [] },
 ];
 
 const mockHospitals: Hospital[] = [
@@ -375,3 +378,4 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
+
