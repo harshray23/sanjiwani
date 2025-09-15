@@ -77,6 +77,7 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-17', userId: 'clinic-17', name: 'Healthworld Clinic Asansol', address: 'MWVX+2H2, Burnpur Rd, Asansol', licenseNo: 'CLN-Q901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-17/400/200', doctors: [] },
   { id: 'clinic-18', userId: 'clinic-18', name: 'The Mission Hospital Asansol Clinic', address: 'MXV2+J4V, Asansol-Neamatpur Rd, Asansol', licenseNo: 'CLN-R234', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-18/400/200', doctors: [] },
   { id: 'clinic-19', userId: 'clinic-19', name: 'Ultra Clinic', address: 'Ground Floor, Sahara Apartment, Asansol', licenseNo: 'CLN-S567', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-19/400/200', doctors: [] },
+  { id: 'clinic-20', userId: 'clinic-20', name: 'Seva Clinic', address: 'B-3/17, Kalyani', licenseNo: 'CLN-T890', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-20/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -112,6 +113,7 @@ const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-2/400/200', dataAiHint: 'mri machine', tests: [comprehensiveTests[5], comprehensiveTests[6]], pathologists: [mockPathologists[1]] },
   { id: 'diag-3', name: 'Care Scans & Labs', location: '202 Health Blvd, Wellness City', contact: { phone: '555-666-7777', email: 'support@carescan.com' }, rating: 4.8, imageUrl: 'https://picsum.photos/seed/diag-3/400/200', dataAiHint: 'health clinic', tests: comprehensiveTests, pathologists: [mockPathologists[0], mockPathologists[2]] },
   { id: 'diag-4', name: 'The Burdwan Medical Centre', location: 'KHOSEBAGAN P.O.:, 23, RAMKRISHNA ROAD, Burdwan', contact: { phone: 'N/A', email: 'contact@burdwanmed.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-4/400/200', dataAiHint: 'diagnostic center', tests: comprehensiveTests.slice(4,8), pathologists: [] },
+  { id: 'diag-5', name: 'Mitali Memorial Polyclinic', location: 'A9X/5S, Kalyani', contact: { phone: '094322 52863', email: 'contact@mitalipolyclinic.com' }, rating: 2.7, imageUrl: 'https://picsum.photos/seed/diag-5/400/200', dataAiHint: 'diagnostic center', tests: comprehensiveTests.slice(2,7), pathologists: [] },
 ];
 
 const mockHospitals: Hospital[] = [
@@ -364,6 +366,8 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 
 
+
+    
 
     
 
