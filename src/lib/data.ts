@@ -124,6 +124,8 @@ const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-12', name: 'SONOSCAN', location: '44, CIT Rd, near Ladies Park, Kolkata', contact: { phone: '09775... (Number Incomplete)', email: 'contact@sonoscan.com' }, rating: 4.7, imageUrl: 'https://picsum.photos/seed/diag-12/400/200', dataAiHint: 'ultrasound scanner', tests: comprehensiveTests.slice(6, 9), pathologists: [] },
   { id: 'diag-13', name: 'Vijaya Diagnostic Centre', location: 'D No. 173, 4/5, VIP Rd, beside O2 Hotel, Kolkata', contact: { phone: 'N/A', email: 'contact@vijayadiag.com' }, rating: 4.6, imageUrl: 'https://picsum.photos/seed/diag-13/400/200', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0, 7), pathologists: [] },
   { id: 'diag-14', name: 'Aloka Medicare Pvt Ltd', location: '114B, Sarat Bose Rd, Kolkata', contact: { phone: '078900 78966', email: 'contact@alokamedicare.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-14/400/200', dataAiHint: 'modern laboratory', tests: comprehensiveTests, pathologists: [] },
+  { id: 'diag-15', name: 'Burdwan Scan Centre Pvt. Ltd.', location: '7, R.B. Ghosh Rd, Burdwan', contact: { phone: '0342 255 0829', email: 'contact@burdwanscan.com' }, rating: 4.5, imageUrl: 'https://picsum.photos/seed/diag-15/400/200', dataAiHint: 'medical laboratory', tests: comprehensiveTests.slice(0,8), pathologists: [] },
+  { id: 'diag-16', name: 'Agilus Diagnostics - RB Ghosh Road', location: 'Shop No 30, Khoshbagan, R.B.Ghosh Rd, Burdwan', contact: { phone: '08071 3...', email: 'contact@agilusburdwan.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-16/400/200', dataAiHint: 'diagnostic lab', tests: comprehensiveTests.slice(1,6), pathologists: [] },
 ];
 
 const mockHospitals: Hospital[] = [
@@ -382,5 +384,6 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
+
 
 
