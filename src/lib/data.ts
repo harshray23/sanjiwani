@@ -1,4 +1,5 @@
 
+
 import type {
   User,
   DoctorProfile,
@@ -35,7 +36,7 @@ export const mockUsers: User[] = [
   { uid: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', phone: '08336971217', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', phone: '07596878887', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-
+  { uid: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 ];
 
 const mockDoctors: DoctorDetails[] = [
@@ -50,6 +51,7 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doc-saugat', userId: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', specialization: 'Doctor', licenseNo: 'DOC-L11223', consultationFee: 750, availability: ["06:00 PM", "07:00 PM", "08:00 PM"], clinicId: 'clinic-6', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc8', phone: '08336971217', clinicName: 'B-9/20 Kalyani Clinic' },
   { id: 'doc-arvind', userId: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', specialization: 'Diabetologist', licenseNo: 'DOC-L22334', consultationFee: 800, availability: ["05:30 PM", "06:30 PM"], clinicId: 'clinic-7', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc9', phone: '07596878887', clinicName: 'Dr. Arvind Kumar Clinic' },
   { id: 'doc-indranil', userId: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L33445', consultationFee: 1000, availability: ["03:00 PM", "04:00 PM"], clinicId: 'clinic-8', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc10', phone: 'N/A', clinicName: 'GICE NURSING HOME' },
+  { id: 'doc-tania', userId: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', specialization: 'ENT Specialist', licenseNo: 'DOC-L44556', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "04:00 PM", "05:00 PM"], clinicId: 'clinic-9', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc11', phone: 'N/A', clinicName: "Dr. Tania Mukherjee's Clinic" },
 ];
 
 const mockClinics: ClinicDetails[] = [
@@ -61,6 +63,7 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-6', userId: 'clinic-6', name: 'B-9/20 Kalyani Clinic', address: 'B-9/20, Kalyani', licenseNo: 'CLN-F678', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-6/400/200', doctors: [] },
   { id: 'clinic-7', userId: 'clinic-7', name: 'Dr. Arvind Kumar Clinic', address: 'B2/54, Kalyani', licenseNo: 'CLN-G901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-7/400/200', doctors: [] },
   { id: 'clinic-8', userId: 'clinic-8', name: 'GICE NURSING HOME', address: 'A-3/3S Kalyani', licenseNo: 'CLN-H234', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-8/400/200', doctors: [] },
+  { id: 'clinic-9', userId: 'clinic-9', name: "Dr. Tania Mukherjee's Clinic", address: '62 N, S.B Gorai Road, opp. IMA House, Asansol', licenseNo: 'CLN-I567', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-9/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -297,7 +300,7 @@ export const comprehensiveSpecialties = [
     "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
     "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
     "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology", "Surgeon", "General Physician",
-    "Doctor", "Diabetologist"
+    "Doctor", "Diabetologist", "ENT Specialist"
 ];
 
 export const comprehensiveHospitalDepartments = [
@@ -347,5 +350,7 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 
 
+
+    
 
     
