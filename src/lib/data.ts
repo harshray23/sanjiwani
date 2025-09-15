@@ -1,4 +1,5 @@
 
+
 import type {
   User,
   DoctorProfile,
@@ -120,6 +121,9 @@ const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-9', name: 'Suraksha Diagnostics - Asansol', location: '9/190, Anand Appartment, G.T. Road, Asansol', contact: { phone: 'N/A', email: 'contact@surakshaasansol.com' }, rating: 4.6, imageUrl: 'https://picsum.photos/seed/diag-9/400/200', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0,6), pathologists: [] },
   { id: 'diag-10', name: 'Avishkar Diagnostic, Asansol', location: 'Ground Floor, Sarada Enclave, Grand Trunk Rd, Asansol', contact: { phone: 'N/A', email: 'contact@avishkarasansol.com' }, rating: 2.7, imageUrl: 'https://picsum.photos/seed/diag-10/400/200', dataAiHint: 'testing centre', tests: comprehensiveTests.slice(5,10), pathologists: [] },
   { id: 'diag-11', name: 'Asansol Diagnostics', location: 'Burnpur Rd, Asansol', contact: { phone: '081455 55593', email: 'contact@asansoldiag.com' }, rating: 4.0, imageUrl: 'https://picsum.photos/seed/diag-11/400/200', dataAiHint: 'diagnostic imaging', tests: comprehensiveTests.slice(2,8), pathologists: [] },
+  { id: 'diag-12', name: 'SONOSCAN', location: '44, CIT Rd, near Ladies Park, Kolkata', contact: { phone: '09775... (Number Incomplete)', email: 'contact@sonoscan.com' }, rating: 4.7, imageUrl: 'https://picsum.photos/seed/diag-12/400/200', dataAiHint: 'ultrasound scanner', tests: comprehensiveTests.slice(6, 9), pathologists: [] },
+  { id: 'diag-13', name: 'Vijaya Diagnostic Centre', location: 'D No. 173, 4/5, VIP Rd, beside O2 Hotel, Kolkata', contact: { phone: 'N/A', email: 'contact@vijayadiag.com' }, rating: 4.6, imageUrl: 'https://picsum.photos/seed/diag-13/400/200', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0, 7), pathologists: [] },
+  { id: 'diag-14', name: 'Aloka Medicare Pvt Ltd', location: '114B, Sarat Bose Rd, Kolkata', contact: { phone: '078900 78966', email: 'contact@alokamedicare.com' }, rating: 4.9, imageUrl: 'https://picsum.photos/seed/diag-14/400/200', dataAiHint: 'modern laboratory', tests: comprehensiveTests, pathologists: [] },
 ];
 
 const mockHospitals: Hospital[] = [
@@ -378,4 +382,5 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
+
 
