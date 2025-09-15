@@ -31,7 +31,7 @@ export const mockUsers: User[] = [
   { uid: 'doc-ashutosh', name: 'Dr. Ashutosh Nayak', email: 'ashutosh.nayak@test.com', phone: '09073945866', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-prattay', name: 'Dr. Prattay Ghosh', email: 'prattay.ghosh@test.com', phone: '07679944040', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', phone: '09331926111', role 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', phone: '09331926111', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', phone: '08336971217', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', phone: '07596878887', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
@@ -346,3 +346,6 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 
 
+
+
+    
