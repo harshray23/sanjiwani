@@ -37,6 +37,8 @@ export const mockUsers: User[] = [
   { uid: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', phone: '07596878887', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', phone: '09147023666', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', phone: '07076642946', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 ];
 
 const mockDoctors: DoctorDetails[] = [
@@ -52,6 +54,8 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doc-arvind', userId: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', specialization: 'Diabetologist', licenseNo: 'DOC-L22334', consultationFee: 800, availability: ["05:30 PM", "06:30 PM"], clinicId: 'clinic-7', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc9', phone: '07596878887', clinicName: 'Dr. Arvind Kumar Clinic' },
   { id: 'doc-indranil', userId: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L33445', consultationFee: 1000, availability: ["03:00 PM", "04:00 PM"], clinicId: 'clinic-8', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc10', phone: 'N/A', clinicName: 'GICE NURSING HOME' },
   { id: 'doc-tania', userId: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', specialization: 'ENT Specialist', licenseNo: 'DOC-L44556', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "04:00 PM", "05:00 PM"], clinicId: 'clinic-9', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc11', phone: 'N/A', clinicName: "Dr. Tania Mukherjee's Clinic" },
+  { id: 'doc-saptarshi', userId: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', specialization: 'Gastroenterologist', licenseNo: 'DOC-L55667', consultationFee: 1200, availability: ["04:00 PM", "05:00 PM", "06:00 PM"], clinicId: 'clinic-10', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc12', phone: '09147023666', clinicName: "Bengal Institute of Gastroenterology" },
+  { id: 'doc-cngupta', userId: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L66778', consultationFee: 600, availability: ["05:00 PM", "06:00 PM"], clinicId: 'clinic-11', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc13', phone: '07076642946', clinicName: "Dr. C.N. Gupta's Clinic" },
 ];
 
 const mockClinics: ClinicDetails[] = [
@@ -64,6 +68,8 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-7', userId: 'clinic-7', name: 'Dr. Arvind Kumar Clinic', address: 'B2/54, Kalyani', licenseNo: 'CLN-G901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-7/400/200', doctors: [] },
   { id: 'clinic-8', userId: 'clinic-8', name: 'GICE NURSING HOME', address: 'A-3/3S Kalyani', licenseNo: 'CLN-H234', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-8/400/200', doctors: [] },
   { id: 'clinic-9', userId: 'clinic-9', name: "Dr. Tania Mukherjee's Clinic", address: '62 N, S.B Gorai Road, opp. IMA House, Asansol', licenseNo: 'CLN-I567', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-9/400/200', doctors: [] },
+  { id: 'clinic-10', userId: 'clinic-10', name: 'Bengal Institute of Gastroenterology', address: 'Burir Bagan, Rani Sayer North, 71, BB Ghosh Rd, Burdwan', licenseNo: 'CLN-J890', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-10/400/200', doctors: [] },
+  { id: 'clinic-11', userId: 'clinic-11', name: "Dr. C.N. Gupta's Clinic", address: 'RC Das Road, Burdwan', licenseNo: 'CLN-K123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-11/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -300,7 +306,7 @@ export const comprehensiveSpecialties = [
     "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
     "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
     "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology", "Surgeon", "General Physician",
-    "Doctor", "Diabetologist", "ENT Specialist"
+    "Doctor", "Diabetologist", "ENT Specialist", "Gastroenterologist"
 ];
 
 export const comprehensiveHospitalDepartments = [
