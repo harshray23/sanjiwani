@@ -49,14 +49,16 @@ function SearchResults() {
 
   const doctorSpecialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    comprehensiveSpecialties.forEach(spec => counts[spec] = 0);
-    results.doctors.forEach(doctor => {
-        if (counts[doctor.specialization] !== undefined) {
-            counts[doctor.specialization]++;
-        }
+    const specialties = new Set(results.doctors.map(d => d.specialization));
+    specialties.forEach(spec => {
+      counts[spec] = results.doctors.filter(d => d.specialization === spec).length;
     });
     return counts;
   }, [results.doctors]);
+
+  const sortedSpecialties = useMemo(() => {
+    return Object.keys(doctorSpecialtyCounts).sort((a,b) => a.localeCompare(b));
+  },[doctorSpecialtyCounts])
 
   return (
     <div className="container mx-auto py-8">
@@ -112,7 +114,8 @@ function SearchResults() {
                             <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={activeDoctorSpecialty || "All"} onValueChange={(value) => setActiveDoctorSpecialty(value === "All" ? null : value)}>
                                 <DropdownMenuRadioItem value="All">All ({results.doctors.length})</DropdownMenuRadioItem>
-                                {comprehensiveSpecialties.map(specialty => (
+                                {sortedSpecialties.map(specialty => (
+                                    doctorSpecialtyCounts[specialty] > 0 &&
                                     <DropdownMenuRadioItem key={specialty} value={specialty}>
                                         {specialty} ({doctorSpecialtyCounts[specialty] || 0})
                                     </DropdownMenuRadioItem>

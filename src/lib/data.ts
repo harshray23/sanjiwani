@@ -28,6 +28,10 @@ export const mockUsers: User[] = [
   { uid: 'diag-1', name: 'City Diagnostics', email: 'diag@test.com', phone: '555-444-3333', role: 'diagnostics_centres', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'hospital-1', name: 'Metro General Hospital', email: 'hospital@test.com', phone: '123-123-1234', role: 'hospital', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doctor-test', name: 'Dr. Kushal P. Anand', email: 'doctor@test.com', phone: '8420382000', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-ashutosh', name: 'Dr. Ashutosh Nayak', email: 'ashutosh.nayak@test.com', phone: '09073945866', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-prattay', name: 'Dr. Prattay Ghosh', email: 'prattay.ghosh@test.com', phone: '07679944040', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', phone: '09331926111', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 
 ];
 
@@ -36,11 +40,18 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doctor-2', userId: 'doctor-2', name: 'Dr. John Smith', email: 'john.smith@test.com', specialization: 'Dermatology', licenseNo: 'DOC-L67890', consultationFee: 700, availability: ["09:00 AM", "11:30 AM"], clinicId: 'clinic-2', verified: false, imageUrl: 'https://i.pravatar.cc/150?u=doc2', phone: '444-555-6666', clinicName: 'Oakwood Medical' },
   { id: 'doctor-3', userId: 'doctor-3', name: 'Dr. Sarah Lee', email: 'sarah.lee@test.com', specialization: 'Pediatrics', licenseNo: 'DOC-L54321', consultationFee: 600, availability: ["10:00 AM", "01:00 PM", "03:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc3', phone: '777-888-9999', clinicName: 'Sunnyvale Clinic' },
   { id: 'doctor-test', userId: 'doctor-test', name: 'Dr. Kushal P. Anand', email: 'doctor@test.com', specialization: 'General Practice', licenseNo: 'DOC-TEST', consultationFee: 500, availability: ["09:00 AM", "10:00 AM", "11:00 AM"], clinicId: 'clinic-1', verified: true, imageUrl: '/Doc.jpg', phone: '8420382000', clinicName: 'Sunnyvale Clinic' },
+  { id: 'doc-ashutosh', userId: 'doc-ashutosh', name: 'Dr. Ashutosh Nayak', email: 'ashutosh.nayak@test.com', specialization: 'Surgeon', licenseNo: 'DOC-L98765', consultationFee: 1000, availability: ["04:00 PM", "05:00 PM"], clinicId: 'clinic-3', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc4', phone: '09073945866', clinicName: '1 Mall Road Clinic' },
+  { id: 'doc-prattay', userId: 'doc-prattay', name: 'Dr. Prattay Ghosh', email: 'prattay.ghosh@test.com', specialization: 'General Physician', licenseNo: 'DOC-L87654', consultationFee: 900, availability: ["09:00 AM", "12:00 PM", "03:00 PM"], clinicId: 'hosp-12', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc5', phone: '07679944040', clinicName: 'Apollo Multispeciality Hospitals, Kolkata' },
+  { id: 'doc-amitabha', userId: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', specialization: 'General Physician', licenseNo: 'DOC-L76543', consultationFee: 850, availability: ["10:00 AM", "01:00 PM"], clinicId: 'clinic-4', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc6', phone: 'N/A', clinicName: 'Suraksha Clinic' },
+  { id: 'doc-rkgupta', userId: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', specialization: 'General Physician', licenseNo: 'DOC-L65432', consultationFee: 950, availability: ["05:00 PM", "06:00 PM", "07:00 PM"], clinicId: 'clinic-5', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc7', phone: '09331926111', clinicName: 'Townsend Road Practice' },
 ];
 
 const mockClinics: ClinicDetails[] = [
   { id: 'clinic-1', userId: 'clinic-1', name: 'Sunnyvale Clinic', address: '123 Health St, Wellness City', licenseNo: 'CLN-A123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-1/400/200', doctors: [mockDoctors[0], mockDoctors[2]] },
   { id: 'clinic-2', userId: 'clinic-2', name: 'Oakwood Medical', address: '456 Cure Ave, Remedy Town', licenseNo: 'CLN-B456', verified: false, imageUrl: 'https://picsum.photos/seed/clinic-2/400/200', doctors: [mockDoctors[1]] },
+  { id: 'clinic-3', userId: 'clinic-3', name: '1 Mall Road Clinic', address: '1 Mall Road, Kolkata', licenseNo: 'CLN-C789', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-3/400/200', doctors: [] },
+  { id: 'clinic-4', userId: 'clinic-4', name: 'Suraksha Clinic', address: 'Central Pollution Board, Kolkata', licenseNo: 'CLN-D012', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-4/400/200', doctors: [] },
+  { id: 'clinic-5', userId: 'clinic-5', name: 'Townsend Road Practice', address: '21, Townsend Rd, Kolkata', licenseNo: 'CLN-E345', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-5/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -276,7 +287,7 @@ export const getUsers = async (): Promise<User[]> => {
 export const comprehensiveSpecialties = [
     "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
     "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
-    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology"
+    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology", "Surgeon", "General Physician"
 ];
 
 export const comprehensiveHospitalDepartments = [
@@ -320,6 +331,7 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
+
 
 
 
