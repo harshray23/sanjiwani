@@ -1,5 +1,4 @@
 
-
 import type {
   User,
   DoctorProfile,
@@ -75,6 +74,9 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-14', userId: 'clinic-14', name: "Petals Woman's Clinic", address: '11 A, Sarojini Naidu Sarani, Rawdon St, Kolkata', licenseNo: 'CLN-N012', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-14/400/200', doctors: [] },
   { id: 'clinic-15', userId: 'clinic-15', name: 'Apollo Clinic Beliaghata', address: '13A, Hem Chandra Naskar Rd, Kolkata', licenseNo: 'CLN-O345', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-15/400/200', doctors: [] },
   { id: 'clinic-16', userId: 'clinic-16', name: 'Apollo Clinic Park Circus', address: '8, Circus Row, Kolkata', licenseNo: 'CLN-P678', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-16/400/200', doctors: [] },
+  { id: 'clinic-17', userId: 'clinic-17', name: 'Healthworld Clinic Asansol', address: 'MWVX+2H2, Burnpur Rd, Asansol', licenseNo: 'CLN-Q901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-17/400/200', doctors: [] },
+  { id: 'clinic-18', userId: 'clinic-18', name: 'The Mission Hospital Asansol Clinic', address: 'MXV2+J4V, Asansol-Neamatpur Rd, Asansol', licenseNo: 'CLN-R234', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-18/400/200', doctors: [] },
+  { id: 'clinic-19', userId: 'clinic-19', name: 'Ultra Clinic', address: 'Ground Floor, Sahara Apartment, Asansol', licenseNo: 'CLN-S567', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-19/400/200', doctors: [] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -366,5 +368,3 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
     
 
     
-
-
