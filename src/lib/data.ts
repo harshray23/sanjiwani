@@ -65,11 +65,11 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-4', userId: 'clinic-4', name: 'Suraksha Clinic', address: 'Central Pollution Board, Kolkata', licenseNo: 'CLN-D012', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-4/400/200', doctors: [] },
   { id: 'clinic-5', userId: 'clinic-5', name: 'Townsend Road Practice', address: '21, Townsend Rd, Kolkata', licenseNo: 'CLN-E345', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-5/400/200', doctors: [] },
   { id: 'clinic-6', userId: 'clinic-6', name: 'B-9/20 Kalyani Clinic', address: 'B-9/20, Kalyani', licenseNo: 'CLN-F678', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-6/400/200', doctors: [] },
-  { id: 'clinic-7', userId: 'clinic-7', name: 'Dr. Arvind Kumar Clinic', address: 'B2/54, Kalyani', licenseNo: 'CLN-G901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-7/400/200', doctors: [] },
+  { id: 'clinic-7', userId: 'clinic-7', name: 'Dr. Arvind Kumar Clinic', address: 'B2/54, Kalyani', licenseNo: 'CLN-G901', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-7/400/200', doctors: [mockDoctors[9]] },
   { id: 'clinic-8', userId: 'clinic-8', name: 'GICE NURSING HOME', address: 'A-3/3S Kalyani', licenseNo: 'CLN-H234', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-8/400/200', doctors: [] },
   { id: 'clinic-9', userId: 'clinic-9', name: "Dr. Tania Mukherjee's Clinic", address: '62 N, S.B Gorai Road, opp. IMA House, Asansol', licenseNo: 'CLN-I567', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-9/400/200', doctors: [mockDoctors[11]] },
   { id: 'clinic-10', userId: 'clinic-10', name: 'Bengal Institute of Gastroenterology', address: 'Burir Bagan, Rani Sayer North, 71, BB Ghosh Rd, Burdwan', licenseNo: 'CLN-J890', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-10/400/200', doctors: [mockDoctors[12]] },
-  { id: 'clinic-11', userId: 'clinic-11', name: "Dr. C.N. Gupta's Clinic", address: 'RC Das Road, Burdwan', licenseNo: 'CLN-K123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-11/400/200', doctors: [] },
+  { id: 'clinic-11', userId: 'clinic-11', name: "Dr. C.N. Gupta's Clinic", address: 'RC Das Road, Burdwan', licenseNo: 'CLN-K123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-11/400/200', doctors: [mockDoctors[13]] },
   { id: 'clinic-12', userId: 'clinic-12', name: 'Chittaranjan Clinic Pvt ltd', address: 'Ramkrishna Road, Burdwan', licenseNo: 'CLN-L456', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-12/400/200', doctors: [] },
   { id: 'clinic-13', userId: 'clinic-13', name: 'Astha Medical Centre', address: '6VW6+WJX, Burdwan', licenseNo: 'CLN-M789', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-13/400/200', doctors: [] },
   { id: 'clinic-14', userId: 'clinic-14', name: "Petals Woman's Clinic", address: '11 A, Sarojini Naidu Sarani, Rawdon St, Kolkata', licenseNo: 'CLN-N012', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-14/400/200', doctors: [] },
@@ -388,3 +388,6 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 
 
+
+
+    
