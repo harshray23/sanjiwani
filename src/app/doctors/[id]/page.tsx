@@ -25,7 +25,6 @@ export default function DoctorDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   
   const router = useRouter();
   const { toast } = useToast();
@@ -35,7 +34,6 @@ export default function DoctorDetailPage() {
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     }
-    setIsAuthLoading(false);
   }, []);
 
   useEffect(() => {
@@ -56,6 +54,15 @@ export default function DoctorDetailPage() {
   }, [id]);
 
   const handleBookAppointment = (type: 'clinic' | 'video') => {
+    if (!user) {
+        toast({
+            title: "Login Required",
+            description: "Please log in to book an appointment.",
+        });
+        router.push('/login');
+        return;
+    }
+    
     if (type === 'video') {
       router.push('/coming-soon');
       return;
@@ -70,7 +77,7 @@ export default function DoctorDetailPage() {
       return;
     }
 
-    if (user && doctor) {
+    if (doctor) {
         const queryParams = new URLSearchParams({
             doctorId: doctor.uid,
             type: type
@@ -82,16 +89,10 @@ export default function DoctorDetailPage() {
             queryParams.set('clinicId', doctor.clinicId);
         }
         router.push(`/payment?${queryParams.toString()}`);
-    } else {
-        toast({
-            title: "Login Required",
-            description: "Please log in to book an appointment.",
-        });
-        router.push('/login');
     }
   }
 
-  if (isLoading || isAuthLoading) {
+  if (isLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
@@ -175,7 +176,7 @@ export default function DoctorDetailPage() {
                 <Button 
                 onClick={() => handleBookAppointment('clinic')}
                 className="w-full"
-                disabled={isAuthLoading || !doctor.availability || doctor.availability.length === 0}
+                disabled={!doctor.availability || doctor.availability.length === 0}
               >
                   Book In-Clinic Visit
               </Button>
@@ -217,3 +218,5 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
+
+    

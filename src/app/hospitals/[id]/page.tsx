@@ -4,13 +4,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getHospitalById } from '@/lib/data';
-import type { Hospital } from '@/lib/types';
+import type { Hospital, User } from '@/lib/types';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { BedDouble, Building, Check, Clock, Hospital as HospitalIcon, Info, Loader2, MapPin, Phone, User } from 'lucide-react';
+import { BedDouble, Building, Check, Clock, Hospital as HospitalIcon, Info, Loader2, MapPin, Phone, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,7 @@ export default function HospitalDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isBooking, setIsBooking] = useState(false);
     const [selectedBed, setSelectedBed] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -48,6 +49,12 @@ export default function HospitalDetailPage() {
             setIsLoading(false);
         };
         fetchHospital();
+        
+        const storedUser = localStorage.getItem('mockUser');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
     }, [id]);
 
     const handleBedSelection = (bedType: string) => {
@@ -65,6 +72,16 @@ export default function HospitalDetailPage() {
 
     const handleConfirmBooking = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!user) {
+            toast({
+                title: "Login Required",
+                description: "Please log in to reserve a bed.",
+            });
+            router.push('/login');
+            return;
+        }
+
         if (!selectedBed) {
             toast({
                 title: "Select a Bed Type",
@@ -195,3 +212,4 @@ export default function HospitalDetailPage() {
     );
 }
 
+    

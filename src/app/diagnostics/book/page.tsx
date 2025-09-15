@@ -55,11 +55,11 @@ function TestPaymentForm() {
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     } else {
+        toast({ title: "Login Required", description: "Please log in to book a test.", variant: "default" });
         router.push('/login');
+        return;
     }
-  }, [router]);
 
-  useEffect(() => {
     const fetchData = async () => {
       if (!centreId || !testId) {
         toast({ title: "Missing Information", description: "Centre or Test ID not provided.", variant: "destructive" });
@@ -265,3 +265,5 @@ export default function DiagnosticsBookingPage() {
         </Suspense>
     )
 }
+
+    

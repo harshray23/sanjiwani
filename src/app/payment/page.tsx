@@ -45,7 +45,6 @@ function PaymentForm() {
   const searchParams = useSearchParams();
   
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(true);
   
   const [user, setUser] = useState<User | null>(null);
@@ -66,12 +65,11 @@ function PaymentForm() {
     if (storedUser) {
         setUser(JSON.parse(storedUser));
     } else {
+        toast({ title: "Login Required", description: "Please log in to book an appointment.", variant: "default" });
         router.push('/login');
+        return;
     }
-    setIsAuthLoading(false);
-  }, [router]);
 
-  useEffect(() => {
     const fetchDoctor = async () => {
       if (!doctorId) {
         toast({ title: "Missing Information", description: "Doctor ID not provided.", variant: "destructive" });
@@ -148,7 +146,7 @@ function PaymentForm() {
       return consultationType === 'video' ? 40 : 25;
   }
 
-  if (isAuthLoading || isDataLoading) {
+  if (isDataLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
   }
 
@@ -306,3 +304,5 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
+
+    
