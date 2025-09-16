@@ -128,4 +128,15 @@
     .animate-fade-in-up {
         animation: fade-in-up 0.8s ease-out forwards;
     }
+
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .animate-marquee {
+        display: inline-block;
+        white-space: nowrap;
+        animation: marquee 30s linear infinite;
+    }
 }
