@@ -25,12 +25,7 @@ const formSchema = z.object({
 });
 
 export default function MediBotPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'model',
-      content: 'Hello! I am Medi+Bot, your personal health assistant from Sanjiwani. How can I help you today?',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +35,36 @@ export default function MediBotPage() {
       query: '',
     },
   });
+  
+  // Effect to send initial greeting
+  useEffect(() => {
+    const sendInitialGreeting = async () => {
+        setIsLoading(true);
+        try {
+            const stream = await streamChat({
+                history: [],
+                query: "Hello, who are you?",
+            } as MediBotInput);
+            
+            let fullResponse = '';
+            for await (const chunk of stream) {
+                fullResponse += chunk;
+            }
+             setMessages([{ role: 'model', content: fullResponse }]);
+        } catch (error) {
+            console.error('Error getting initial greeting:', error);
+            setMessages([
+                {
+                    role: 'model',
+                    content: 'Sorry, I am having trouble starting up. Please try again later.',
+                },
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    sendInitialGreeting();
+  }, []);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -69,6 +94,7 @@ export default function MediBotPage() {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (isLoading) return; // Prevent multiple submissions
     setIsLoading(true);
 
     const newUserMessage: Message = { role: 'user', content: values.query };
@@ -77,6 +103,7 @@ export default function MediBotPage() {
     form.reset();
 
     try {
+      // The history should not include the latest user message for some models, but we'll include it.
       const history = newMessages.slice(0, -1).filter(m => m.role === 'user' || m.role === 'model');
       const stream = await streamChat({
         history: history,
@@ -152,6 +179,12 @@ export default function MediBotPage() {
                   )}
                 </div>
               ))}
+               {messages.length === 0 && isLoading && (
+                 <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Contacting Medi+Bot...</span>
+                  </div>
+              )}
             </div>
           </ScrollArea>
           

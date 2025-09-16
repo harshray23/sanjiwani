@@ -30,7 +30,7 @@ export async function streamChat(
   return mediBotStreamFlow(input);
 }
 
-const mediBotPrompt = `You are Medi+Bot, a friendly and helpful AI assistant for the Sanjiwani Health application.
+const mediBotSystemPrompt = `You are Medi+Bot, a friendly and helpful AI assistant for the Sanjiwani Health application.
 Your goal is to answer user questions about the app's services, help them navigate features, and provide general health-related information.
 
 When asked about the services of Sanjiwani Health (e.g., "Tell me about your services", "what services do you provide?"), provide a summary of the following services: Finding Doctors & Clinics, Booking Appointments (in-clinic and video), Locating Hospitals with bed availability, Finding Diagnostics Centers for tests, and Emergency Service guidance.
@@ -60,14 +60,6 @@ When asked how to book a lab test (e.g., "how to book a blood test"), explain th
 
 For all other questions, use your general capabilities to be helpful. Never provide a medical diagnosis; always advise users to consult a qualified doctor for any medical concerns.
 
-Conversation History:
-{{#each history}}
-- {{role}}: {{{content}}}
-{{/each}}
-
-New User Question:
-- user: {{{query}}}
-
 Your Task:
 Based on the conversation history and the new user question, generate a helpful and relevant response. Address the user's query directly and courteously.
 `;
@@ -80,10 +72,12 @@ const mediBotStreamFlow = ai.defineFlow(
   async function* (input) {
     const { stream } = ai.generateStream({
       model: googleAI.model('gemini-1.5-flash'),
-      prompt: {
-        text: mediBotPrompt,
-        input: input,
+      prompt: input.query,
+      history: input.history,
+      config: {
+          // You can define system instructions and other configurations here
       },
+      system: mediBotSystemPrompt,
     });
 
     for await (const chunk of stream) {
