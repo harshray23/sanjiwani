@@ -25,7 +25,6 @@ export function Header() {
     { href: '/appointments', label: 'My Appointments' },
   ];
   
-  const quote = "Dharmārtha-kāma-mokṣāṇāṃ svāsthyaṃ mūlam-uttamam | Svasthasya kuśalaṃ śreyaḥ svāsthyaṃ sarvārtha-sādhanam ||";
 
   return (
     <div className="sticky top-0 z-50">
@@ -118,16 +117,6 @@ export function Header() {
           </div>
         </div>
       </header>
-       <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
-        <div className="absolute flex">
-            <p className="animate-marquee py-2 text-primary">
-                <span className="mx-16">{quote}</span>
-            </p>
-             <p className="animate-marquee py-2 text-primary" aria-hidden="true">
-                <span className="mx-16">{quote}</span>
-            </p>
-        </div>
-      </div>
     </div>
   );
 }

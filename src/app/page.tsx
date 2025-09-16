@@ -24,6 +24,8 @@ export default function HomePage() {
       { value: '4.8/5', label: 'Patient Rating', icon: <Star className="h-8 w-8 text-primary fill-primary"/>},
   ]
 
+  const quote = "Dharmārtha-kāma-mokṣāṇāṃ svāsthyaṃ mūlam-uttamam | Svasthasya kuśalaṃ śreyaḥ svāsthyaṃ sarvārtha-sādhanam ||";
+
   return (
     <div className="w-full space-y-20">
       {/* Hero Section */}
@@ -101,6 +103,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Running Text Animation Section */}
+       <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+        <div className="absolute flex">
+            <p className="animate-marquee py-2 text-primary">
+                <span className="mx-16">{quote}</span>
+            </p>
+             <p className="animate-marquee py-2 text-primary" aria-hidden="true">
+                <span className="mx-16">{quote}</span>
+            </p>
+        </div>
+      </div>
       
        {/* How It Works Section */}
       <section id="how-it-works" className="py-16 text-center animate-fade-in-up">
