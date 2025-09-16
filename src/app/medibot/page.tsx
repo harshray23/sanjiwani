@@ -14,6 +14,8 @@ import type { MediBotInput } from '@/ai/flows/medibot-flow';
 import { Loader2, Bot, User, Send } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+
 
 interface Message {
   role: 'user' | 'model';
@@ -43,7 +45,7 @@ export default function MediBotPage() {
         try {
             const stream = await streamChat({
                 history: [],
-                query: "Hello, who are you?",
+                query: "Introduce yourself and what you can do.",
             } as MediBotInput);
             
             let fullResponse = '';
@@ -155,14 +157,20 @@ export default function MediBotPage() {
                   )}
                   <div
                     className={cn(
-                      'max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-md',
+                      'max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-md prose',
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground rounded-br-none'
                         : 'bg-muted text-foreground rounded-bl-none'
                     )}
                   >
                     {message.content ? (
-                      <p>{message.content}</p>
+                      <ReactMarkdown
+                         components={{
+                           p: ({node, ...props}) => <p className="my-0" {...props} />,
+                           ul: ({node, ...props}) => <ul className="my-2 pl-4" {...props} />,
+                           li: ({node, ...props}) => <li className="my-1" {...props} />
+                         }}
+                      >{message.content}</ReactMarkdown>
                     ) : (
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
