@@ -21,6 +21,7 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
           width={400}
           height={200}
           className="w-full h-48 object-cover rounded-t-lg"
+          data-ai-hint={clinic.dataAiHint}
         />
       </CardHeader>
       <CardContent className="p-4 flex-grow">

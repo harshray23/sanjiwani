@@ -40,6 +40,7 @@ export interface ClinicDetails {
   licenseNo: string;
   verified: boolean;
   imageUrl?: string;
+  dataAiHint?: string;
   doctors: DoctorDetails[];
   about?: string;
 }
