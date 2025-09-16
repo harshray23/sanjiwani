@@ -65,7 +65,7 @@ export function Footer() {
                 </p>
                  <p className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4 text-primary"/>
-                    <a href="mailto:support@sanjiwanihealth.com" className="hover:text-primary">support@sanjiwanihealth.com</a>
+                    <a href="mailto:healthsanjiwani@gmail.com" className="hover:text-primary">healthsanjiwani@gmail.com</a>
                 </p>
                  <p className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4 text-primary"/>

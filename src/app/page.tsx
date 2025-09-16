@@ -44,7 +44,7 @@ export default function HomePage() {
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
               Find trusted doctors, book appointments instantly, and get real-time hospital availability. Quality healthcare is just a click away.
             </p>
-             <div className="max-w-2xl mx-auto bg-white/90 dark:bg-card/80 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-2xl">
+             <div className="max-w-2xl mx-auto bg-white/90 dark:bg-card/80 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-2xl transition-all duration-300 hover:shadow-primary/40 hover:shadow-2xl hover:-translate-y-1">
                 <form action="/search" method="GET" className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
