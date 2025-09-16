@@ -48,7 +48,7 @@ export default function MediBotPage() {
             try {
                 const stream = await streamChat({
                     history: [],
-                    query: "Introduce yourself as Medi+Bot from Sanjiwani Health and briefly state what you can do.",
+                    query: "Introduce yourself with a simple greeting: \"Hello! I'm Medi+Bot, your AI health assistant. How can I help you today?\"",
                 } as MediBotInput);
                 
                 await handleStreamResponse(stream);
