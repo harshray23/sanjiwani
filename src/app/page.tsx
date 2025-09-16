@@ -34,6 +34,8 @@ export default function HomePage() {
             fill
             className="object-cover"
             priority
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+F9PQAI8wNPvd7POQAAAABJRU5ErkJggg=="
             data-ai-hint="doctors team technology"
         />
         <div className="absolute inset-0 bg-black/50" />
