@@ -29,7 +29,7 @@ const formSchema = z.object({
 export default function MediBotPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,40 +40,40 @@ export default function MediBotPage() {
   
   // Effect to send initial greeting
   useEffect(() => {
-    const sendInitialGreeting = async () => {
-        setIsLoading(true);
-        try {
-            const stream = await streamChat({
-                history: [],
-                query: "Introduce yourself and what you can do.",
-            } as MediBotInput);
-            
-            let fullResponse = '';
-            for await (const chunk of stream) {
-                fullResponse += chunk;
+    // Only send greeting if there are no messages
+    if (messages.length === 0) {
+        const sendInitialGreeting = async () => {
+            setIsLoading(true);
+            setMessages([{ role: 'model', content: '' }]); // Add a placeholder for the bot's response
+            try {
+                const stream = await streamChat({
+                    history: [],
+                    query: "Introduce yourself as Medi+Bot from Sanjiwani Health and briefly state what you can do.",
+                } as MediBotInput);
+                
+                await handleStreamResponse(stream);
+
+            } catch (error) {
+                console.error('Error getting initial greeting:', error);
+                 setMessages((prev) => [
+                    ...prev.slice(0, -1),
+                    {
+                        role: 'model',
+                        content: 'Sorry, I am having trouble starting up. Please try again later.',
+                    },
+                ]);
+            } finally {
+                setIsLoading(false);
             }
-             setMessages([{ role: 'model', content: fullResponse }]);
-        } catch (error) {
-            console.error('Error getting initial greeting:', error);
-            setMessages([
-                {
-                    role: 'model',
-                    content: 'Sorry, I am having trouble starting up. Please try again later.',
-                },
-            ]);
-        } finally {
-            setIsLoading(false);
         }
+        sendInitialGreeting();
     }
-    sendInitialGreeting();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.children[0] as HTMLDivElement;
-        if (viewport) {
-             viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-        }
+    if (scrollViewportRef.current) {
+        scrollViewportRef.current.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
     }
   };
 
@@ -87,7 +87,7 @@ export default function MediBotPage() {
       fullResponse += chunk;
       setMessages((prev) => {
         const newMessages = [...prev];
-        if (newMessages[newMessages.length - 1].role === 'model') {
+        if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'model') {
           newMessages[newMessages.length - 1].content = fullResponse;
         }
         return newMessages;
@@ -100,13 +100,12 @@ export default function MediBotPage() {
     setIsLoading(true);
 
     const newUserMessage: Message = { role: 'user', content: values.query };
-    const newMessages: Message[] = [...messages, newUserMessage];
-    setMessages([...newMessages, { role: 'model', content: '' }]);
+    const currentMessages = [...messages, newUserMessage];
+    setMessages([...currentMessages, { role: 'model', content: '' }]);
     form.reset();
 
     try {
-      // The history should not include the latest user message for some models, but we'll include it.
-      const history = newMessages.slice(0, -1).filter(m => m.role === 'user' || m.role === 'model');
+      const history = currentMessages.slice(0, -1).filter(m => m.role === 'user' || m.role === 'model');
       const stream = await streamChat({
         history: history,
         query: values.query,
@@ -138,7 +137,7 @@ export default function MediBotPage() {
         </CardHeader>
         
         <CardContent className="flex-grow p-0 flex flex-col overflow-hidden">
-          <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
+          <ScrollArea className="flex-1 p-6" viewportRef={scrollViewportRef}>
             <div className="space-y-6">
               {messages.map((message, index) => (
                 <div
@@ -157,7 +156,7 @@ export default function MediBotPage() {
                   )}
                   <div
                     className={cn(
-                      'max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-md prose',
+                      'max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-md prose dark:prose-invert',
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground rounded-br-none'
                         : 'bg-muted text-foreground rounded-bl-none'
