@@ -59,7 +59,7 @@ export default function HomePage() {
             </div>
              <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                 {stats.map((stat) => (
-                <Card key={stat.label} className="bg-white/20 dark:bg-card/30 backdrop-blur-md border-white/30 text-white">
+                <Card key={stat.label} className="bg-white/20 dark:bg-card/30 backdrop-blur-md border-white/30 text-white transition-all duration-300 hover:bg-white/30 hover:scale-105 hover:shadow-lg">
                     <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
                         {stat.icon}
                         <p className="text-2xl font-bold">{stat.value}</p>
