@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Inter as FontSans } from "next/font/google"
 import { cn } from '@/lib/utils';
 import { Suspense } from 'react';
+import { AppLoader } from '@/components/layout/AppLoader';
  
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,12 +30,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", fontSans.variable)}>
-        <Header />
-        <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
-          {children}
-        </main>
-        <Footer />
-        <Toaster />
+        <AppLoader>
+          <Header />
+          <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
+            {children}
+          </main>
+          <Footer />
+          <Toaster />
+        </AppLoader>
       </body>
     </html>
   );
