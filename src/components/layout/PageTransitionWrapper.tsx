@@ -39,7 +39,6 @@ export function PageTransitionWrapper({ children }: { children: React.ReactNode 
       {isPageLoading && animationData && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm">
             <Lottie animationData={animationData} loop={true} className="w-64 h-64" />
-            <p className="text-lg text-muted-foreground mt-4">Loading Page...</p>
         </div>
       )}
       {children}
