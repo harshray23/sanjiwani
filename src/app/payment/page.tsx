@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -25,7 +24,6 @@ import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/data';
 import type { DoctorProfile, User } from '@/lib/types';
 import { createAppointment } from '@/lib/data';
-import comingSoonAnimation from '@/assets/animations/Coming.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 const cardFormSchema = z.object({
@@ -50,6 +48,7 @@ function PaymentForm() {
   const [user, setUser] = useState<User | null>(null);
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
+  const [comingSoonAnimation, setComingSoonAnimation] = useState(null);
   
   const doctorId = searchParams.get('doctorId');
   const clinicId = searchParams.get('clinicId');
@@ -61,6 +60,11 @@ function PaymentForm() {
   const totalFee = consultationFee + platformFee;
 
   useEffect(() => {
+    fetch('/Coming.json')
+      .then(response => response.json())
+      .then(data => setComingSoonAnimation(data))
+      .catch(error => console.error("Error fetching animation:", error));
+
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
         setUser(JSON.parse(storedUser));
@@ -304,5 +308,3 @@ export default function PaymentPage() {
         </Suspense>
     )
 }
-
-    
