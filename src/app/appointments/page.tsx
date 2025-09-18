@@ -1,7 +1,8 @@
 
+
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getAppointmentsForUser } from '@/lib/data';
 import type { Appointment, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -22,7 +23,7 @@ const PrescriptionUploadDialog = ({ appointment, onUploadSuccess }: { appointmen
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [open, setOpen] = useState(false);
-    const fileInputRef = useState<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
