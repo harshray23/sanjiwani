@@ -25,6 +25,7 @@ export default function HomePage() {
   ]
 
   const quote = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), karma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
+  const hindiQuote = "धर्म, अर्थ, काम और मोक्ष – इन चारों पुरुषार्थों का श्रेष्ठतम मूल स्वास्थ्य है। स्वस्थ व्यक्ति का ही कल्याण और श्रेष्ठता संभव है। स्वास्थ्य ही सभी उद्देश्यों की सिद्धि का साधन है।";
 
   return (
     <div className="w-full space-y-20">
@@ -103,6 +104,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      
+      {/* Running Text Animation Section - Hindi */}
+       <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+        <div className="absolute flex">
+            <p className="animate-marquee py-2 text-primary">
+                <span className="mx-16">{hindiQuote}</span>
+            </p>
+             <p className="animate-marquee py-2 text-primary" aria-hidden="true">
+                <span className="mx-16">{hindiQuote}</span>
+            </p>
+        </div>
+      </div>
 
       {/* Running Text Animation Section */}
        <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
