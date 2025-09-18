@@ -29,7 +29,7 @@ export function PageLoader() {
       )}
     >
       {loadingAnimation && (
-         <div className="w-48 h-48">
+         <div className="w-64 h-64">
             <Lottie animationData={loadingAnimation} loop={true} />
          </div>
       )}
