@@ -18,8 +18,8 @@ export default function HomePage() {
   ];
   
   const stats = [
-      { value: '5', label: 'Verified Doctors', icon: <Shield className="h-8 w-8 text-primary"/>},
-      { value: '3', label: 'Partner Hospitals', icon: <Hospital className="h-8 w-8 text-primary"/>},
+      { value: '14', label: 'Verified Doctors', icon: <Shield className="h-8 w-8 text-primary"/>},
+      { value: '14', label: 'Partner Hospitals', icon: <Hospital className="h-8 w-8 text-primary"/>},
       { value: '200+', label: 'Appointments Daily', icon: <CalendarCheck className="h-8 w-8 text-primary"/>},
       { value: '4.8/5', label: 'Patient Rating', icon: <Star className="h-8 w-8 text-primary fill-primary"/>},
   ]
