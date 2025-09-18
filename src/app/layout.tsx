@@ -8,6 +8,7 @@ import { Inter as FontSans } from "next/font/google"
 import { cn } from '@/lib/utils';
 import { Suspense } from 'react';
 import { AppLoader } from '@/components/layout/AppLoader';
+import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
  
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -33,7 +34,9 @@ export default function RootLayout({
         <AppLoader>
           <Header />
           <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
-            {children}
+            <PageTransitionWrapper>
+              {children}
+            </PageTransitionWrapper>
           </main>
           <Footer />
           <Toaster />
