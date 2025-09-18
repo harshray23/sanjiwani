@@ -29,10 +29,10 @@ const PrescriptionUploadDialog = ({ appointment, onUploadSuccess }: { appointmen
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 100 * 1024 * 1024) { // 100MB
+            if (file.size > 200 * 1024 * 1024) { // 200MB
                 toast({
                     title: "File Too Large",
-                    description: "Please select a file smaller than 100MB.",
+                    description: "Please select a file smaller than 200MB.",
                     variant: "destructive",
                 });
                 return;
@@ -98,7 +98,7 @@ const PrescriptionUploadDialog = ({ appointment, onUploadSuccess }: { appointmen
                 <DialogHeader>
                     <DialogTitle>Upload Prescription</DialogTitle>
                     <DialogDescription>
-                        Upload the prescription from Dr. {appointment.doctor?.name} to claim your cashback. Max file size: 100MB.
+                        Upload the prescription from Dr. {appointment.doctor?.name} to claim your cashback. Max file size: 200MB.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
