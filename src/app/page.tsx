@@ -25,7 +25,6 @@ export default function HomePage() {
   ]
 
   const quote = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), karma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
-  const hindiQuote = "धर्म, अर्थ, काम और मोक्ष – इन चारों पुरुषार्थों का श्रेष्ठतम मूल स्वास्थ्य है। स्वस्थ व्यक्ति का ही कल्याण और श्रेष्ठता संभव है। स्वास्थ्य ही सभी उद्देश्यों की सिद्धि का साधन है।";
 
   return (
     <div className="w-full space-y-20">
@@ -105,18 +104,6 @@ export default function HomePage() {
         </div>
       </section>
       
-      {/* Running Text Animation Section - Hindi */}
-       <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
-        <div className="absolute flex">
-            <p className="animate-marquee py-2 text-primary">
-                <span className="mx-16">{hindiQuote}</span>
-            </p>
-             <p className="animate-marquee py-2 text-primary" aria-hidden="true">
-                <span className="mx-16">{hindiQuote}</span>
-            </p>
-        </div>
-      </div>
-
       {/* Running Text Animation Section */}
        <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
         <div className="absolute flex">
@@ -128,19 +115,6 @@ export default function HomePage() {
             </p>
         </div>
       </div>
-
-       {/* Sanskrit Quote Section */}
-      <section className="py-16 animate-fade-in-up">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-3xl mx-auto p-8 text-center shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:shadow-accent/20">
-            <p className="text-2xl lg:text-3xl font-serif text-accent leading-loose">
-              धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम्।
-              <br />
-              स्वस्थस्य कुशलं श्रेयः स्वास्थ्यं सर्वार्थसाधनम्॥
-            </p>
-          </Card>
-        </div>
-      </section>
       
        {/* How It Works Section */}
       <section id="how-it-works" className="py-16 text-center animate-fade-in-up">
@@ -233,6 +207,19 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Sanskrit Quote Section */}
+      <section className="py-16 animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <Card className="max-w-3xl mx-auto p-8 text-center shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:shadow-accent/20">
+            <p className="text-2xl lg:text-3xl font-serif text-accent leading-loose">
+              धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम्।
+              <br />
+              स्वस्थस्य कुशलं श्रेयः स्वास्थ्यं सर्वार्थसाधनम्॥
+            </p>
+          </Card>
         </div>
       </section>
 
