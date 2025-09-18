@@ -24,7 +24,7 @@ export default function HomePage() {
       { value: '4.8/5', label: 'Patient Rating', icon: <Star className="h-8 w-8 text-primary fill-primary"/>},
   ]
 
-  const quote = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), kāma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
+  const quote = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), karma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
 
   return (
     <div className="w-full space-y-20">
