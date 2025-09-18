@@ -128,6 +128,19 @@ export default function HomePage() {
             </p>
         </div>
       </div>
+
+       {/* Sanskrit Quote Section */}
+      <section className="py-16 animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <Card className="max-w-3xl mx-auto p-8 text-center shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:shadow-accent/20">
+            <p className="text-2xl lg:text-3xl font-serif text-accent leading-loose">
+              धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम्।
+              <br />
+              स्वस्थस्य कुशलं श्रेयः स्वास्थ्यं सर्वार्थसाधनम्॥
+            </p>
+          </Card>
+        </div>
+      </section>
       
        {/* How It Works Section */}
       <section id="how-it-works" className="py-16 text-center animate-fade-in-up">
