@@ -14,7 +14,7 @@ export default function HomePage() {
     { href: '/search', label: 'Find Doctors', description: 'Consult with verified specialists', icon: <Stethoscope className="h-8 w-8 text-orange-500"/>, hoverClass: 'hover-orange' },
     { href: '/hospitals', label: 'Hospitals', description: 'Real-time bed availability', icon: <Hospital className="h-8 w-8 text-blue-500"/>, hoverClass: 'hover-blue' },
     { href: '/diagnostics', label: 'Diagnostics', description: 'Book lab tests & health checkups', icon: <Microscope className="h-8 w-8 text-green-500"/>, hoverClass: 'hover-green' },
-    { href: '/hospitals?emergency=true', label: 'Emergency', description: '24/7 emergency services', icon: <HeartPulse className="h-8 w-8 text-red-500"/>, hoverClass: 'hover-red' },
+    { href: '/coming-soon', label: 'Emergency', description: '24/7 emergency services', icon: <HeartPulse className="h-8 w-8 text-red-500"/>, hoverClass: 'hover-red' },
   ];
   
   const stats = [
@@ -77,7 +77,7 @@ export default function HomePage() {
                     <Link href="/search">Book Appointment</Link>
                 </Button>
                  <Button asChild size="lg" variant="outline" className="h-12 text-base px-10 bg-white/90 text-primary border-primary hover:bg-white hover:text-primary">
-                    <Link href="/hospitals">Find Emergency Care</Link>
+                    <Link href="/coming-soon">Find Emergency Care</Link>
                 </Button>
             </div>
         </div>
