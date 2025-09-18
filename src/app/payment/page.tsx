@@ -25,7 +25,7 @@ import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/data';
 import type { DoctorProfile, User } from '@/lib/types';
 import { createAppointment } from '@/lib/data';
-import comingSoonAnimation from '@/assets/animations/coming_soon.json';
+import comingSoonAnimation from '@/assets/animations/Coming.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 const cardFormSchema = z.object({

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import comingSoonAnimation from '@/assets/animations/coming_soon.json';
+import comingSoonAnimation from '@/assets/animations/Coming.json';
 
 
 export default function ComingSoonPage() {
