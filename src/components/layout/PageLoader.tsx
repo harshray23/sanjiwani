@@ -16,7 +16,7 @@ export function PageLoader() {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000); // Keep loader visible for 1 second
+    }, 2000); // Keep loader visible for 2 seconds
 
     return () => clearTimeout(timer);
   }, [pathname, searchParams]);
