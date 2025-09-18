@@ -6,7 +6,6 @@ import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter as FontSans } from "next/font/google"
 import { cn } from '@/lib/utils';
-import { PageLoader } from '@/components/layout/PageLoader';
 import { Suspense } from 'react';
  
 const fontSans = FontSans({
@@ -30,9 +29,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", fontSans.variable)}>
-        <Suspense>
-          <PageLoader />
-        </Suspense>
         <Header />
         <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
           {children}
