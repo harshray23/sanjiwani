@@ -3,13 +3,18 @@
 
 import { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
-import transitionAnimation from '@/assets/animations/Transition.json';
 import Logo from './Logo';
 
 export function AppLoader({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const [animationData, setAnimationData] = useState(null);
 
   useEffect(() => {
+    fetch('/Transition.json')
+      .then(response => response.json())
+      .then(data => setAnimationData(data))
+      .catch(error => console.error("Error fetching animation:", error));
+
     const timer = setTimeout(() => {
       setLoading(false);
     }, 2500); // 2.5 seconds
@@ -17,12 +22,12 @@ export function AppLoader({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
+  if (loading || !animationData) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background gap-4">
         <Logo className="h-32 w-32 text-primary animate-pulse" />
         <div className="w-64 h-64">
-             <Lottie animationData={transitionAnimation} loop={true} />
+             {animationData && <Lottie animationData={animationData} loop={true} />}
         </div>
         <p className="text-lg text-muted-foreground">Initializing Sanjiwani Health...</p>
       </div>
