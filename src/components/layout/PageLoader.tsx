@@ -13,21 +13,13 @@ export function PageLoader() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // On every route change, we don't need to do anything complex.
-    // The loader's visibility is managed by its dependency on pathname and searchParams.
-    // When a link is clicked, the component re-renders but the hooks haven't updated yet.
-    // We can use this to our advantage, but a simple timeout is often the most reliable
-    // way to handle the "end" of loading without complex router event handling.
-    
-    // For this implementation, we will keep it simple. The loader will show briefly
-    // on path changes. We set loading to false when the path updates.
-    setIsLoading(false);
-  }, [pathname, searchParams]);
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Keep loader visible for 1 second
 
-  // A simple way to trigger the loader on link clicks is not straightforward
-  // in App Router without complex workarounds. We will rely on Suspense for now
-  // and keep this component as a fallback. The previous implementation was causing errors.
-  // This simplified version will prevent errors.
+    return () => clearTimeout(timer);
+  }, [pathname, searchParams]);
 
   return (
     <div
