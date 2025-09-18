@@ -46,7 +46,7 @@ const verifyPrescriptionPrompt = ai.definePrompt({
   name: 'verifyPrescriptionPrompt',
   input: { schema: VerifyPrescriptionInputSchema },
   output: { schema: VerifyPrescriptionOutputSchema },
-  model: googleAI.model('gemini-1.5-flash-preview'),
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
 Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
