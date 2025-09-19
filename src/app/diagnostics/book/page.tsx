@@ -197,60 +197,15 @@ function TestPaymentForm() {
                 </TabsContent>
 
                 <TabsContent value="card" className="pt-4">
-                  <Form {...cardForm}>
-                    <form onSubmit={cardForm.handleSubmit(handlePayment)} className="space-y-4">
-                      <FormField
-                        control={cardForm.control}
-                        name="cardNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Card Number</FormLabel>
-                            <FormControl><Input placeholder="0000 0000 0000 0000" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                       <FormField
-                        control={cardForm.control}
-                        name="cardName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name on Card</FormLabel>
-                            <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={cardForm.control}
-                          name="expiryDate"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Expiry (MM/YY)</FormLabel>
-                              <FormControl><Input placeholder="MM/YY" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                         <FormField
-                          control={cardForm.control}
-                          name="cvv"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CVV</FormLabel>
-                              <FormControl><Input placeholder="123" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                         Pay ₹{totalFee.toFixed(2)}
-                      </Button>
-                    </form>
-                  </Form>
+                  <div className="flex flex-col items-center text-center">
+                    {comingSoonAnimation ? (
+                        <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    ): <p>Loading animation...</p>}
+                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Card payments will be available shortly.
+                    </p>
+                  </div>
                 </TabsContent>
               </Tabs>
                <p className="text-xs text-muted-foreground text-center mt-4">
