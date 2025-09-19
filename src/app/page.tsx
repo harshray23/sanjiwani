@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const [currentImage, setCurrentImage] = useState(0);
-  const images = ['/h1.jpg', '/h2.jpg', '/h3.jpg'];
+  const images = ['/h1.jpg', '/h2.jpg', '/h3.jpg', '/img_hospital.jpg'];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -257,3 +257,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
