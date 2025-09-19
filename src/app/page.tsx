@@ -1,4 +1,5 @@
 
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,20 @@ import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarChec
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
+  const [currentImage, setCurrentImage] = useState(0);
+  const images = ['/h1.jpg', '/h2.jpg', '/h3.jpg'];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImage((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(timer);
+  }, [images.length]);
+
 
   const quickAccessLinks = [
     { href: '/search', label: 'Find Doctors', description: 'Consult with verified specialists', icon: <Stethoscope className="h-8 w-8 text-orange-500"/>, hoverClass: 'hover-orange' },
@@ -30,16 +43,17 @@ export default function HomePage() {
     <div className="w-full space-y-20">
       {/* Hero Section */}
       <section className="relative w-full h-auto md:h-[80vh] flex flex-col items-center justify-center text-center text-white rounded-xl overflow-hidden py-12 md:py-0">
-        <Image
-            src="/img_hospital.jpg"
-            alt="A team of doctors collaborating around a futuristic medical interface"
+        {images.map((src, index) => (
+          <Image
+            key={src}
+            src={src}
+            alt="A team of doctors collaborating"
             fill
-            className="object-cover"
-            priority
-            placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+F9PQAI8wNPvd7POQAAAABJRU5ErkJggg=="
+            className={`object-cover transition-opacity duration-1000 ease-in-out ${index === currentImage ? 'opacity-100' : 'opacity-0'}`}
+            priority={index === 0}
             data-ai-hint="doctors team technology"
-        />
+          />
+        ))}
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 p-4 animate-fade-in-up">
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
