@@ -23,7 +23,6 @@ import { Loader2, CreditCard, QrCode, ShieldCheck, Microscope } from "lucide-rea
 import Lottie from "lottie-react";
 import { getDiagnosticsCentreById, getTestById, createTestAppointment } from '@/lib/data';
 import type { DiagnosticsCentre, DiagnosticTest, User } from '@/lib/types';
-import comingSoonAnimation from '@/assets/animations/coming_soon.json';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
 const cardFormSchema = z.object({
@@ -44,6 +43,7 @@ function TestPaymentForm() {
   const [user, setUser] = useState<User | null>(null);
   const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
   const [test, setTest] = useState<DiagnosticTest | null>(null);
+  const [comingSoonAnimation, setComingSoonAnimation] = useState(null);
   
   const centreId = searchParams.get('centreId');
   const testId = searchParams.get('testId');
@@ -51,6 +51,11 @@ function TestPaymentForm() {
   const totalFee = test?.price || 0;
 
   useEffect(() => {
+    fetch('/Coming.json')
+      .then(response => response.json())
+      .then(data => setComingSoonAnimation(data))
+      .catch(error => console.error("Error fetching animation:", error));
+
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
         setUser(JSON.parse(storedUser));
@@ -181,7 +186,9 @@ function TestPaymentForm() {
                 
                 <TabsContent value="upi" className="pt-4">
                   <div className="flex flex-col items-center text-center">
-                    <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    {comingSoonAnimation ? (
+                      <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
+                    ): <p>Loading animation...</p>}
                     <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
                     <p className="text-sm text-muted-foreground">
                       UPI and QR Code payments will be available shortly.
@@ -265,5 +272,7 @@ export default function DiagnosticsBookingPage() {
         </Suspense>
     )
 }
+
+    
 
     
