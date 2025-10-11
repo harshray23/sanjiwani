@@ -1,15 +1,13 @@
 /**
- * @fileoverview This file initializes and configures the Genkit AI plugin.
- * It creates a single, shared `ai` instance that can be used across the application.
+ * @fileoverview This file initializes and a shared `ai` instance that can be used across the application.
  */
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 
 // Initialize the Google AI plugin.
-const googleAiPlugin = googleAI({
-    // You can specify your API key here if it's not set in an environment variable
-    // apiKey: process.env.GEMINI_API_KEY,
-});
+// By not passing an API key here, the plugin will automatically
+// use the `GEMINI_API_KEY` environment variable.
+const googleAiPlugin = googleAI();
 
 // Configure Genkit with the necessary plugins.
 // The `ai` object is the main entry point for using Genkit's features.
