@@ -3,7 +3,7 @@
  * It creates a single, shared `ai` instance that can be used across the application.
  */
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/google-genai';
 
 // Initialize the Google AI plugin.
 const googleAiPlugin = googleAI({
