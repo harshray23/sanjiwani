@@ -106,10 +106,11 @@ const mediBotStreamFlow = ai.defineFlow(
   {
     name: 'mediBotStreamFlow',
     inputSchema: MediBotInputSchema,
+    outputSchema: z.string().stream(),
   },
   async function* (input) {
     const { stream } = ai.generateStream({
-      model: googleAI.model('gemini-1.5-flash'),
+      model: 'gemini-1.5-flash',
       prompt: input.query,
       history: input.history,
       system: mediBotSystemPrompt,

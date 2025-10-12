@@ -41,30 +41,6 @@ export async function verifyPrescription(input: VerifyPrescriptionInput): Promis
   return verifyPrescriptionFlow(input);
 }
 
-// Define the Genkit prompt for the AI model.
-const verifyPrescriptionPrompt = ai.definePrompt({
-  name: 'verifyPrescriptionPrompt',
-  input: { schema: VerifyPrescriptionInputSchema },
-  output: { schema: VerifyPrescriptionOutputSchema },
-  model: googleAI.model('gemini-1.5-flash'),
-  prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
-Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
-
-**Expected Doctor's Name:** {{{doctorName}}}
-
-**Image of Prescription:**
-{{media url=photoDataUri}}
-
-**Instructions:**
-1.  Read the text from the image.
-2.  Check if the document appears to be a real medical prescription.
-3.  Find the doctor's name on the prescription.
-4.  Compare the name on the prescription with the expected doctor's name. A partial match of the last name is acceptable. The name might be part of a signature or a stamp.
-5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
-6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`,
-});
-
-
 // Define the Genkit flow that orchestrates the verification process.
 const verifyPrescriptionFlow = ai.defineFlow(
   {
@@ -73,8 +49,30 @@ const verifyPrescriptionFlow = ai.defineFlow(
     outputSchema: VerifyPrescriptionOutputSchema,
   },
   async (input) => {
-    // Call the AI prompt with the input data.
-    const llmResponse = await verifyPrescriptionPrompt(input);
+
+    const llmResponse = await ai.generate({
+        model: googleAI.model('gemini-1.5-flash'),
+        output: { schema: VerifyPrescriptionOutputSchema },
+        prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
+        Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
+
+        **Expected Doctor's Name:** ${input.doctorName}
+
+        **Image of Prescription:**
+        {{media url=photoDataUri}}
+
+        **Instructions:**
+        1.  Read the text from the image.
+        2.  Check if the document appears to be a real medical prescription.
+        3.  Find the doctor's name on the prescription.
+        4.  Compare the name on the prescription with the expected doctor's name. A partial match of the last name is acceptable. The name might be part of a signature or a stamp.
+        5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
+        6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`,
+        promptInput: {
+          photoDataUri: input.photoDataUri
+        }
+    });
+    
     const output = llmResponse.output;
 
     // Handle cases where the model might not return a valid output.
