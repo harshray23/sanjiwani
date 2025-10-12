@@ -40,33 +40,11 @@ export default function MediBotPage() {
   
   // Effect to send initial greeting
   useEffect(() => {
-    // Only send greeting if there are no messages
+    // Set a predefined initial greeting from the bot.
     if (messages.length === 0) {
-        const sendInitialGreeting = async () => {
-            setIsLoading(true);
-            setMessages([{ role: 'model', content: '' }]); // Add a placeholder for the bot's response
-            try {
-                const stream = await streamChat({
-                    history: [],
-                    query: "Introduce yourself with a simple greeting: \"Hello! I'm Medi+Bot, your AI health assistant. How can I help you today?\"",
-                } as MediBotInput);
-                
-                await handleStreamResponse(stream);
-
-            } catch (error) {
-                console.error('Error getting initial greeting:', error);
-                 setMessages((prev) => [
-                    ...prev.slice(0, -1),
-                    {
-                        role: 'model',
-                        content: 'Sorry, I am having trouble starting up. Please try again later.',
-                    },
-                ]);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        sendInitialGreeting();
+        setMessages([
+            { role: 'model', content: "Hello! I'm Sanjiwani Health Assistant, your AI health assistant. How can I help you today?" }
+        ]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
