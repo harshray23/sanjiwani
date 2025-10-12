@@ -1,58 +1,55 @@
+
 'use server';
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+
+import { ai } from "@/ai/genkit";
+import { z } from "zod";
 
 const MediBotInputSchema = z.object({
-  history: z.array(
-    z.object({
-      role: z.enum(['user', 'model']),
-      content: z.string(),
-    })
-  ),
-  query: z.string(),
+  history: z
+    .array(z.object({ role: z.string(), content: z.string().optional() }))
+    .optional(),
+  query: z.string().optional(),
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
 const mediBotSystemPrompt = `
-You are Sanjiwani Health Assistant, a friendly and helpful AI assistant for a healthcare application.
-Your goal is to provide helpful, safe, and informative guidance on healthcare topics, services offered by the Sanjiwani Health platform, and assist users with tasks like finding doctors or booking appointments.
-
-**IMPORTANT RULES:**
-- **DO NOT PROVIDE MEDICAL ADVICE.** Never diagnose conditions, prescribe medication, or suggest specific treatments.
-- Always preface any health-related information with a clear disclaimer: "As an AI assistant, I cannot provide medical advice. Please consult with a qualified healthcare professional for any health concerns."
-- If the user seems to be in an emergency, your immediate and only response should be to advise them to contact local emergency services.
-- Your knowledge is based on your training data. You are not a real doctor.
+You are Medi+Bot — a virtual assistant for Sanjiwani Health.
+You help users find doctors, hospitals, diagnostic centers, and book appointments.
+Be concise, factual, and guide them clearly.
 `;
 
-export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
-  const validatedInput = MediBotInputSchema.parse({
-    history: Array.isArray(input.history)
-      ? input.history.map(h => ({ ...h, content: String(h.content || '') }))
-      : [],
-    query: String(input.query || ''),
-  });
+export async function streamChat(input: MediBotInput) {
+  // ✅ Sanitize & coerce
+  if (!input) throw new Error("Invalid input: empty payload");
+  const history = Array.isArray(input.history)
+    ? input.history.map((h) => ({
+        role: h.role === "model" ? "assistant" : "user",
+        content: String(h.content ?? "").trim(),
+      }))
+    : [];
+  const query = String(input.query ?? "").trim();
 
   const messages = [
-    { role: 'system', content: mediBotSystemPrompt },
-    ...validatedInput.history.map(h => ({
-      role: h.role === 'model' ? 'assistant' : 'user',
-      content: [{ text: h.content }],
-    })),
-    { role: 'user', content: [{ text: validatedInput.query }] },
+    { role: "system", content: mediBotSystemPrompt },
+    ...history,
+    { role: "user", content: query },
   ];
 
-  try {
-    // ✅ Correct usage
-    const { stream } = await ai.generateStream({
-      model: 'gemini-1.5-flash',
-      messages,
-    });
+  // ✅ Always send proper messages shape
+  const { stream } = await ai.generateStream({
+    model: "gemini-1.5-flash",
+    prompt: { messages },
+  });
 
-    for await (const chunk of stream) {
-      if (chunk.text) yield chunk.text;
+  const reader = stream.getReader();
+  async function* iterator() {
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += value.text ?? "";
+      yield value.text ?? "";
     }
-  } catch (err) {
-    console.error('AI prompt error in medibot-flow:', err);
-    yield "I'm sorry, but I encountered an error and can't respond right now. Please try again later.";
   }
+  return iterator();
 }
