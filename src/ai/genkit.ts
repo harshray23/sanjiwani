@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview This file initializes and a shared `ai` instance that can be used across the application.
  */
@@ -5,7 +6,7 @@ import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 
 if (!process.env.GEMINI_API_KEY) {
-  console.warn('GEMINI_API_KEY environment variable not set. AI-powered features may fail. Please set this in your .env file.');
+  console.warn('GEMINI_API_KEY environment variable not set. AI-powered features may fail. Please set this in your .env.example file.');
 }
 
 // Initialize the Google AI plugin.

@@ -66,6 +66,3 @@ Return the data in the specified JSON format.`
     return output;
   }
 );
-
-
-    

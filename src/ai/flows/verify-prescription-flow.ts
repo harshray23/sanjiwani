@@ -87,6 +87,3 @@ Your task is to analyze the provided image of a prescription and determine if it
     return output;
   }
 );
-
-
-    

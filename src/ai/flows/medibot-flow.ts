@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A conversational AI flow for the MediBot assistant.
@@ -48,7 +49,7 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
   // 2. Build the message history in the format the AI model expects.
   // Map 'model' role to 'assistant' for compatibility.
   const messages = [
-    { role: 'system', content: mediBotSystemPrompt },
+    { role: 'system', content: [{text: mediBotSystemPrompt}] },
     ...validatedInput.history.map(h => ({
       role: h.role === 'model' ? 'assistant' : 'user',
       content: [{text: h.content}],
@@ -58,7 +59,7 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
 
   try {
     // 3. Call the AI model with the correctly structured prompt.
-    const { stream } = await ai.generateStream({
+    const { stream } = ai.generateStream({
       model: 'gemini-1.5-flash',
       prompt: { messages },
     });
@@ -76,5 +77,3 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
     yield "I'm sorry, but I encountered an error and can't respond right now. Please try again later.";
   }
 }
-
-    
