@@ -113,6 +113,7 @@ const mediBotStreamFlow = ai.defineFlow(
       prompt: '{{{query}}}',
       history: input.history,
       system: mediBotSystemPrompt,
+      input: input, // Pass the input object for the prompt template
     });
 
     for await (const chunk of stream) {
