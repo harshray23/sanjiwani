@@ -108,11 +108,12 @@ const mediBotStreamFlow = ai.defineFlow(
     outputSchema: z.string(),
   },
   async function* (input) {
-    const { stream } = ai.generateStream({
+    const { stream } = await ai.generateStream({
       model: 'gemini-1.5-flash',
-      prompt: input.query,
+      prompt: '{{{query}}}',
       history: input.history,
       system: mediBotSystemPrompt,
+      input,
     });
 
     for await (const chunk of stream) {
