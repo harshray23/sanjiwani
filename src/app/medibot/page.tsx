@@ -87,12 +87,12 @@ export default function MediBotPage() {
       // This adds client-side robustness.
       const history = currentMessages
         .slice(0, -1)
-        .filter(m => (m.role === 'user' || m.role === 'model') && m.content)
+        .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.content === 'string')
         .map(m => ({ role: m.role, content: String(m.content || '') }));
 
       const stream = await streamChat({
         history: history,
-        query: values.query,
+        query: String(values.query || ''),
       } as MediBotInput);
       await handleStreamResponse(stream);
     } catch (error) {
@@ -212,3 +212,5 @@ export default function MediBotPage() {
     </div>
   );
 }
+
+    

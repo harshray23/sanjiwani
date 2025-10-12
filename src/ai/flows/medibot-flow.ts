@@ -1,147 +1,80 @@
-
 'use server';
 /**
- * @fileOverview A streaming AI chatbot flow for the Medi+Bot assistant.
- *
- * - streamChat: Handles conversational chat with streaming responses.
- * - MediBotInput: The input schema for the chat flow.
+ * @fileOverview A conversational AI flow for the MediBot assistant.
+ * - streamChat: A streaming flow that takes chat history and a new query,
+ *   and yields the AI's response in chunks.
+ * - MediBotInput: The Zod schema for the flow's input.
  */
-
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
+// Define the input schema for the MediBot flow.
 const MediBotInputSchema = z.object({
-  history: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'model']),
-        content: z.string(),
-      })
-    )
-    .describe('The conversation history.'),
-  query: z.string().describe('The latest user query.'),
+  history: z.array(
+    z.object({
+      role: z.enum(['user', 'model']),
+      content: z.string(),
+    })
+  ),
+  query: z.string(),
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
-export async function streamChat(
-  input: MediBotInput
-): Promise<AsyncGenerator<string>> {
-  return mediBotStreamFlow(input);
-}
 
 const mediBotSystemPrompt = `
-**Role / Personality of the Bot**
-You are Sanjiwani Health Assistant, a smart healthcare guide.
-You help patients, doctors, clinics, hospitals, and diagnostic centers connect quickly.
-Your tone is professional, caring, and concise.
+You are Sanjiwani Health Assistant, a friendly and helpful AI assistant for a healthcare application.
+Your goal is to provide helpful, safe, and informative guidance on healthcare topics, services offered by the Sanjiwani Health platform, and assist users with tasks like finding doctors or booking appointments.
 
-**1. Core Function**
-
-- Analyze user query for location, specialization, disease/symptom, or service type.
-- Suggest relevant doctors, hospitals, clinics, or diagnostic centers from the database.
-- Provide lists of names (not personal contact details).
-- Guide users to book appointments, reserve beds, or book diagnostic tests.
-
-**2. Intents (User Goals)**
-
-- **Find Doctor:** “I need a cardiologist in Pune” / “Doctor for fever in Delhi”
-- **Find Hospital/Clinic:** “Hospitals in Mumbai with ICU” / “Clinics near me for diabetes”
-- **Find Diagnostic Center/Test:** “Book a blood test in Nagpur” / “Where can I get an MRI?”
-- **Book Appointment:** “Book an appointment with Dr. Sharma tomorrow”
-- **Reserve Bed:** “I need a bed in Bangalore hospital for emergency”
-- **General Help:** “What services do you offer?”
-
-**3. Entities to Extract**
-
-- **Specialization:** Cardiologist, Dermatologist, Orthopedic, Neurologist, etc.
-- **Symptom/Disease:** fever, cough, chest pain, skin rash, fracture, diabetes.
-- **Location:** City, area, pin code.
-- **Test Type:** Blood test, X-ray, MRI, CT scan.
-- **Hospital/Clinic Name**
-
-**4. Training Instructions (Sample User → Expected Bot Response)**
-
-**Doctor Search**
-- User: “Find a cardiologist in Pune.”
-- Bot: “Here are some cardiologists in Pune: Dr. A (XYZ Hospital), Dr. B (ABC Clinic). Would you like to book an appointment?”
-
-**Symptom-Based Search**
-- User: “I have chest pain in Delhi.”
-- Bot: “Chest pain is usually treated by a cardiologist. Here are some cardiologists in Delhi: Dr. X, Dr. Y. Would you like to book a consultation?”
-
-**Hospital/Clinic Search**
-- User: “Hospitals in Mumbai with ICU beds.”
-- Bot: “Here are some hospitals in Mumbai with ICU facilities: 1. XYZ Hospital, 2. ABC Medical Center. Do you want me to check bed availability?”
-
-**Diagnostic Test Booking**
-- User: “Book an MRI in Nagpur.”
-- Bot: “Here are diagnostic centers in Nagpur offering MRI scans: 1. LabOne, 2. City Diagnostics. Which one do you prefer?”
-
-**Appointment Booking**
-- User: “Book an appointment with Dr. Sharma tomorrow at 10am.”
-- Bot: “Appointment request noted: Dr. Sharma, tomorrow 10am. Confirm booking?”
-
-**Bed Reservation**
-- User: “Need a hospital bed in Bangalore.”
-- Bot: “Here are hospitals in Bangalore with bed availability: 1. Apollo Hospital, 2. CityCare Hospital. Do you want to reserve one now?”
-
-**Account Help**
-- User: "how to login" or "tell me the way to login"
-- Bot: "To log in to your profile, please follow these steps:\n1. Go to the 'Login / Sign Up' button in the top right corner of the page and click on it.\n2. Select the 'Sign In' option.\n3. Enter your registered email and password, then click the 'Sign In' button."
-
-**General Help**
-- User: “What services do you provide?”
-- Bot: “I can help you find doctors, hospitals, clinics, and diagnostic centers by location, specialization, or disease. I can also help book appointments, reserve hospital beds, and schedule diagnostic tests.”
-
-**5. Constraints & Conversational Flow**
-
-- Never provide personal contact details of doctors/hospitals.
-- Always return lists of names only (doctor, hospital, clinic, or lab).
-- **Use the conversation history.** If information is missing, ask a clarifying question (e.g., if user says "book an appointment" after you've listed doctors, ask "With which doctor would you like to book?").
-- **Follow up.** After providing a list, ask a helpful follow-up question like "Would you like me to book an appointment?" or "Do you want to reserve a bed?".
+**IMPORTANT RULES:**
+- **DO NOT PROVIDE MEDICAL ADVICE.** Never diagnose conditions, prescribe medication, or suggest specific treatments.
+- Always preface any health-related information with a clear disclaimer: "As an AI assistant, I cannot provide medical advice. Please consult with a qualified healthcare professional for any health concerns."
+- If the user seems to be in an emergency, your immediate and only response should be to advise them to contact local emergency services.
+- Your knowledge is based on your training data. You are not a real doctor.
 `;
 
-const mediBotStreamFlow = ai.defineFlow(
-  {
-    name: 'mediBotStreamFlow',
-    inputSchema: MediBotInputSchema,
-    outputSchema: z.string(),
-  },
-  async function* (input) {
-    // 1. Validate and coerce input to match the schema and prevent runtime errors.
-    const validatedInput = MediBotInputSchema.parse(input);
+/**
+ * The main exported function that clients will call to stream chat responses.
+ * It takes chat history and a user query, and returns an async generator
+ * that yields the response text in chunks.
+ */
+export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
 
-    // 2. Build the messages array in the format expected by the Gemini API.
-    //    This is the modern, correct way to structure conversational prompts.
-    const messages = [
-        // System prompt provides overall instructions for the AI.
-        { role: 'system', content: [{ text: mediBotSystemPrompt }] },
-        // Map the chat history, ensuring content is always a string.
-        ...validatedInput.history.map(h => ({
-            role: h.role as 'user' | 'model', // Cast role to the expected enum
-            content: [{ text: String(h.content || '') }]
-        })),
-        // Add the latest user query.
-        { role: 'user', content: [{ text: String(validatedInput.query || '') }] }
-    ];
-    
-    try {
-        // 3. Call generateStream with the correctly structured 'prompt' object.
-        const { stream } = await ai.generateStream({
-          model: 'gemini-1.5-flash',
-          prompt: { messages }, // Pass the structured messages array here.
-        });
+  // 1. Defensive Coercion & Validation
+  const validatedInput = MediBotInputSchema.parse({
+    history: Array.isArray(input.history) ? input.history.map(h => ({ ...h, content: String(h.content || '') })) : [],
+    query: String(input.query || '')
+  });
 
-        // 4. Yield each text chunk as it arrives.
-        for await (const chunk of stream) {
-          yield chunk.text;
-        }
-    } catch (err) {
-        // Defensive logging: If an error still occurs, log the shape for easier debugging.
-        console.error('AI prompt schema error:', err);
-        const promptShape = messages.map(m => ({role: m.role, contentType: typeof m.content}));
-        console.error('AI prompt shape sent:', JSON.stringify(promptShape, null, 2));
-        yield "Sorry, I encountered an error processing your request. Please try again."
+  // 2. Build the message history in the format the AI model expects.
+  // Map 'model' role to 'assistant' for compatibility.
+  const messages = [
+    { role: 'system', content: mediBotSystemPrompt },
+    ...validatedInput.history.map(h => ({
+      role: h.role === 'model' ? 'assistant' : 'user',
+      content: [{text: h.content}],
+    })),
+    { role: 'user', content: [{text: validatedInput.query}] },
+  ];
+
+  try {
+    // 3. Call the AI model with the correctly structured prompt.
+    const { stream } = await ai.generateStream({
+      model: 'gemini-1.5-flash',
+      prompt: { messages },
+    });
+
+    // 4. Yield each chunk of text as it is received.
+    for await (const chunk of stream) {
+      const text = chunk.text;
+      if (text) {
+        yield text;
+      }
     }
+  } catch (err: any) {
+    console.error('AI prompt error in medibot-flow:', err);
+    // Provide a user-friendly error message in the stream
+    yield "I'm sorry, but I encountered an error and can't respond right now. Please try again later.";
   }
-);
+}
+
+    
