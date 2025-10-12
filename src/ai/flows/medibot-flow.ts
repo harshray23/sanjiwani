@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A streaming AI chatbot flow for the Medi+Bot assistant.
@@ -107,7 +108,7 @@ const mediBotStreamFlow = ai.defineFlow(
     outputSchema: z.string(),
   },
   async function* (input) {
-    const { stream } = ai.generateStream({
+    const { stream } = await ai.generateStream({
       model: 'gemini-1.5-flash',
       prompt: input.query,
       history: input.history,
