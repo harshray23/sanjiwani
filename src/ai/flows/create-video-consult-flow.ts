@@ -31,7 +31,6 @@ const prompt = ai.definePrompt({
   name: 'videoConsultationPrompt',
   input: { schema: VideoConsultationInputSchema },
   output: { schema: VideoConsultationOutputSchema },
-  model: 'gemini-1.5-flash',
   prompt: `You are a helpful medical assistant setting up a video consultation.
 The patient's name is {{{patientName}}}.
 The doctor is {{{doctorName}}}, who is a specialist in {{{doctorSpecialty}}}.
@@ -50,7 +49,12 @@ const videoConsultationFlow = ai.defineFlow(
     outputSchema: VideoConsultationOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const { output } = await ai.generate({
+        model: 'gemini-1.5-flash',
+        prompt: prompt.render(input),
+        output: { schema: VideoConsultationOutputSchema },
+    });
+
     if (!output) {
       throw new Error('AI model did not return a valid response.');
     }

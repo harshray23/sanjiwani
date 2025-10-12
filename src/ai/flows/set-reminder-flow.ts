@@ -29,7 +29,6 @@ const prompt = ai.definePrompt({
   name: 'medicineReminderPrompt',
   input: { schema: MedicineReminderInputSchema },
   output: { schema: MedicineReminderOutputSchema },
-  model: 'gemini-1.5-flash',
   prompt: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
 The user's input is: "{{{reminderText}}}"
 
@@ -52,7 +51,11 @@ const medicineReminderFlow = ai.defineFlow(
   async (input) => {
     // In a real app, you would integrate with a notification service here.
     // For now, we just rely on the AI to generate the confirmation.
-    const { output } = await prompt(input);
+    const { output } = await ai.generate({
+        model: 'gemini-1.5-flash',
+        prompt: prompt.render(input),
+        output: { schema: MedicineReminderOutputSchema },
+    });
 
     if (!output) {
       throw new Error('AI model did not return a valid response.');

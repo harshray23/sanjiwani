@@ -44,7 +44,6 @@ const prompt = ai.definePrompt({
     name: 'verifyPrescriptionPrompt',
     input: { schema: VerifyPrescriptionInputSchema },
     output: { schema: VerifyPrescriptionOutputSchema },
-    model: 'gemini-1.5-flash',
     prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
         Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
@@ -71,7 +70,11 @@ const verifyPrescriptionFlow = ai.defineFlow(
     outputSchema: VerifyPrescriptionOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const { output } = await ai.generate({
+        model: 'gemini-1.5-flash',
+        prompt: prompt.render(input),
+        output: { schema: VerifyPrescriptionOutputSchema },
+    });
 
     // Handle cases where the model might not return a valid output.
     if (!output) {
