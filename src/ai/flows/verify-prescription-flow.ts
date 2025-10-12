@@ -48,23 +48,31 @@ const verifyPrescriptionFlow = ai.defineFlow(
     outputSchema: VerifyPrescriptionOutputSchema,
   },
   async (input) => {
+    // Correctly structured prompt for Genkit 1.x with multimodal input
     const { output } = await ai.generate({
         model: 'gemini-1.5-flash',
-        prompt: [
-            {text: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
-        Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
+        prompt: {
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {text: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
+Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
-        **Expected Doctor's Name:** ${input.doctorName}
+**Expected Doctor's Name:** ${input.doctorName}
 
-        **Instructions:**
-        1.  Read the text from the image.
-        2.  Check if the document appears to be a real medical prescription.
-        3.  Find the doctor's name on the prescription.
-        4.  Compare the name on the prescription with the expected doctor's name. A partial match of the last name is acceptable. The name might be part of a signature or a stamp.
-        5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
-        6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`},
-            {media: {url: input.photoDataUri}}
-        ],
+**Instructions:**
+1.  Read the text from the image.
+2.  Check if the document appears to be a real medical prescription.
+3.  Find the doctor's name on the prescription.
+4.  Compare the name on the prescription with the expected doctor's name. A partial match of the last name is acceptable. The name might be part of a signature or a stamp.
+5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
+6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`},
+                        {media: {url: input.photoDataUri}}
+                    ]
+                }
+            ]
+        },
         output: { schema: VerifyPrescriptionOutputSchema },
     });
 

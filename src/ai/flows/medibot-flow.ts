@@ -108,24 +108,40 @@ const mediBotStreamFlow = ai.defineFlow(
     outputSchema: z.string(),
   },
   async function* (input) {
+    // 1. Validate and coerce input to match the schema and prevent runtime errors.
     const validatedInput = MediBotInputSchema.parse(input);
 
+    // 2. Build the messages array in the format expected by the Gemini API.
+    //    This is the modern, correct way to structure conversational prompts.
     const messages = [
+        // System prompt provides overall instructions for the AI.
         { role: 'system', content: [{ text: mediBotSystemPrompt }] },
+        // Map the chat history, ensuring content is always a string.
         ...validatedInput.history.map(h => ({
-            role: h.role,
+            role: h.role as 'user' | 'model', // Cast role to the expected enum
             content: [{ text: String(h.content || '') }]
         })),
+        // Add the latest user query.
         { role: 'user', content: [{ text: String(validatedInput.query || '') }] }
     ];
     
-    const { stream } = ai.generateStream({
-      model: 'gemini-1.5-flash',
-      prompt: messages,
-    });
+    try {
+        // 3. Call generateStream with the correctly structured 'prompt' object.
+        const { stream } = await ai.generateStream({
+          model: 'gemini-1.5-flash',
+          prompt: { messages }, // Pass the structured messages array here.
+        });
 
-    for await (const chunk of stream) {
-      yield chunk.text;
+        // 4. Yield each text chunk as it arrives.
+        for await (const chunk of stream) {
+          yield chunk.text;
+        }
+    } catch (err) {
+        // Defensive logging: If an error still occurs, log the shape for easier debugging.
+        console.error('AI prompt schema error:', err);
+        const promptShape = messages.map(m => ({role: m.role, contentType: typeof m.content}));
+        console.error('AI prompt shape sent:', JSON.stringify(promptShape, null, 2));
+        yield "Sorry, I encountered an error processing your request. Please try again."
     }
   }
 );

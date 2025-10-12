@@ -4,6 +4,10 @@
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('GEMINI_API_KEY environment variable not set. AI-powered features may fail. Please set this in your .env file.');
+}
+
 // Initialize the Google AI plugin.
 // By not passing an API key here, the plugin will automatically
 // use the `GEMINI_API_KEY` environment variable.

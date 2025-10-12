@@ -34,9 +34,16 @@ const videoConsultationFlow = ai.defineFlow(
     outputSchema: VideoConsultationOutputSchema,
   },
   async (input) => {
+    // Correctly structured prompt for Genkit 1.x
     const { output } = await ai.generate({
         model: 'gemini-1.5-flash',
-        prompt: `You are a helpful medical assistant setting up a video consultation.
+        prompt: {
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            text: `You are a helpful medical assistant setting up a video consultation.
 The patient's name is ${input.patientName}.
 The doctor is ${input.doctorName}, who is a specialist in ${input.doctorSpecialty}.
 
@@ -44,7 +51,12 @@ Your tasks:
 1.  Generate a unique, secure video meeting link. The link should follow the pattern: https://meet.sanjivanihealth.app/session/{random_string}.
 2.  Based on the doctor's specialty, provide some brief, general, and safe preliminary advice for the patient. This should be 1-2 sentences. For example, for a cardiologist, you might advise having recent test reports handy. For a general physician, you might suggest noting down all symptoms.
 
-Return the data in the specified JSON format.`,
+Return the data in the specified JSON format.`
+                        }
+                    ]
+                }
+            ]
+        },
         output: { schema: VideoConsultationOutputSchema },
     });
 

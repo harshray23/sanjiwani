@@ -83,7 +83,8 @@ export default function MediBotPage() {
     form.reset();
 
     try {
-      // Sanitize history before sending
+      // Sanitize history before sending: ensure content is always a string.
+      // This adds client-side robustness.
       const history = currentMessages
         .slice(0, -1)
         .filter(m => (m.role === 'user' || m.role === 'model') && m.content)
