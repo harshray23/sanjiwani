@@ -35,13 +35,7 @@ const medicineReminderFlow = ai.defineFlow(
     // Correctly structured prompt for Genkit 1.x
     const { output } = await ai.generate({
         model: 'gemini-1.5-flash',
-        prompt: {
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  text: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
+        prompt: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
 The user's input is: "${input.reminderText}"
 
 1.  Parse the primary medicine name from the user's input.
@@ -51,12 +45,7 @@ Example:
 - Input: "Paracetamol" -> Output: { medicineName: "Paracetamol", confirmationMessage: "Reminder set for Paracetamol. You will be notified." }
 - Input: "Crocin advance 500mg" -> Output: { medicineName: "Crocin advance 500mg", confirmationMessage: "Reminder set for Crocin advance 500mg. You will be notified." }
 
-Return the data in the specified JSON format.`
-                }
-              ]
-            }
-          ]
-        },
+Return the data in the specified JSON format.`,
         output: { schema: MedicineReminderOutputSchema },
     });
 

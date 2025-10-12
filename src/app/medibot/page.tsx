@@ -97,6 +97,7 @@ export default function MediBotPage() {
         history,
         query: String(values.query ?? '').trim(),
       } as MediBotInput);
+      
       await handleStreamResponse(stream);
     } catch (error) {
       console.error('Error streaming chat:', error);
