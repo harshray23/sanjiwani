@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:ai": "tsx src/tests/ai-flow-test.ts"
   },
   "dependencies": {
     "genkit": "^1.0.0",
@@ -64,6 +65,7 @@
     "babel-loader": "^10.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.16.2",
     "typescript": "^5"
   }
 }

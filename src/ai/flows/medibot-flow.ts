@@ -1,55 +1,41 @@
-
 'use server';
 
-import { ai } from "@/ai/genkit";
-import { z } from "zod";
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 
 const MediBotInputSchema = z.object({
-  history: z
-    .array(z.object({ role: z.string(), content: z.string().optional() }))
-    .optional(),
-  query: z.string().optional(),
+  history: z.array(
+    z.object({
+      role: z.enum(['user', 'model']),
+      content: z.string(),
+    })
+  ),
+  query: z.string(),
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
-const mediBotSystemPrompt = `
-You are Medi+Bot — a virtual assistant for Sanjiwani Health.
-You help users find doctors, hospitals, diagnostic centers, and book appointments.
-Be concise, factual, and guide them clearly.
-`;
-
-export async function streamChat(input: MediBotInput) {
-  // ✅ Sanitize & coerce
-  if (!input) throw new Error("Invalid input: empty payload");
-  const history = Array.isArray(input.history)
-    ? input.history.map((h) => ({
-        role: h.role === "model" ? "assistant" : "user",
-        content: String(h.content ?? "").trim(),
-      }))
-    : [];
-  const query = String(input.query ?? "").trim();
+export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
+  // ✅ Directly use async generator — no Promise<AsyncGenerator>
+  const validatedInput = MediBotInputSchema.parse(input);
 
   const messages = [
-    { role: "system", content: mediBotSystemPrompt },
-    ...history,
-    { role: "user", content: query },
+    { role: 'system', content: mediBotSystemPrompt },
+    ...validatedInput.history,
+    { role: 'user', content: validatedInput.query },
   ];
 
-  // ✅ Always send proper messages shape
+  // ✅ Use ai.generateStream properly
   const { stream } = await ai.generateStream({
-    model: "gemini-1.5-flash",
-    prompt: { messages },
+    model: 'gemini-1.5-flash',
+    input: messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n'),
   });
 
-  const reader = stream.getReader();
-  async function* iterator() {
-    let buffer = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += value.text ?? "";
-      yield value.text ?? "";
-    }
+  for await (const chunk of stream) {
+    if (chunk.text) yield chunk.text;
   }
-  return iterator();
 }
+
+const mediBotSystemPrompt = `
+You are Sanjiwani Health Assistant...
+(rest of your system prompt here)
+`;
