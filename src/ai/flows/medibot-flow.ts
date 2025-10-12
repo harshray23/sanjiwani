@@ -108,16 +108,20 @@ const mediBotStreamFlow = ai.defineFlow(
     outputSchema: z.string(),
   },
   async function* (input) {
+    const validatedInput = MediBotInputSchema.parse(input);
+
+    const messages = [
+        { role: 'system', content: [{ text: mediBotSystemPrompt }] },
+        ...validatedInput.history.map(h => ({
+            role: h.role,
+            content: [{ text: String(h.content || '') }]
+        })),
+        { role: 'user', content: [{ text: String(validatedInput.query || '') }] }
+    ];
+    
     const { stream } = ai.generateStream({
       model: 'gemini-1.5-flash',
-      prompt: [
-        { role: 'system', content: [{ text: mediBotSystemPrompt }] },
-        ...input.history.map(h => ({
-            role: h.role,
-            content: [{ text: h.content }]
-        })),
-        { role: 'user', content: [{ text: input.query }] }
-      ],
+      prompt: messages,
     });
 
     for await (const chunk of stream) {

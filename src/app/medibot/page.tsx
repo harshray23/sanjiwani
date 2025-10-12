@@ -83,7 +83,12 @@ export default function MediBotPage() {
     form.reset();
 
     try {
-      const history = currentMessages.slice(0, -1).filter(m => m.role === 'user' || m.role === 'model');
+      // Sanitize history before sending
+      const history = currentMessages
+        .slice(0, -1)
+        .filter(m => (m.role === 'user' || m.role === 'model') && m.content)
+        .map(m => ({ role: m.role, content: String(m.content || '') }));
+
       const stream = await streamChat({
         history: history,
         query: values.query,

@@ -50,9 +50,7 @@ const verifyPrescriptionFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
         model: 'gemini-1.5-flash',
-        prompt: [{
-          role: 'user',
-          content: [
+        prompt: [
             {text: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
         Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
@@ -66,7 +64,7 @@ const verifyPrescriptionFlow = ai.defineFlow(
         5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
         6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`},
             {media: {url: input.photoDataUri}}
-        ]}],
+        ],
         output: { schema: VerifyPrescriptionOutputSchema },
     });
 
