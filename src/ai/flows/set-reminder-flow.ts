@@ -25,23 +25,6 @@ export async function setMedicineReminder(input: MedicineReminderInput): Promise
   return medicineReminderFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'medicineReminderPrompt',
-  input: { schema: MedicineReminderInputSchema },
-  output: { schema: MedicineReminderOutputSchema },
-  prompt: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
-The user's input is: "{{{reminderText}}}"
-
-1.  Parse the primary medicine name from the user's input.
-2.  Generate a friendly confirmation message confirming that the reminder has been set for the parsed medicine name.
-
-Example:
-- Input: "Paracetamol" -> Output: { medicineName: "Paracetamol", confirmationMessage: "Reminder set for Paracetamol. You will be notified." }
-- Input: "Crocin advance 500mg" -> Output: { medicineName: "Crocin advance 500mg", confirmationMessage: "Reminder set for Crocin advance 500mg. You will be notified." }
-
-Return the data in the specified JSON format.`,
-});
-
 const medicineReminderFlow = ai.defineFlow(
   {
     name: 'medicineReminderFlow',
@@ -53,7 +36,22 @@ const medicineReminderFlow = ai.defineFlow(
     // For now, we just rely on the AI to generate the confirmation.
     const { output } = await ai.generate({
         model: 'gemini-1.5-flash',
-        prompt: prompt.render(input),
+        prompt: {
+          messages: [{
+            role: 'user',
+            content: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
+The user's input is: "${input.reminderText}"
+
+1.  Parse the primary medicine name from the user's input.
+2.  Generate a friendly confirmation message confirming that the reminder has been set for the parsed medicine name.
+
+Example:
+- Input: "Paracetamol" -> Output: { medicineName: "Paracetamol", confirmationMessage: "Reminder set for Paracetamol. You will be notified." }
+- Input: "Crocin advance 500mg" -> Output: { medicineName: "Crocin advance 500mg", confirmationMessage: "Reminder set for Crocin advance 500mg. You will be notified." }
+
+Return the data in the specified JSON format.`
+          }]
+        },
         output: { schema: MedicineReminderOutputSchema },
     });
 
