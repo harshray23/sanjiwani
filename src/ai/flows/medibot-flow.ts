@@ -35,10 +35,10 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
     query: String(input.query || '').trim(),
   });
 
-  const messages = [
+  const messages: Message[] = [
     { role: 'system', content: [{ text: mediBotSystemPrompt }] },
     ...validatedInput.history.map(h => ({
-      role: h.role === 'model' ? 'assistant' : 'user',
+      role: h.role as 'user' | 'model',
       content: [{ text: h.content }],
     })),
     { role: 'user', content: [{ text: validatedInput.query }] },
@@ -47,7 +47,7 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
   try {
     const { stream, response } = ai.generateStream({
       model: 'gemini-2.5-flash-preview',
-      prompt: 'message'
+      prompt: { messages }
     });
 
     for await (const chunk of stream) {
