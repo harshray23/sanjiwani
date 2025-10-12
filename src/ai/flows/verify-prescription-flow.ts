@@ -41,22 +41,14 @@ export async function verifyPrescription(input: VerifyPrescriptionInput): Promis
   return verifyPrescriptionFlow(input);
 }
 
-// Define the Genkit flow that orchestrates the verification process.
-const verifyPrescriptionFlow = ai.defineFlow(
-  {
-    name: 'verifyPrescriptionFlow',
-    inputSchema: VerifyPrescriptionInputSchema,
-    outputSchema: VerifyPrescriptionOutputSchema,
-  },
-  async (input) => {
-
-    const llmResponse = await ai.generate({
-        model: googleAI.model('gemini-1.5-flash'),
-        output: { schema: VerifyPrescriptionOutputSchema },
-        prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
+const prompt = ai.definePrompt({
+    name: 'verifyPrescriptionPrompt',
+    input: { schema: VerifyPrescriptionInputSchema },
+    output: { schema: VerifyPrescriptionOutputSchema },
+    prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
         Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
-        **Expected Doctor's Name:** ${input.doctorName}
+        **Expected Doctor's Name:** {{{doctorName}}}
 
         **Image of Prescription:**
         {{media url=photoDataUri}}
@@ -68,9 +60,22 @@ const verifyPrescriptionFlow = ai.defineFlow(
         4.  Compare the name on the prescription with the expected doctor's name. A partial match of the last name is acceptable. The name might be part of a signature or a stamp.
         5.  Set 'isValid' to true if the doctor's name is present and the document looks like a prescription. Otherwise, set it to false.
         6.  Provide a brief 'reason' for your decision. For example, "Doctor's name 'Dr. Emily Carter' found on the prescription" or "Doctor's name not found".`,
-        promptInput: {
-          photoDataUri: input.photoDataUri
-        }
+});
+
+
+// Define the Genkit flow that orchestrates the verification process.
+const verifyPrescriptionFlow = ai.defineFlow(
+  {
+    name: 'verifyPrescriptionFlow',
+    inputSchema: VerifyPrescriptionInputSchema,
+    outputSchema: VerifyPrescriptionOutputSchema,
+  },
+  async (input) => {
+
+    const llmResponse = await ai.generate({
+        model: 'gemini-1.5-flash',
+        prompt: prompt,
+        input: input,
     });
     
     const output = llmResponse.output;

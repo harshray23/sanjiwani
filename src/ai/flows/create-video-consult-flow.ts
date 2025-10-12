@@ -53,7 +53,7 @@ const videoConsultationFlow = ai.defineFlow(
       throw new Error('AI model did not return a valid response.');
     }
     // Ensure the generated link is unique and valid. For this mock, we append random chars.
-    output.meetingLink = output.meetingLink.replace('{{random_string}}', Math.random().toString(36).substring(2, 12));
+    output.meetingLink = `https://meet.sanjivanihealth.app/session/${Math.random().toString(36).substring(2, 12)}`;
     return output;
   }
 );
