@@ -1,6 +1,7 @@
 
 'use server';
 import { ai } from '@/ai/genkit';
+import { Message } from 'genkit';
 import { z } from 'zod';
 
 const MediBotInputSchema = z.object({
@@ -44,10 +45,9 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
   ];
 
   try {
-    const { stream } = await ai.generateStream({
+    const { stream, response } = ai.generateStream({
       model: 'gemini-1.5-flash',
-      // @ts-ignore - The `messages` structure is correct for the API but may not match the inferred type perfectly.
-      messages,
+      prompt: 'message'
     });
 
     for await (const chunk of stream) {
