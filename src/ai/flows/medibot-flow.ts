@@ -8,7 +8,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const MediBotInputSchema = z.object({
@@ -106,7 +105,7 @@ const mediBotStreamFlow = ai.defineFlow(
   {
     name: 'mediBotStreamFlow',
     inputSchema: MediBotInputSchema,
-    outputSchema: z.string().stream(),
+    outputSchema: z.string(),
   },
   async function* (input) {
     const { stream } = ai.generateStream({
