@@ -50,7 +50,7 @@ const verifyPrescriptionFlow = ai.defineFlow(
   async (input) => {
     // Correctly structured prompt for Genkit 1.x with multimodal input
     const { output } = await ai.generate({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash-preview',
         prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
 Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 

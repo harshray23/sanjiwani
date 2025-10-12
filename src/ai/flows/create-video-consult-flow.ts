@@ -36,7 +36,7 @@ const videoConsultationFlow = ai.defineFlow(
   async (input) => {
     // Correctly structured prompt for Genkit 1.x
     const { output } = await ai.generate({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash-preview',
         prompt: `You are a helpful medical assistant setting up a video consultation.
 The patient's name is ${input.patientName}.
 The doctor is ${input.doctorName}, who is a specialist in ${input.doctorSpecialty}.

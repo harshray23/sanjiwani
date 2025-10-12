@@ -46,7 +46,7 @@ export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
 
   try {
     const { stream, response } = ai.generateStream({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash-preview',
       prompt: 'message'
     });
 

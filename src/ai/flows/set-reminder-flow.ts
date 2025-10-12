@@ -34,7 +34,7 @@ const medicineReminderFlow = ai.defineFlow(
   async (input) => {
     // Correctly structured prompt for Genkit 1.x
     const { output } = await ai.generate({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash-preview',
         prompt: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
 The user's input is: "${input.reminderText}"
 
