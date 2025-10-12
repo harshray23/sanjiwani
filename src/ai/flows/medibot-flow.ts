@@ -111,7 +111,7 @@ const mediBotStreamFlow = ai.defineFlow(
     const { stream } = ai.generateStream({
       model: 'gemini-1.5-flash',
       prompt: [
-        { role: 'system', content: mediBotSystemPrompt },
+        { role: 'system', content: [{ text: mediBotSystemPrompt }] },
         ...input.history.map(h => ({
             role: h.role,
             content: [{ text: h.content }]
