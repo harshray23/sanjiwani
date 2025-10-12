@@ -84,16 +84,18 @@ export default function MediBotPage() {
     form.reset();
 
     try {
-      // Sanitize history before sending: ensure content is always a string.
-      // This adds client-side robustness.
+      // Clean & sanitize before sending to API
       const history = currentMessages
         .slice(0, -1)
-        .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.content === 'string')
-        .map(m => ({ role: m.role, content: String(m.content || '') }));
+        .filter(m => m.role === 'user' || m.role === 'model')
+        .map(m => ({
+          role: m.role,
+          content: String(m.content ?? '').trim(),
+        }));
 
       const stream = await streamChat({
-        history: history,
-        query: String(values.query || ''),
+        history,
+        query: String(values.query ?? '').trim(),
       } as MediBotInput);
       await handleStreamResponse(stream);
     } catch (error) {
