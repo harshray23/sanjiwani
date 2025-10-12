@@ -11,7 +11,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/google-genai';
 
 // Define the input schema for the prescription verification flow.
 const VerifyPrescriptionInputSchema = z.object({
@@ -45,6 +44,7 @@ const prompt = ai.definePrompt({
     name: 'verifyPrescriptionPrompt',
     input: { schema: VerifyPrescriptionInputSchema },
     output: { schema: VerifyPrescriptionOutputSchema },
+    model: 'gemini-1.5-flash',
     prompt: `You are an AI assistant responsible for verifying medical prescriptions for a cashback program.
         Your task is to analyze the provided image of a prescription and determine if it is valid based on the expected doctor's name.
 
@@ -71,14 +71,7 @@ const verifyPrescriptionFlow = ai.defineFlow(
     outputSchema: VerifyPrescriptionOutputSchema,
   },
   async (input) => {
-
-    const llmResponse = await ai.generate({
-        model: 'gemini-1.5-flash',
-        prompt: prompt,
-        input: input,
-    });
-    
-    const output = llmResponse.output;
+    const { output } = await prompt(input);
 
     // Handle cases where the model might not return a valid output.
     if (!output) {

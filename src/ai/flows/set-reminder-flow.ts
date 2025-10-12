@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for setting a medicine reminder.
@@ -28,6 +29,7 @@ const prompt = ai.definePrompt({
   name: 'medicineReminderPrompt',
   input: { schema: MedicineReminderInputSchema },
   output: { schema: MedicineReminderOutputSchema },
+  model: 'gemini-1.5-flash',
   prompt: `You are an intelligent assistant for a healthcare app. A user wants to set a reminder for their medicine.
 The user's input is: "{{{reminderText}}}"
 

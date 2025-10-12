@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for creating a video consultation.
@@ -30,6 +31,7 @@ const prompt = ai.definePrompt({
   name: 'videoConsultationPrompt',
   input: { schema: VideoConsultationInputSchema },
   output: { schema: VideoConsultationOutputSchema },
+  model: 'gemini-1.5-flash',
   prompt: `You are a helpful medical assistant setting up a video consultation.
 The patient's name is {{{patientName}}}.
 The doctor is {{{doctorName}}}, who is a specialist in {{{doctorSpecialty}}}.
