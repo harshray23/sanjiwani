@@ -113,7 +113,6 @@ const mediBotStreamFlow = ai.defineFlow(
       prompt: '{{{query}}}',
       history: input.history,
       system: mediBotSystemPrompt,
-      input,
     });
 
     for await (const chunk of stream) {
