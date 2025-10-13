@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// ✅ Fix default Leaflet icons for Next.js bundling
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
 L.Icon.Default.mergeOptions({ iconUrl, shadowUrl: iconShadow });
 
 export default function HealthcareMap() {
@@ -14,12 +14,11 @@ export default function HealthcareMap() {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // If already initialized, do nothing
-    if (mapRef.current || !containerRef.current) return;
+    if (!containerRef.current || mapRef.current) return;
 
-    // Initialize map once
+    // Initialize map
     const map = L.map(containerRef.current, {
-      center: [20.5937, 78.9629], // Default center: India
+      center: [20.5937, 78.9629], // Default: India
       zoom: 5,
     });
     mapRef.current = map;
@@ -28,27 +27,72 @@ export default function HealthcareMap() {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    // ✅ Track whether component is still mounted
     let isMounted = true;
 
-    // ✅ Safe geolocation handling
+    // ✅ Helper: Fetch healthcare data from Overpass API
+    const fetchNearbyHealthcare = async (lat: number, lon: number) => {
+      const radius = 5000; // meters (5 km)
+      const overpassQuery = `
+        [out:json];
+        (
+          node["amenity"="hospital"](around:${radius},${lat},${lon});
+          node["amenity"="clinic"](around:${radius},${lat},${lon});
+          node["amenity"="doctors"](around:${radius},${lat},${lon});
+          node["healthcare"="diagnostic"](around:${radius},${lat},${lon});
+        );
+        out center;
+      `;
+
+      try {
+        const response = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          body: overpassQuery,
+        });
+        const data = await response.json();
+
+        if (!isMounted || !mapRef.current) return;
+
+        // Add markers for results
+        data.elements.forEach((el: any) => {
+          if (el.lat && el.lon) {
+            const name = el.tags?.name || "Unnamed Facility";
+            const type =
+              el.tags?.amenity ||
+              el.tags?.healthcare ||
+              "Healthcare Facility";
+
+            L.marker([el.lat, el.lon])
+              .addTo(mapRef.current!)
+              .bindPopup(`<b>${name}</b><br/>Type: ${type}`);
+          }
+        });
+      } catch (err) {
+        console.error("Overpass API error:", err);
+      }
+    };
+
+    // ✅ Use user location if available
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (!isMounted || !mapRef.current) return; // guard against unmount
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
+        async (pos) => {
+          if (!isMounted || !mapRef.current) return;
+          const { latitude: lat, longitude: lon } = pos.coords;
           mapRef.current.setView([lat, lon], 14);
+
           L.marker([lat, lon])
             .addTo(mapRef.current)
             .bindPopup("📍 You are here")
             .openPopup();
+
+          await fetchNearbyHealthcare(lat, lon);
         },
-        () => alert("Unable to retrieve your location.")
+        () => {
+          alert("Unable to access your location. Showing default area.");
+          fetchNearbyHealthcare(20.5937, 78.9629);
+        }
       );
     }
 
-    // ✅ Cleanup on unmount
     return () => {
       isMounted = false;
       if (mapRef.current) {
@@ -60,11 +104,7 @@ export default function HealthcareMap() {
 
   return (
     <div className="relative w-full h-full">
-      <div
-        ref={containerRef}
-        id="map"
-        className="w-full h-full rounded-xl shadow-lg"
-      />
+      <div ref={containerRef} id="map" className="w-full h-full rounded-xl shadow-lg" />
     </div>
   );
 }
