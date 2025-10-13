@@ -17,7 +17,6 @@ export function Header() {
     { href: '/search', label: 'Find Doctors', icon: <Stethoscope/> },
     { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital/> },
     { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical/> },
-    { href: '/medibot', label: 'Medi+Bot', icon: <Bot/> },
   ];
 
   const navItems = [
