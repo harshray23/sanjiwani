@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-// Load Leaflet map only on the client (no SSR)
+// Load map only on the client
 const HealthcareMap = dynamic(() => import("@/components/HealthcareMap"), {
   ssr: false,
 });
