@@ -1,24 +1,15 @@
-
-"use client";
-
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
-import Lottie from "lottie-react";
-import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
-// Disable SSR for the map component to ensure it only renders on the client.
-// This is the standard and most reliable way to prevent Leaflet from trying to initialize on the server.
-const HealthcareMapWithNoSSR = dynamic(() => import("@/components/HealthcareMap"), {
+// Import without SSR to avoid Next.js server-side rendering Leaflet
+const HealthcareMap = dynamic(() => import("@/components/HealthcareMap"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-screen flex flex-col items-center justify-center">
-      <Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" />
-      <p className="text-muted-foreground mt-4">Loading map...</p>
-    </div>
-  ),
 });
 
-
 export default function EmergencyPage() {
-  return <HealthcareMapWithNoSSR />;
+  return (
+    <main className="flex flex-col h-screen w-full">
+      <h1 className="text-2xl font-bold p-4 text-center text-accent">Emergency Healthcare Near You</h1>
+      <HealthcareMap />
+    </main>
+  );
 }
