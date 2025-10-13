@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 // Import without SSR to avoid Next.js server-side rendering Leaflet
