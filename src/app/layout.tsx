@@ -41,9 +41,8 @@ export default function RootLayout({
           </main>
           <Footer />
           <Toaster />
+          <BotpressChat />
         </AppLoader>
-
-        <BotpressChat />
       </body>
     </html>
   );
