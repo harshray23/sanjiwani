@@ -100,7 +100,6 @@ export default function HealthcareMap() {
   return (
     <div className="relative w-full h-full">
       <MapContainer
-        id="map"
         center={[20.5937, 78.9629]} // Default to center of India
         zoom={5}
         className="w-full h-full"
