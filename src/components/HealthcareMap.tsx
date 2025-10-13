@@ -51,6 +51,13 @@ export default function HealthcareMap() {
           method: "POST",
           body: overpassQuery,
         });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Overpass API error:", response.status, errorText);
+          return;
+        }
+
         const data = await response.json();
 
         if (!isMounted || !mapRef.current) return;
@@ -70,7 +77,7 @@ export default function HealthcareMap() {
           }
         });
       } catch (err) {
-        console.error("Overpass API error:", err);
+        console.error("Failed to fetch or parse Overpass API data:", err);
       }
     };
 
