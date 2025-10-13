@@ -1,79 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix missing marker icons in Next.js
+// Fix default marker icons for Next.js bundling
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 L.Icon.Default.mergeOptions({ iconUrl, shadowUrl: iconShadow });
 
-// --- LocateUser helper ---
-function LocateUser() {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    let isMounted = true;
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (!isMounted) return;
-        const { latitude, longitude } = pos.coords;
-        map.setView([latitude, longitude], 14);
-        L.marker([latitude, longitude])
-          .addTo(map)
-          .bindPopup("📍 You are here")
-          .openPopup();
-      },
-      () => alert("Unable to retrieve your location.")
-    );
-
-    return () => {
-      isMounted = false;
-    };
-  }, [map]);
-
-  return null;
-}
-
-// --- Main Map Component ---
 export default function HealthcareMap() {
-  const [isClient, setIsClient] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // Ensure code runs only in browser, not during SSR
-    setIsClient(true);
+    // Clean up any previous Leaflet map instance bound to this container
+    if (containerRef.current && containerRef.current.hasChildNodes()) {
+      containerRef.current.replaceChildren(); // clears DOM safely
+    }
+
+    // Ensure we only init once per component mount
+    if (!mapRef.current && containerRef.current) {
+      const map = L.map(containerRef.current, {
+        center: [20.5937, 78.9629], // Default center (India)
+        zoom: 5,
+      });
+      mapRef.current = map;
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+
+      // Locate the user
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            map.setView([lat, lon], 14);
+            L.marker([lat, lon])
+              .addTo(map)
+              .bindPopup("📍 You are here")
+              .openPopup();
+          },
+          () => alert("Unable to retrieve your location.")
+        );
+      }
+    }
+
+    // Cleanup: fully remove the map before unmount
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
   }, []);
 
-  if (!isClient) return null;
-
   return (
-    <div className="relative w-full h-[100vh]">
-      <MapContainer
-        // 👇 key ensures full remount if needed
-        key="unique-map"
-        center={[20.5937, 78.9629]} // Default: center of India
-        zoom={5}
+    <div className="relative w-full h-full">
+      <div
+        ref={containerRef}
+        id="map"
         className="w-full h-full rounded-xl shadow-lg"
-        whenReady={(mapInstance) => {
-          // Defensive: destroy any pre-existing map
-          const container = mapInstance.target.getContainer();
-          if (container._leaflet_id) {
-            try {
-              mapInstance.target.remove();
-            } catch (_) {}
-          }
-        }}
-      >
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocateUser />
-      </MapContainer>
+      />
     </div>
   );
 }
