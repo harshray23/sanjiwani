@@ -24,13 +24,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-        // Ensures leaflet's images can be loaded
-        config.resolve.alias['leaflet/dist/images'] = require.resolve('leaflet/dist/images');
-    }
-    return config;
-  },
 };
 
 export default nextConfig;
