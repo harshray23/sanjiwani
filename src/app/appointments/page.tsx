@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -13,124 +12,15 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
-import { verifyPrescription } from '@/ai/flows/verify-prescription-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 
-
-const PrescriptionUploadDialog = ({ appointment, onUploadSuccess }: { appointment: Appointment, onUploadSuccess: () => void }) => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [isVerifying, setIsVerifying] = useState(false);
-    const [open, setOpen] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const { toast } = useToast();
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.size > 200 * 1024 * 1024) { // 200MB
-                toast({
-                    title: "File Too Large",
-                    description: "Please select a file smaller than 200MB.",
-                    variant: "destructive",
-                });
-                return;
-            }
-            setSelectedFile(file);
-        }
-    };
-
-    const handleVerify = async () => {
-        if (!selectedFile || !appointment.doctor) {
-            toast({ title: "Verification Error", description: "No file selected or doctor info missing.", variant: "destructive" });
-            return;
-        }
-
-        setIsVerifying(true);
-        try {
-            const reader = new FileReader();
-            reader.readAsDataURL(selectedFile);
-            reader.onloadend = async () => {
-                const base64data = reader.result as string;
-                const result = await verifyPrescription({
-                    photoDataUri: base64data,
-                    doctorName: appointment.doctor!.name,
-                });
-
-                if (result.isValid) {
-                    toast({
-                        title: "Prescription Verified!",
-                        description: `Cashback of ₹${result.reason.includes('video') ? 40 : 25} will be processed.`,
-                        variant: "default",
-                    });
-                    onUploadSuccess();
-                    setOpen(false);
-                } else {
-                    toast({
-                        title: "Verification Failed",
-                        description: result.reason || "The prescription could not be verified.",
-                        variant: "destructive",
-                    });
-                }
-            };
-        } catch (error) {
-            console.error("Verification failed:", error);
-            toast({
-                title: "An Error Occurred",
-                description: "Something went wrong during verification. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsVerifying(false);
-        }
-    };
-    
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="w-full">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Prescription for Cashback
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Upload Prescription</DialogTitle>
-                    <DialogDescription>
-                        Upload the prescription from Dr. {appointment.doctor?.name} to claim your cashback. Max file size: 200MB.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                    <Input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        accept="image/png, image/jpeg, image/webp"
-                        className="h-auto"
-                    />
-                    {selectedFile && <p className="text-sm text-muted-foreground mt-2">Selected file: {selectedFile.name}</p>}
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary" disabled={isVerifying}>Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={handleVerify} disabled={!selectedFile || isVerifying}>
-                        {isVerifying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isVerifying ? "Verifying..." : "Verify & Submit"}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-};
-
-
 const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
-  const [showUpload, setShowUpload] = useState(appointment.status === 'completed');
   const appointmentDate = new Date(appointment.scheduledAt);
   const formattedDate = format(appointmentDate, 'EEEE, MMMM d, yyyy');
   const formattedTime = format(appointmentDate, 'p');
+  const isCompleted = appointment.status === 'completed';
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow bg-card">
@@ -178,13 +68,10 @@ const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch bg-muted/30 p-4 min-h-[6rem]">
-        {showUpload && (
-          <PrescriptionUploadDialog appointment={appointment} onUploadSuccess={() => setShowUpload(false)} />
-        )}
-         {appointment.status === 'completed' && !showUpload && (
+         {isCompleted && (
             <div className="text-center text-sm text-green-600 font-medium p-2 bg-green-100 rounded-md">
                 <CheckCircle className="inline-block mr-2 h-4 w-4"/>
-                Cashback claimed for this appointment.
+                This appointment is complete.
             </div>
         )}
       </CardFooter>
