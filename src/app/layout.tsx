@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Suspense } from 'react';
 import { AppLoader } from '@/components/layout/AppLoader';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
+import Script from 'next/script';
  
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -41,6 +42,9 @@ export default function RootLayout({
           <Footer />
           <Toaster />
         </AppLoader>
+
+        <Script src="https://cdn.botpress.cloud/webchat/v3.3/inject.js"></Script>
+        <Script src="https://files.bpcontent.cloud/2025/10/13/18/20251013185801-Z3TVPZ4W.js" defer></Script>
       </body>
     </html>
   );
