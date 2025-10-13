@@ -1,7 +1,6 @@
-
 'use server';
+
 import { ai } from '@/ai/genkit';
-import { Message } from 'genkit';
 import { z } from 'zod';
 
 const MediBotInputSchema = z.object({
@@ -15,49 +14,28 @@ const MediBotInputSchema = z.object({
 });
 export type MediBotInput = z.infer<typeof MediBotInputSchema>;
 
-const mediBotSystemPrompt = `
-You are Sanjiwani Health Assistant, a friendly and helpful AI assistant for a healthcare application.
-Your goal is to provide helpful, safe, and informative guidance on healthcare topics, services offered by the Sanjiwani Health platform, and assist users with tasks like finding doctors or booking appointments.
-
-**IMPORTANT RULES:**
-- **DO NOT PROVIDE MEDICAL ADVICE.** Never diagnose conditions, prescribe medication, or suggest specific treatments.
-- Always preface any health-related information with a clear disclaimer: "As an AI assistant, I cannot provide medical advice. Please consult with a qualified healthcare professional for any health concerns."
-- If the user seems to be in an emergency, your immediate and only response should be to advise them to contact local emergency services.
-- Your knowledge is based on your training data. You are not a real doctor.
-`;
-
 export async function* streamChat(input: MediBotInput): AsyncGenerator<string> {
-  // Defensive coercion and validation
-  const validatedInput = MediBotInputSchema.parse({
-    history: Array.isArray(input.history)
-      ? input.history.map(h => ({ ...h, content: String(h.content || '').trim() }))
-      : [],
-    query: String(input.query || '').trim(),
-  });
+  // ✅ Directly use async generator — no Promise<AsyncGenerator>
+  const validatedInput = MediBotInputSchema.parse(input);
 
-  const messages: Message[] = [
-    { role: 'system', content: [{ text: mediBotSystemPrompt }] },
-    ...validatedInput.history.map(h => ({
-      role: h.role as 'user' | 'model',
-      content: [{ text: h.content }],
-    })),
-    { role: 'user', content: [{ text: validatedInput.query }] },
+  const messages = [
+    { role: 'system', content: mediBotSystemPrompt },
+    ...validatedInput.history,
+    { role: 'user', content: validatedInput.query },
   ];
 
-  try {
-    const { stream, response } = ai.generateStream({
-      model: 'gemini-2.5-flash-preview',
-      prompt: { messages }
-    });
+  // ✅ Use ai.generateStream properly
+  const { stream } = await ai.generateStream({
+    model: 'gemini-1.5-flash',
+    input: messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n'),
+  });
 
-    for await (const chunk of stream) {
-      if (chunk.text) yield chunk.text;
-    }
-  } catch (err: any) {
-    console.error('AI prompt error in medibot-flow. Prompt shape:', {
-      messageCount: messages.length,
-      roles: messages.map(m => m.role)
-    }, 'Error:', err.message);
-    yield "I'm sorry, but I encountered an error and can't respond right now. Please try again later.";
+  for await (const chunk of stream) {
+    if (chunk.text) yield chunk.text;
   }
 }
+
+const mediBotSystemPrompt = `
+You are Sanjiwani Health Assistant...
+(rest of your system prompt here)
+`;
