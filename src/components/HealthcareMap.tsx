@@ -4,10 +4,17 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+// ✅ Explicitly import icon paths for Next.js
 import iconUrl from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
-L.Icon.Default.mergeOptions({ iconUrl, shadowUrl: iconShadow });
+// ✅ Fix default icon so markers render correctly
+L.Icon.Default.mergeOptions({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+});
 
 export default function HealthcareMap() {
   const containerRef = useRef<HTMLDivElement | null>(null);
