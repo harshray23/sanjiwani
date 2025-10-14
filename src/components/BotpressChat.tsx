@@ -35,8 +35,11 @@ export default function BotpressChat() {
       script1.src = "https://cdn.botpress.cloud/webchat/v3.3/inject.js";
       script1.async = true;
       script1.id = "botpress-inject";
-      document.body.appendChild(script1);
-
+      
+      // Only append if it doesn't exist
+      if (!document.getElementById(script1.id)) {
+        document.body.appendChild(script1);
+      }
     }, 0);
 
     return () => {
@@ -45,6 +48,7 @@ export default function BotpressChat() {
       if (script1 && document.body.contains(script1)) {
         document.body.removeChild(script1);
       }
+      // Botpress also creates this container, which should be removed for a clean unmount
       const chatContainer = document.getElementById("botpress-webchat-container");
       if (chatContainer && chatContainer.parentElement) {
           chatContainer.parentElement.removeChild(chatContainer);
