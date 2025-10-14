@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -15,15 +16,12 @@ export default function BotpressChat() {
     document.body.appendChild(script2);
 
     return () => {
-      // Find and remove the scripts by their src to avoid issues if they are moved in the DOM
-      const injectedScript1 = document.querySelector('script[src="https://cdn.botpress.cloud/webchat/v3.3/inject.js"]');
-      if (injectedScript1 && document.body.contains(injectedScript1)) {
-        document.body.removeChild(injectedScript1);
+      // Use the variables to ensure we remove the correct elements.
+      if (document.body.contains(script1)) {
+        document.body.removeChild(script1);
       }
-
-      const injectedScript2 = document.querySelector('script[src="https://files.bpcontent.cloud/2025/10/13/18/20251013185801-Z3TVPZ4W.js"]');
-      if (injectedScript2 && document.body.contains(injectedScript2)) {
-        document.body.removeChild(injectedScript2);
+      if (document.body.contains(script2)) {
+        document.body.removeChild(script2);
       }
     };
   }, []);
