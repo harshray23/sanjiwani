@@ -29,6 +29,8 @@ export default function BotpressChat() {
               "themeColor": "#2563eb",
               "subtitle": "Ask your questions here",
             });
+          } else {
+             console.error("Botpress webchat script not loaded.");
           }
         }}
       />
