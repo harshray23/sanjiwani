@@ -17,7 +17,7 @@ export function AppLoader({ children }: { children: React.ReactNode }) {
 
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2500); // 2.5 seconds
+    }, 1000); // Reduced from 2500ms to 1000ms
 
     return () => clearTimeout(timer);
   }, []);
