@@ -24,6 +24,7 @@ function SearchResults() {
   const [results, setResults] = useState<{ clinics: ClinicDetails[]; doctors: DoctorDetails[] }>({ clinics: [], doctors: [] });
   const [searchQuery, setSearchQuery] = useState(query);
   const [activeDoctorSpecialty, setActiveDoctorSpecialty] = useState<string | null>(null);
+  const [activeClinicFilter, setActiveClinicFilter] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -39,6 +40,16 @@ function SearchResults() {
      e.preventDefault();
      window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
   }
+
+  const filteredClinics = useMemo(() => {
+    if (!activeClinicFilter) {
+      return results.clinics;
+    }
+    if (activeClinicFilter === 'verified') {
+      return results.clinics.filter(clinic => clinic.verified);
+    }
+    return results.clinics;
+  }, [results.clinics, activeClinicFilter]);
 
   const filteredDoctors = useMemo(() => {
     if (!activeDoctorSpecialty) {
@@ -85,17 +96,42 @@ function SearchResults() {
       ) : (
         <Tabs defaultValue="doctors">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="clinics">Clinics ({results.clinics.length})</TabsTrigger>
+            <TabsTrigger value="clinics">Clinics ({filteredClinics.length})</TabsTrigger>
             <TabsTrigger value="doctors">Doctors ({filteredDoctors.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="clinics">
-            {results.clinics.length > 0 ? (
+            <div className="my-6">
+              <div className="flex items-center gap-4">
+                  <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                              <Filter className="mr-2 h-4 w-4"/>
+                              {activeClinicFilter ? 'Verified Clinics' : "Filter Clinics"}
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64">
+                          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuRadioGroup value={activeClinicFilter || "all"} onValueChange={(value) => setActiveClinicFilter(value === "all" ? null : value)}>
+                              <DropdownMenuRadioItem value="all">All ({results.clinics.length})</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="verified">
+                                  Verified ({results.clinics.filter(c => c.verified).length})
+                              </DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
+                  {activeClinicFilter && (
+                      <Button variant="ghost" onClick={() => setActiveClinicFilter(null)}>Clear Filter</Button>
+                  )}
+              </div>
+            </div>
+            {filteredClinics.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {results.clinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
+                {filteredClinics.map(clinic => <ClinicCard key={clinic.id} clinic={clinic} />)}
               </div>
             ) : (
               <p className="text-center py-12 text-muted-foreground">
-                No clinics found matching your search.
+                No clinics found matching your criteria.
               </p>
             )}
           </TabsContent>
