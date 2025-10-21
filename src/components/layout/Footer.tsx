@@ -15,7 +15,7 @@ export function Footer() {
 
   const forProviders = [
     { name: "Join as Doctor", href: "/login" },
-    { name: "Partner Hospital", href: "/contact" },
+    { name: "Partner Hospital", href: "/login" },
     { name: "Add Diagnostic Center", href: "/contact" },
     { name: "Provider Dashboard", href: "/login" },
   ];
