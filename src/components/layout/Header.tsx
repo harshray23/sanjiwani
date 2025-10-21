@@ -25,6 +25,11 @@ export function Header() {
     { href: '/appointments', label: 'My Appointments' },
   ];
   
+  const openChatbot = () => {
+    if ((window as any).botpressWebChat) {
+      (window as any).botpressWebChat.send({ type: "trigger" });
+    }
+  }
 
   return (
     <div className="sticky top-0 z-50">
@@ -71,7 +76,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-             <Button variant="ghost" className="group" onClick={() => (window as any).botpressWebChat.send({ type: "trigger" })}>
+             <Button variant="ghost" className="group" onClick={openChatbot}>
               <Bot />
               Chatbot
             </Button>
@@ -83,7 +88,7 @@ export function Header() {
           </nav>
 
           <div className="md:hidden flex items-center gap-2">
-             <Button variant="ghost" size="icon" onClick={() => (window as any).botpressWebChat.send({ type: "trigger" })}>
+             <Button variant="ghost" size="icon" onClick={openChatbot}>
                 <Bot />
             </Button>
             <Suspense>
