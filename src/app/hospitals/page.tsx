@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchHospitals, getHospitals, comprehensiveHospitalDepartments } from '@/lib/data';
+import { getHospitals, comprehensiveHospitalDepartments } from '@/lib/data';
 import type { Hospital } from '@/lib/types';
 import { HospitalCard } from '@/components/HospitalCard';
 import { Input } from '@/components/ui/input';
@@ -19,34 +19,24 @@ function HospitalSearch() {
   const initialQuery = searchParams.get('query') || '';
 
   const [isLoading, setIsLoading] = useState(true);
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [allHospitals, setAllHospitals] = useState<Hospital[]>([]);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       setIsLoading(true);
-      // Fetch all hospitals initially to calculate counts correctly
-      const allHospitals = await getHospitals();
-      setHospitals(allHospitals);
+      const allHospitalsData = await getHospitals();
+      setAllHospitals(allHospitalsData);
       setIsLoading(false);
     };
     fetchResults();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    searchHospitals(searchQuery).then(data => {
-        setHospitals(data);
-        setIsLoading(false);
-    });
-  };
-  
   const specialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     comprehensiveHospitalDepartments.forEach(spec => counts[spec] = 0);
-    hospitals.forEach(hospital => {
+    allHospitals.forEach(hospital => {
       hospital.specialties.forEach(spec => {
         if (counts[spec] !== undefined) {
           counts[spec]++;
@@ -54,18 +44,16 @@ function HospitalSearch() {
       });
     });
     return counts;
-  }, [hospitals]);
+  }, [allHospitals]);
   
   const filteredHospitals = useMemo(() => {
-    let results = hospitals;
-    
-    // This logic needs to be careful. The search query should filter from ALL hospitals,
-    // not just the base set. Re-fetching on search is better.
-    // For now, we'll filter the already loaded set.
-    if(searchQuery) {
+    let results = allHospitals;
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    if (lowerCaseQuery) {
         results = results.filter(h => 
-            h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            h.location.address.toLowerCase().includes(searchQuery.toLowerCase())
+            h.name.toLowerCase().includes(lowerCaseQuery) ||
+            h.location.address.toLowerCase().includes(lowerCaseQuery)
         );
     }
     
@@ -73,7 +61,7 @@ function HospitalSearch() {
         results = results.filter(hospital => hospital.specialties.includes(activeSpecialty));
     }
     return results;
-  }, [hospitals, activeSpecialty, searchQuery]);
+  }, [allHospitals, activeSpecialty, searchQuery]);
 
 
   return (
@@ -87,7 +75,7 @@ function HospitalSearch() {
             <CardDescription className="text-lg text-muted-foreground">Search for hospitals and check real-time bed availability.</CardDescription>
         </CardHeader>
         <CardContent>
-            <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mx-auto">
+            <form onSubmit={(e) => e.preventDefault()} className="flex gap-2 max-w-2xl mx-auto">
                 <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -95,7 +83,7 @@ function HospitalSearch() {
                     className="h-12 text-base"
                 />
                 <Button type="submit" size="lg" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="animate-spin" /> : <SearchIcon />}
+                    <SearchIcon />
                 </Button>
             </form>
         </CardContent>
@@ -121,10 +109,11 @@ function HospitalSearch() {
                             <DropdownMenuLabel>Filter by Department</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={activeSpecialty || "All"} onValueChange={(value) => setActiveSpecialty(value === "All" ? null : value)}>
-                                <DropdownMenuRadioItem value="All">All ({hospitals.length})</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="All">All ({allHospitals.length})</DropdownMenuRadioItem>
                                 {comprehensiveHospitalDepartments.map(specialty => (
+                                    specialtyCounts[specialty] > 0 &&
                                     <DropdownMenuRadioItem key={specialty} value={specialty}>
-                                        {specialty} ({specialtyCounts[specialty] || 0})
+                                        {specialty} ({specialtyCounts[specialty]})
                                     </DropdownMenuRadioItem>
                                 ))}
                             </DropdownMenuRadioGroup>
