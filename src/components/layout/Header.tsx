@@ -4,12 +4,11 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, Bot } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Image from 'next/image';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 
 
 export function Header() {
@@ -24,12 +23,6 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/appointments', label: 'My Appointments' },
   ];
-  
-  const openChatbot = () => {
-    if ((window as any).botpressWebChat) {
-      (window as any).botpressWebChat.send({ type: "trigger" });
-    }
-  }
 
   return (
     <div className="sticky top-0 z-50">
@@ -76,21 +69,12 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-             <Button variant="ghost" className="group" onClick={openChatbot}>
-              <Bot />
-              Chatbot
-            </Button>
-
-
             <Suspense fallback={<Button>Login</Button>}>
               <UserNav />
             </Suspense>
           </nav>
 
           <div className="md:hidden flex items-center gap-2">
-             <Button variant="ghost" size="icon" onClick={openChatbot}>
-                <Bot />
-            </Button>
             <Suspense>
               <UserNav />
             </Suspense>
