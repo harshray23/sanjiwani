@@ -21,7 +21,7 @@ function HospitalSearch() {
   const [isLoading, setIsLoading] = useState(true);
   const [allHospitals, setAllHospitals] = useState<Hospital[]>([]);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
+  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(initialQuery.toLowerCase() === 'emergency' ? 'Emergency' : null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -32,6 +32,12 @@ function HospitalSearch() {
     };
     fetchResults();
   }, []);
+  
+  useEffect(() => {
+    if (initialQuery.toLowerCase() === 'emergency') {
+        setActiveSpecialty('Emergency');
+    }
+  }, [initialQuery]);
 
   const specialtyCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -47,20 +53,28 @@ function HospitalSearch() {
   }, [allHospitals]);
   
   const filteredHospitals = useMemo(() => {
-    let results = allHospitals;
     const lowerCaseQuery = searchQuery.toLowerCase();
 
-    if (lowerCaseQuery) {
-        results = results.filter(h => 
-            h.name.toLowerCase().includes(lowerCaseQuery) ||
-            h.location.address.toLowerCase().includes(lowerCaseQuery)
-        );
+    if (!lowerCaseQuery && !activeSpecialty) {
+      return allHospitals;
     }
-    
-    if (activeSpecialty) {
-        results = results.filter(hospital => hospital.specialties.includes(activeSpecialty));
-    }
-    return results;
+
+    return allHospitals.filter(hospital => {
+      const matchesQuery = lowerCaseQuery
+        ? hospital.name.toLowerCase().includes(lowerCaseQuery) ||
+          hospital.location.address.toLowerCase().includes(lowerCaseQuery) ||
+          hospital.specialties.some(s => s.toLowerCase().includes(lowerCaseQuery))
+        : false;
+
+      const matchesSpecialty = activeSpecialty
+        ? hospital.specialties.includes(activeSpecialty)
+        : false;
+        
+      if(lowerCaseQuery && activeSpecialty) {
+          return matchesQuery && matchesSpecialty;
+      }
+      return matchesQuery || matchesSpecialty;
+    });
   }, [allHospitals, activeSpecialty, searchQuery]);
 
 
@@ -132,9 +146,9 @@ function HospitalSearch() {
             </div>
           ) : (
             <p className="text-center py-16 text-muted-foreground bg-card rounded-lg shadow-md">
-                {activeSpecialty
-                    ? `No hospitals found for the specialization "${activeSpecialty}".`
-                    : "No hospitals found matching your search. Try a different query."
+                {activeSpecialty || searchQuery
+                    ? `No hospitals found matching your criteria.`
+                    : "No hospitals found."
                 }
             </p>
           )}
