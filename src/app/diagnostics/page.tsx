@@ -106,7 +106,10 @@ export default function DiagnosticsPage() {
             results = results.filter(centre => 
                 centre.name.toLowerCase().includes(lowerCaseQuery) ||
                 centre.location.toLowerCase().includes(lowerCaseQuery) ||
-                centre.tests.some(test => test.name.toLowerCase().includes(lowerCaseQuery))
+                centre.tests.some(test => 
+                    test.name.toLowerCase().includes(lowerCaseQuery) ||
+                    test.category.toLowerCase().includes(lowerCaseQuery)
+                )
             );
         }
 
