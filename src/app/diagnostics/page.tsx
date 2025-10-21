@@ -92,13 +92,15 @@ export default function DiagnosticsPage() {
 
     const filteredCentres = useMemo(() => {
         let results = centres;
-        
+
+        // Apply category filter first
         if (activeTestCategory) {
             results = results.filter(centre => 
                 centre.tests.some(test => test.category === activeTestCategory)
             );
         }
-
+        
+        // Then apply search query on the (potentially filtered) results
         if (searchQuery) {
             const lowerCaseQuery = searchQuery.toLowerCase();
             results = results.filter(centre => 
