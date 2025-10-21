@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { searchClinicsAndDoctors, comprehensiveSpecialties } from '@/lib/data';
 import type { ClinicDetails, DoctorDetails } from '@/lib/types';
 import { ClinicCard } from '@/components/ClinicCard';
@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadio
 
 function SearchResults() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const query = searchParams.get('query') || '';
 
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +39,7 @@ function SearchResults() {
   
   const handleSearch = (e: React.FormEvent) => {
      e.preventDefault();
-     window.location.href = `/search?query=${encodeURIComponent(searchQuery)}`;
+     router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
   }
 
   const filteredClinics = useMemo(() => {
