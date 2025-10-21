@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 export function Header() {
   const serviceItems = [
     { href: '/search', label: 'Find Doctors', icon: <Stethoscope/> },
+    { href: '/clinics', label: 'Find Clinics', icon: <Building/> },
     { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital/> },
     { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical/> },
   ];
@@ -70,12 +71,21 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+             <Button variant="ghost" className="group" onClick={() => (window as any).botpressWebChat.send({ type: "trigger" })}>
+              <Bot />
+              Chatbot
+            </Button>
+
+
             <Suspense fallback={<Button>Login</Button>}>
               <UserNav />
             </Suspense>
           </nav>
 
           <div className="md:hidden flex items-center gap-2">
+             <Button variant="ghost" size="icon" onClick={() => (window as any).botpressWebChat.send({ type: "trigger" })}>
+                <Bot />
+            </Button>
             <Suspense>
               <UserNav />
             </Suspense>

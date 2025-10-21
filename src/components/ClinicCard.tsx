@@ -5,7 +5,7 @@ import type { ClinicDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, BadgeCheck } from 'lucide-react';
 
 interface ClinicCardProps {
   clinic: ClinicDetails;
@@ -16,12 +16,12 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="p-0">
         <Image
-          src={clinic.imageUrl || `https://i.pravatar.cc/400?u=${clinic.id}`}
+          src={clinic.imageUrl || `https://picsum.photos/seed/${clinic.id}/400/200`}
           alt={clinic.name}
           width={400}
           height={200}
           className="w-full h-48 object-cover rounded-t-lg"
-          data-ai-hint={clinic.dataAiHint}
+          data-ai-hint={clinic.dataAiHint || 'clinic building'}
         />
       </CardHeader>
       <CardContent className="p-4 flex-grow">
@@ -31,14 +31,21 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
           {clinic.address}
         </CardDescription>
         <div className="flex items-center gap-2 mb-4">
-            <Badge variant={clinic.verified ? 'default' : 'destructive'}>
-                {clinic.verified ? 'Verified' : 'Not Verified'}
-            </Badge>
+            {clinic.verified ? (
+                <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                    <BadgeCheck className="h-4 w-4 mr-1"/>
+                    Verified
+                </Badge>
+            ) : (
+                <Badge variant="destructive">
+                    Not Verified
+                </Badge>
+            )}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button asChild className="w-full">
-          <Link href={`/clinics/${clinic.id}`}>View Doctors</Link>
+          <Link href={`/clinics/${clinic.id}`}>View Details</Link>
         </Button>
       </CardFooter>
     </Card>
