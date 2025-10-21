@@ -80,7 +80,7 @@ function SearchResults() {
           <Input 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search again..."
+            placeholder="Search doctors, specialties, or clinics..."
             className="h-12 text-base"
           />
           <Button type="submit" size="lg" disabled={isLoading}>
