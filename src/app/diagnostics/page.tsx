@@ -58,6 +58,7 @@ export default function DiagnosticsPage() {
     const [centres, setCentres] = useState<DiagnosticsCentre[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTestCategory, setActiveTestCategory] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchCentres = async () => {
@@ -90,13 +91,25 @@ export default function DiagnosticsPage() {
     }, [centres, uniqueTestCategories]);
 
     const filteredCentres = useMemo(() => {
-        if (!activeTestCategory) {
-            return centres;
+        let results = centres;
+        
+        if (activeTestCategory) {
+            results = results.filter(centre => 
+                centre.tests.some(test => test.category === activeTestCategory)
+            );
         }
-        return centres.filter(centre => 
-            centre.tests.some(test => test.category === activeTestCategory)
-        );
-    }, [centres, activeTestCategory]);
+
+        if (searchQuery) {
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            results = results.filter(centre => 
+                centre.name.toLowerCase().includes(lowerCaseQuery) ||
+                centre.location.toLowerCase().includes(lowerCaseQuery) ||
+                centre.tests.some(test => test.name.toLowerCase().includes(lowerCaseQuery))
+            );
+        }
+
+        return results;
+    }, [centres, activeTestCategory, searchQuery]);
 
 
     return (
@@ -110,10 +123,12 @@ export default function DiagnosticsPage() {
                     <CardDescription className="text-lg text-muted-foreground">Search for labs and book tests with ease.</CardDescription>
                 </CardHeader>
                  <CardContent>
-                    <form className="flex gap-2 max-w-2xl mx-auto">
+                    <form onSubmit={(e) => e.preventDefault()} className="flex gap-2 max-w-2xl mx-auto">
                         <Input
                             placeholder="Search by centre name, test, or location..."
                             className="h-12 text-base"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <Button type="submit" size="lg">
                             <Search />
@@ -164,8 +179,8 @@ export default function DiagnosticsPage() {
                         </div>
                     ) : (
                         <p className="text-center py-16 text-muted-foreground bg-card rounded-lg shadow-md">
-                            {activeTestCategory
-                                ? `No diagnostics centres found for the category "${activeTestCategory}".`
+                            {activeTestCategory || searchQuery
+                                ? `No diagnostics centres found matching your criteria.`
                                 : "No diagnostics centres found."
                             }
                         </p>
