@@ -117,30 +117,53 @@ function PaymentForm() {
       image: "/logo.jpg", 
       order_id: orderId,
       handler: async function (response: any) {
-        try {
-          const appointment = await createAppointment(
-            user.uid,
-            doctor.uid,
-            clinicId!,
-            slot!,
-            consultationType
-          );
+        
+        // Verify payment on the backend
+        const verificationRes = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+            }),
+        });
 
-          toast({
-            title: "Payment Successful!",
-            description: "Your appointment has been booked.",
-            variant: "default",
-          });
+        const verificationData = await verificationRes.json();
 
-          router.push(`/appointments/confirmed?id=${appointment.id}`);
-        } catch (error) {
-          console.error("Booking Error:", error);
-          toast({
-            title: "Booking Failed",
-            description: "We could not complete your booking after payment. Please contact support.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
+        if (verificationData.status === 'success') {
+             try {
+              const appointment = await createAppointment(
+                user.uid,
+                doctor.uid,
+                clinicId!,
+                slot!,
+                consultationType
+              );
+
+              toast({
+                title: "Payment Successful & Verified!",
+                description: "Your appointment has been booked.",
+                variant: "default",
+              });
+
+              router.push(`/appointments/confirmed?id=${appointment.id}`);
+            } catch (error) {
+              console.error("Booking Error:", error);
+              toast({
+                title: "Booking Failed",
+                description: "We could not complete your booking after payment. Please contact support.",
+                variant: "destructive",
+              });
+              setIsLoading(false);
+            }
+        } else {
+            toast({
+                title: "Payment Verification Failed",
+                description: "Your payment could not be verified. Please contact support.",
+                variant: "destructive",
+            });
+            setIsLoading(false);
         }
       },
       prefill: {
