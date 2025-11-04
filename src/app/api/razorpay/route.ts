@@ -10,6 +10,7 @@ export async function POST(req: Request) {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
+    console.error("Razorpay API keys are not configured in environment variables.");
     return NextResponse.json({ error: 'Razorpay API keys not configured.' }, { status: 500 });
   }
 
@@ -29,6 +30,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ orderId: order.id, keyId: keyId });
   } catch (error) {
     console.error('Razorpay order creation error:', error);
-    return NextResponse.json({ error: 'Failed to create Razorpay order.' }, { status: 500 });
+    // Provide a more specific error message if possible
+    const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred.';
+    return NextResponse.json({ error: 'Failed to create Razorpay order.', details: errorMessage }, { status: 500 });
   }
 }

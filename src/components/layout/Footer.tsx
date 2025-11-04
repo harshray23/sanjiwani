@@ -23,8 +23,8 @@ export function Footer() {
   const support = [
     { name: "Help Center", href: "/contact" },
     { name: "Contact Us", href: "/contact" },
-    { name: "Privacy Policy", href: "/coming-soon" },
-    { name: "Terms of Service", href: "/coming-soon" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
     { name: "FAQ", href: "/coming-soon" },
   ];
 
@@ -61,7 +61,7 @@ export function Footer() {
             <div className="space-y-2 text-sm">
                 <p className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4 text-primary"/>
-                    <span>Emergency: <strong>108</strong> | Support: <strong>+91 1800-123-4567</strong></span>
+                    <span>Emergency: <strong>108</strong> | Support: <strong>+91 8535916871</strong></span>
                 </p>
                  <p className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4 text-primary"/>

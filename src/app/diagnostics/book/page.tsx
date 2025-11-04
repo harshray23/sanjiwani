@@ -3,34 +3,90 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CreditCard, QrCode, ShieldCheck, Microscope } from "lucide-react";
+import { Loader2, ShieldCheck, Microscope } from "lucide-react";
 import Lottie from "lottie-react";
 import { getDiagnosticsCentreById, getTestById, createTestAppointment } from '@/lib/data';
 import type { DiagnosticsCentre, DiagnosticTest, User } from '@/lib/types';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
+import axios from 'axios';
 
-const cardFormSchema = z.object({
-  cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
-  cardName: z.string().min(2, "Name on card is required"),
-  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, "Invalid expiry date (MM/YY)"),
-  cvv: z.string().regex(/^[0-9]{3,4}$/, "Invalid CVV"),
-});
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+async function handlePayment(
+  totalFee: number, 
+  user: User, 
+  centre: DiagnosticsCentre, 
+  test: DiagnosticTest, 
+  toast: ReturnType<typeof useToast>['toast'], 
+  router: ReturnType<typeof useRouter>
+) {
+  try {
+    const { data: order } = await axios.post('/api/razorpay', { amount: totalFee });
+
+    const options = {
+      key: order.keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Sanjiwani Health",
+      description: `Test booking for ${test.name} at ${centre.name}`,
+      order_id: order.orderId,
+      handler: async function (response: any) {
+        const { data } = await axios.post('/api/razorpay/verify', {
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature,
+        });
+
+        if (data.status === 'success') {
+          const appointment = await createTestAppointment(user.uid, centre.id, test.id);
+          toast({
+            title: "Payment Successful!",
+            description: "Your test has been booked.",
+          });
+          router.push(`/diagnostics/confirmed?id=${appointment.id}`);
+        } else {
+          toast({
+            title: "Payment Verification Failed",
+            description: "Please contact support.",
+            variant: "destructive",
+          });
+        }
+      },
+      prefill: {
+        name: user.name,
+        email: user.email,
+        contact: user.phone,
+      },
+      theme: {
+        color: "#f97316",
+      },
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.on('payment.failed', function (response: any) {
+        toast({
+            title: "Payment Failed",
+            description: response.error.description,
+            variant: "destructive",
+        });
+    });
+    rzp1.open();
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "Error",
+      description: "Failed to initiate payment.",
+      variant: "destructive",
+    });
+  }
+}
 
 function TestPaymentForm() {
   const { toast } = useToast();
@@ -43,7 +99,6 @@ function TestPaymentForm() {
   const [user, setUser] = useState<User | null>(null);
   const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
   const [test, setTest] = useState<DiagnosticTest | null>(null);
-  const [comingSoonAnimation, setComingSoonAnimation] = useState(null);
   
   const centreId = searchParams.get('centreId');
   const testId = searchParams.get('testId');
@@ -51,10 +106,10 @@ function TestPaymentForm() {
   const totalFee = test?.price || 0;
 
   useEffect(() => {
-    fetch('/Coming.json')
-      .then(response => response.json())
-      .then(data => setComingSoonAnimation(data))
-      .catch(error => console.error("Error fetching animation:", error));
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
 
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
@@ -89,40 +144,17 @@ function TestPaymentForm() {
     }
     fetchData();
   }, [centreId, testId, router, toast]);
+  
+  const onPay = async () => {
+      if(user && centre && test) {
+        setIsLoading(true);
+        await handlePayment(totalFee, user, centre, test, toast, router);
+        setIsLoading(false);
+      } else {
+        toast({ title: "Booking details incomplete", variant: "destructive"})
+      }
+  }
 
-  const cardForm = useForm<z.infer<typeof cardFormSchema>>({
-    resolver: zodResolver(cardFormSchema),
-    defaultValues: { cardNumber: "", cardName: "", expiryDate: "", cvv: "" },
-  });
-
-  const handlePayment = async () => {
-    if (!user || !centreId || !testId) return;
-
-    setIsLoading(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment gateway
-      
-      const appointment = await createTestAppointment(user.uid, centreId, testId);
-      
-      toast({
-        title: "Payment Successful!",
-        description: "Your test has been booked.",
-        variant: "default",
-      });
-      
-      router.push(`/diagnostics/confirmed?id=${appointment.id}`);
-
-    } catch (error) {
-      console.error("Payment/Booking Error:", error);
-      toast({
-        title: "Booking Failed",
-        description: "We could not complete your booking. Please try again.",
-        variant: "destructive"
-      });
-      setIsLoading(false);
-    }
-  };
 
   if (isDataLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
@@ -177,37 +209,13 @@ function TestPaymentForm() {
             </div>
 
             {/* Payment Options */}
-            <div>
-              <Tabs defaultValue="card">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/> UPI / QR</TabsTrigger>
-                  <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/> Card</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="upi" className="pt-4">
-                  <div className="flex flex-col items-center text-center">
-                    {comingSoonAnimation ? (
-                      <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
-                    ): <p>Loading animation...</p>}
-                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      UPI and QR Code payments will be available shortly.
-                    </p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="card" className="pt-4">
-                  <div className="flex flex-col items-center text-center">
-                    {comingSoonAnimation ? (
-                        <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
-                    ): <p>Loading animation...</p>}
-                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Card payments will be available shortly.
-                    </p>
-                  </div>
-                </TabsContent>
-              </Tabs>
+            <div className="flex flex-col justify-center items-center p-6">
+               <h3 className="text-lg font-bold font-headline text-accent mb-4">Proceed to Payment</h3>
+               <p className="text-muted-foreground text-center mb-6">You will be redirected to Razorpay's secure payment gateway to complete your transaction.</p>
+                <Button onClick={onPay} disabled={isLoading} className="w-full h-12 text-lg">
+                    {isLoading ? <Loader2 className="animate-spin mr-2"/> : null}
+                    Pay ₹{totalFee.toFixed(2)} Now
+                </Button>
                <p className="text-xs text-muted-foreground text-center mt-4">
                 All transactions are secure and encrypted.
               </p>
@@ -227,7 +235,3 @@ export default function DiagnosticsBookingPage() {
         </Suspense>
     )
 }
-
-    
-
-    
