@@ -2,40 +2,24 @@
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
+import Head from 'next/head';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CreditCard, QrCode, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
+import { Loader2, ShieldCheck, BadgePercent, Upload, Video } from "lucide-react";
 import Lottie from "lottie-react";
 import { getDoctorById } from '@/lib/data';
 import type { DoctorProfile, User } from '@/lib/types';
 import { createAppointment } from '@/lib/data';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 
-const cardFormSchema = z.object({
-  cardNumber: z.string().regex(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/, "Invalid card number"),
-  cardName: z.string().min(2, "Name on card is required"),
-  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, "Invalid expiry date (MM/YY)"),
-  cvv: z.string().regex(/^[0-9]{3,4}$/, "Invalid CVV"),
-});
-
-const upiFormSchema = z.object({
-  upiId: z.string().regex(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/, "Invalid UPI ID"),
-});
+// Define a type for the Razorpay window object
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 function PaymentForm() {
   const { toast } = useToast();
@@ -48,27 +32,21 @@ function PaymentForm() {
   const [user, setUser] = useState<User | null>(null);
   const [doctor, setDoctor] = useState<DoctorProfile | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
-  const [comingSoonAnimation, setComingSoonAnimation] = useState(null);
   
   const doctorId = searchParams.get('doctorId');
   const clinicId = searchParams.get('clinicId');
   const selectedSlot = searchParams.get('slot');
   const consultationType = (searchParams.get('type') || 'clinic') as 'clinic' | 'video';
   
-  const consultationFee = doctor?.consultationFee || 500; // Use doctor's fee or a default
+  const consultationFee = doctor?.consultationFee || 500;
   const platformFee = consultationType === 'video' ? 100 : 50;
   const totalFee = consultationFee + platformFee;
 
   useEffect(() => {
-    fetch('/Coming.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => setComingSoonAnimation(data))
-      .catch(error => console.error("Error fetching animation:", error));
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
 
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) {
@@ -101,59 +79,94 @@ function PaymentForm() {
     fetchDoctor();
   }, [doctorId, selectedSlot, router, toast]);
 
-  const cardForm = useForm<z.infer<typeof cardFormSchema>>({
-    resolver: zodResolver(cardFormSchema),
-    defaultValues: { cardNumber: "", cardName: "", expiryDate: "", cvv: "" },
-  });
-
-  const upiForm = useForm<z.infer<typeof upiFormSchema>>({
-    resolver: zodResolver(upiFormSchema),
-    defaultValues: { upiId: "" },
-  });
-
-  const handlePayment = async () => {
-    if (!user || !doctorId) return;
-
-    if (consultationType === 'clinic' && (!slot || !clinicId)) {
-        toast({ title: "Booking Failed", description: "Time slot or clinic not selected for clinic visit.", variant: "destructive" });
-        return;
+ const makePayment = async () => {
+    if (!user || !doctor) {
+      toast({ title: "Error", description: "User or Doctor details missing." });
+      return;
     }
-
     setIsLoading(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment gateway
-      
-      const appointment = await createAppointment(
-        user.uid,
-        doctorId,
-        clinicId!,
-        slot!,
-        consultationType
-      );
-      
-      toast({
-        title: "Payment Successful!",
-        description: "Your appointment has been booked.",
-        variant: "default",
-      });
-      
-      router.push(`/appointments/confirmed?id=${appointment.id}`);
 
-    } catch (error) {
-      console.error("Payment/Booking Error:", error);
+    const res = await fetch("/api/razorpay", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount: totalFee }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      console.error("Failed to create order:", error);
       toast({
-        title: "Booking Failed",
-        description: "We could not complete your booking. Please try again.",
-        variant: "destructive"
+        title: "Payment Error",
+        description: "Could not initiate payment. Please try again.",
+        variant: "destructive",
       });
       setIsLoading(false);
+      return;
     }
-  };
 
-  const getCashbackAmount = () => {
-      return consultationType === 'video' ? 40 : 25;
-  }
+    const { orderId, keyId } = await res.json();
+
+    const options = {
+      key: keyId,
+      amount: totalFee * 100, // Amount in paise
+      currency: "INR",
+      name: "Sanjiwani Health",
+      description: `Appointment with Dr. ${doctor.name}`,
+      image: "/logo.jpg", 
+      order_id: orderId,
+      handler: async function (response: any) {
+        try {
+          const appointment = await createAppointment(
+            user.uid,
+            doctor.uid,
+            clinicId!,
+            slot!,
+            consultationType
+          );
+
+          toast({
+            title: "Payment Successful!",
+            description: "Your appointment has been booked.",
+            variant: "default",
+          });
+
+          router.push(`/appointments/confirmed?id=${appointment.id}`);
+        } catch (error) {
+          console.error("Booking Error:", error);
+          toast({
+            title: "Booking Failed",
+            description: "We could not complete your booking after payment. Please contact support.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
+      },
+      prefill: {
+        name: user.name,
+        email: user.email,
+        contact: user.phone,
+      },
+      notes: {
+        address: "Sanjiwani Health Corporate Office",
+      },
+      theme: {
+        color: "#f97316", // Orange color
+      },
+    };
+
+    const razor = new window.Razorpay(options);
+    razor.on('payment.failed', function (response: any){
+            toast({
+                title: "Payment Failed",
+                description: response.error.description,
+                variant: "destructive",
+            });
+            setIsLoading(false);
+    });
+    razor.open();
+  };
 
   if (isDataLoading) {
     return <div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>;
@@ -206,7 +219,7 @@ function PaymentForm() {
               </div>
               <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg p-3 text-sm font-medium flex items-center justify-center gap-2">
                  <BadgePercent className="h-5 w-5" />
-                 <span>Get up to ₹{getCashbackAmount()} cashback!</span>
+                 <span>Get up to ₹{consultationType === 'video' ? 40 : 25} cashback!</span>
               </div>
                <p className="text-xs text-muted-foreground text-center">
                     <Upload className="inline-block h-3 w-3 mr-1"/>
@@ -215,39 +228,13 @@ function PaymentForm() {
             </div>
 
             {/* Payment Options */}
-            <div>
-              <Tabs defaultValue="card">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/> UPI / QR</TabsTrigger>
-                  <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/> Card</TabsTrigger>
-                </TabsList>
-                
-                {/* UPI Tab */}
-                <TabsContent value="upi" className="pt-4">
-                  <div className="flex flex-col items-center text-center">
-                    {comingSoonAnimation ? (
-                        <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
-                    ): <p>Loading animation...</p>}
-                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      UPI and QR Code payments will be available shortly.
-                    </p>
-                  </div>
-                </TabsContent>
-
-                {/* Card Tab */}
-                <TabsContent value="card" className="pt-4">
-                  <div className="flex flex-col items-center text-center">
-                    {comingSoonAnimation ? (
-                        <Lottie animationData={comingSoonAnimation} loop={true} className="w-48 h-48" />
-                    ): <p>Loading animation...</p>}
-                    <h3 className="font-semibold text-lg mt-2 font-headline">Coming Soon!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Card payments will be available shortly.
-                    </p>
-                  </div>
-                </TabsContent>
-              </Tabs>
+            <div className="flex flex-col justify-center items-center p-6">
+               <h3 className="text-lg font-bold font-headline text-accent mb-4">Proceed to Payment</h3>
+               <p className="text-muted-foreground text-center mb-6">You will be redirected to Razorpay's secure payment gateway to complete your transaction.</p>
+                <Button onClick={makePayment} disabled={isLoading} className="w-full h-12 text-lg">
+                    {isLoading ? <Loader2 className="animate-spin mr-2"/> : null}
+                    Pay ₹{totalFee.toFixed(2)} Now
+                </Button>
                <p className="text-xs text-muted-foreground text-center mt-4">
                 All transactions are secure and encrypted.
               </p>
@@ -262,8 +249,13 @@ function PaymentForm() {
 
 export default function PaymentPage() {
     return (
+      <>
+        <Head>
+          <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        </Head>
         <Suspense fallback={<div className="flex justify-center items-center h-screen"><Lottie animationData={loadingAnimation} loop={true} className="w-48 h-48" /></div>}>
             <PaymentForm />
         </Suspense>
+      </>
     )
 }
