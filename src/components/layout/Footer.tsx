@@ -25,7 +25,7 @@ export function Footer() {
     { name: "Contact Us", href: "/contact" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
-    { name: "FAQ", href: "/coming-soon" },
+    { name: "FAQ", href: "/faq" },
   ];
 
   const socialLinks = [
