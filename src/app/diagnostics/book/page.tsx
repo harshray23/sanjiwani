@@ -58,6 +58,7 @@ async function handlePayment(
             description: "Please contact support.",
             variant: "destructive",
           });
+          setIsLoading(false);
         }
       },
       prefill: {
