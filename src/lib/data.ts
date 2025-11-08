@@ -39,6 +39,7 @@ export const mockUsers: User[] = [
   { uid: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', phone: '09147023666', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', phone: '07076642946', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'doc-nikhil', name: 'Dr. Nikhil', email: 'dr.nikhil@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 ];
 
 const mockDoctors: DoctorDetails[] = [
@@ -56,6 +57,7 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doc-tania', userId: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', specialization: 'ENT Specialist', licenseNo: 'DOC-L44556', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "04:00 PM", "05:00 PM"], clinicId: 'clinic-9', verified: true, imageUrl: '/doctor9.jpg', phone: 'N/A', clinicName: "Dr. Tania Mukherjee's Clinic" },
   { id: 'doc-saptarshi', userId: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', specialization: 'Gastroenterologist', licenseNo: 'DOC-L55667', consultationFee: 1200, availability: ["04:00 PM", "05:00 PM", "06:00 PM"], clinicId: 'clinic-12', verified: true, imageUrl: '/doctor3.jpg', phone: '09147023666', clinicName: "Chittaranjan Clinic Pvt ltd" },
   { id: 'doc-cngupta', userId: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L66778', consultationFee: 600, availability: ["05:00 PM", "06:00 PM"], clinicId: 'diag-4', verified: true, imageUrl: '/doctor8.jpg', phone: '07076642946', clinicName: "The Burdwan Medical Centre" },
+  { id: 'doc-nikhil', userId: 'doc-nikhil', name: 'Dr. Nikhil', email: 'dr.nikhil@test.com', specialization: 'Physician and Diabetologist', licenseNo: 'DOC-N54321', consultationFee: 800, availability: ["09:00 AM", "10:00 AM", "11:00 AM"], clinicId: 'clinic-21', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc-nikhil', phone: 'N/A', clinicName: 'Dr. Nikhil Physician and Diabetologist Clinic' },
 ];
 
 const mockClinics: ClinicDetails[] = [
@@ -79,6 +81,7 @@ const mockClinics: ClinicDetails[] = [
   { id: 'clinic-18', userId: 'clinic-18', name: 'The Mission Hospital Asansol Clinic', address: 'MXV2+J4V, Asansol-Neamatpur Rd, Asansol', licenseNo: 'CLN-R234', verified: true, imageUrl: '/clinic18.jpg', dataAiHint: 'hospital clinic', doctors: [] },
   { id: 'clinic-19', userId: 'clinic-19', name: 'Ultra Clinic', address: 'Ground Floor, Sahara Apartment, Asansol', licenseNo: 'CLN-S567', verified: true, imageUrl: '/clinic19.jpg', dataAiHint: 'modern clinic', doctors: [] },
   { id: 'clinic-20', userId: 'clinic-20', name: 'Seva Clinic', address: 'B-3/17, Kalyani', licenseNo: 'CLN-T890', verified: true, imageUrl: '/clinic20.jpg', dataAiHint: 'community clinic', doctors: [mockDoctors[8]] },
+  { id: 'clinic-21', userId: 'doc-nikhil', name: 'Dr. Nikhil Physician and Diabetologist Clinic', address: 'D 21-10/1-139 Srinagar Main Road, G.S.Raju Rd, near Drainage', licenseNo: 'CLN-U123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-21/400/200', doctors: [mockDoctors[14]] },
 ];
 
 const mockAppointments: Appointment[] = [
@@ -143,6 +146,8 @@ const mockHospitals: Hospital[] = [
     { id: 'hosp-12', name: 'Apollo Multispeciality Hospitals, Kolkata', location: { address: '58, Canal Circular Rd, Kolkata' }, contact: '080 6297 2764', rating: 4.7, specialties: ['Multispeciality'], emergencyAvailable: true, beds: { general: { total: 200, available: 40 }, icu: { total: 40, available: 8 }, ventilator: { total: 20, available: 3 }, oxygen: { total: 100, available: 25 } }, lastUpdated: new Date(Date.now() - 1 * 3600000).toISOString(), imageUrl: '/hos12.jpg', dataAiHint: 'city hospital' },
     { id: 'hosp-13', name: 'Desun Hospital', location: { address: 'Desun More, 720, Eastern Metropolitan Bypass, Kolkata' }, contact: 'N/A', rating: 4.6, specialties: ['Private Hospital', 'Cardiology'], emergencyAvailable: true, beds: { general: { total: 300, available: 50 }, icu: { total: 75, available: 10 }, ventilator: { total: 40, available: 5 }, oxygen: { total: 150, available: 30 } }, lastUpdated: new Date(Date.now() - 2 * 3600000).toISOString(), imageUrl: '/hos13.jpg', dataAiHint: 'hospital building' },
     { id: 'hosp-14', name: 'Manipal Hospitals Broadway', location: { address: 'JC-16 & 17, No. 3A, Broadway Rd, opp. to Stadium, Kolkata' }, contact: 'N/A', rating: 4.7, specialties: ['Private Hospital', 'Oncology'], emergencyAvailable: true, beds: { general: { total: 180, available: 35 }, icu: { total: 35, available: 7 }, ventilator: { total: 15, available: 2 }, oxygen: { total: 90, available: 18 } }, lastUpdated: new Date(Date.now() - 3 * 3600000).toISOString(), imageUrl: '/hos14.jpg', dataAiHint: 'modern hospital' },
+    { id: 'hosp-15', name: 'Manipal Hospital Vijayawada', location: { address: '12-570, near Kanakadurga Varadhi' }, contact: '1800 102 4647', rating: 4.8, specialties: ['Hospital'], emergencyAvailable: true, beds: { general: { total: 150, available: 30 }, icu: { total: 25, available: 5 }, ventilator: { total: 15, available: 2 }, oxygen: { total: 75, available: 15 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-15/600/400', dataAiHint: 'large hospital' },
+    { id: 'hosp-16', name: 'Harini Hospitals - Best Gastroenterologist', location: { address: '#29, 14-51, Prakasam Rd, near Pushpa Hotel Cent...' }, contact: 'N/A', rating: 4.9, specialties: ['Gastroenterology'], emergencyAvailable: true, beds: { general: { total: 40, available: 8 }, icu: { total: 10, available: 2 }, ventilator: { total: 5, available: 1 }, oxygen: { total: 20, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-16/600/400', dataAiHint: 'specialty hospital' },
 ];
 
 const mockTestAppointments: TestAppointment[] = [
