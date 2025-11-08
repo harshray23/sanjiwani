@@ -182,8 +182,8 @@ function PaymentForm() {
     const razor = new window.Razorpay(options);
     razor.on('payment.failed', function (response: any){
             toast({
-                title: "Payment Failed",
-                description: response.error.description,
+                title: "Payment Failed or Cancelled",
+                description: response.error.description || "You can try again.",
                 variant: "destructive",
             });
             setIsLoading(false);

@@ -25,7 +25,8 @@ async function handlePayment(
   centre: DiagnosticsCentre, 
   test: DiagnosticTest, 
   toast: ReturnType<typeof useToast>['toast'], 
-  router: ReturnType<typeof useRouter>
+  router: ReturnType<typeof useRouter>,
+  setIsLoading: (isLoading: boolean) => void
 ) {
   try {
     const { data: order } = await axios.post('/api/razorpay', { amount: totalFee });
@@ -72,10 +73,11 @@ async function handlePayment(
     const rzp1 = new window.Razorpay(options);
     rzp1.on('payment.failed', function (response: any) {
         toast({
-            title: "Payment Failed",
-            description: response.error.description,
+            title: "Payment Failed or Cancelled",
+            description: response.error.description || "You can try again.",
             variant: "destructive",
         });
+        setIsLoading(false);
     });
     rzp1.open();
   } catch (error) {
@@ -85,6 +87,7 @@ async function handlePayment(
       description: "Failed to initiate payment.",
       variant: "destructive",
     });
+    setIsLoading(false);
   }
 }
 
@@ -148,8 +151,7 @@ function TestPaymentForm() {
   const onPay = async () => {
       if(user && centre && test) {
         setIsLoading(true);
-        await handlePayment(totalFee, user, centre, test, toast, router);
-        setIsLoading(false);
+        await handlePayment(totalFee, user, centre, test, toast, router, setIsLoading);
       } else {
         toast({ title: "Booking details incomplete", variant: "destructive"})
       }
