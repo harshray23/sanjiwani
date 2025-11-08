@@ -39,7 +39,7 @@ function PaymentForm() {
   const consultationType = (searchParams.get('type') || 'clinic') as 'clinic' | 'video';
   
   const consultationFee = doctor?.consultationFee || 500;
-  const platformFee = consultationType === 'video' ? 100 : 50;
+  const platformFee = 0;
   const totalFee = consultationFee + platformFee;
 
   useEffect(() => {
