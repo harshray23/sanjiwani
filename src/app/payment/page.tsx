@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -80,8 +81,8 @@ function PaymentForm() {
   }, [doctorId, selectedSlot, router, toast]);
 
  const makePayment = async () => {
-    if (!user || !doctor) {
-      toast({ title: "Error", description: "User or Doctor details missing." });
+    if (!user || !doctor || !clinicId || !slot) {
+      toast({ title: "Error", description: "User, Doctor, Clinic, or Slot details are missing." });
       return;
     }
     setIsLoading(true);
@@ -99,7 +100,7 @@ function PaymentForm() {
       console.error("Failed to create order:", error);
       toast({
         title: "Payment Error",
-        description: "Could not initiate payment. Please try again.",
+        description: error.details || "Could not initiate payment. Please try again.",
         variant: "destructive",
       });
       setIsLoading(false);

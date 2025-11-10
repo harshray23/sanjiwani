@@ -72,7 +72,9 @@ export default function HospitalDetailPage() {
 
     const handleConfirmBooking = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+        const form = e.target as HTMLFormElement;
+        const patientName = (form.elements.namedItem('patientName') as HTMLInputElement).value;
+
         if (!user) {
             toast({
                 title: "Login Required",
@@ -94,15 +96,31 @@ export default function HospitalDetailPage() {
         setIsBooking(true);
         // Simulate booking process
         await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // In a real app, you would create a booking record in the database here
+        // and get a real booking ID.
+        const mockBooking = {
+            id: `bed-${Date.now()}`,
+            hospitalId: hospital?.id,
+            hospitalName: hospital?.name,
+            bedType: selectedBed,
+            patientName: patientName,
+            userId: user.uid,
+            reservedAt: new Date().toISOString()
+        };
+
+        // For mock purposes, we'll store it in session storage to pass to confirmation page
+        sessionStorage.setItem('bedBookingDetails', JSON.stringify(mockBooking));
+
         setIsBooking(false);
 
         toast({
             title: "Bed Reserved Successfully!",
-            description: `Your ${selectedBed} bed at ${hospital?.name} has been reserved for the next 2 hours.`,
+            description: `Redirecting to confirmation...`,
         });
 
-        // Redirect to a confirmation page or dashboard
-        router.push('/appointments');
+        // Redirect to a confirmation page
+        router.push(`/hospitals/confirmed?bookingId=${mockBooking.id}`);
     }
 
     if (isLoading) {
@@ -169,10 +187,10 @@ export default function HospitalDetailPage() {
                                 <div className="space-y-4">
                                     <Label className="font-semibold text-base">2. Patient Details</Label>
                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <Input placeholder="Patient's Full Name" required/>
-                                        <Input placeholder="Patient's Age" type="number" required/>
+                                        <Input name="patientName" placeholder="Patient's Full Name" required/>
+                                        <Input name="patientAge" placeholder="Patient's Age" type="number" required/>
                                      </div>
-                                     <Input placeholder="Contact Number" type="tel" required/>
+                                     <Input name="contactNumber" placeholder="Contact Number" type="tel" required/>
                                 </div>
                                 <Button type="submit" className="w-full h-12 text-lg" disabled={isBooking || !selectedBed}>
                                     {isBooking ? <Loader2 className="animate-spin mr-2"/> : <Check className="mr-2"/>}

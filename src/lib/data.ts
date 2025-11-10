@@ -254,6 +254,20 @@ export const createAppointment = async (
   type: 'clinic' | 'video'
 ): Promise<Appointment> => {
     console.log("MOCK: createAppointment called.", { patientId, doctorId, clinicId, slot, type });
+
+    const now = new Date();
+    const [hours, minutesPart] = slot.split(':');
+    const [minutes, period] = minutesPart.split(' ');
+    
+    let hour = parseInt(hours);
+    if (period === 'PM' && hour < 12) {
+      hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+      hour = 0;
+    }
+    
+    const scheduledAtDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minutes));
+
     const newAppointment: Appointment = {
       id: `appt-${Date.now()}`,
       patientId,
@@ -261,10 +275,10 @@ export const createAppointment = async (
       clinicId,
       type,
       status: 'confirmed',
-      scheduledAt: new Date().toISOString(),
+      scheduledAt: scheduledAtDate.toISOString(),
       createdAt: new Date().toISOString(),
-      patientName: 'Mock Patient',
-      date: new Date().toISOString()
+      patientName: 'Mock Patient', // You might want to fetch this from patientId
+      date: scheduledAtDate.toISOString()
     };
     mockAppointments.push(newAppointment);
     return Promise.resolve(newAppointment);
