@@ -113,12 +113,12 @@ function PaymentForm() {
       key: keyId,
       amount: totalFee * 100, // Amount in paise
       currency: "INR",
-      name: "Sanjiwani Health",
+      name: "Sanjeevani",
       description: `Appointment with Dr. ${doctor.name}`,
       image: "/logo.jpg", 
       order_id: orderId,
       handler: async function (response: any) {
-        
+        setIsLoading(true);
         // Verify payment on the backend
         const verificationRes = await fetch("/api/razorpay/verify", {
             method: "POST",
@@ -173,7 +173,7 @@ function PaymentForm() {
         contact: user.phone,
       },
       notes: {
-        address: "Sanjiwani Health Corporate Office",
+        address: "Sanjeevani Corporate Office",
       },
       theme: {
         color: "#f97316", // Orange color

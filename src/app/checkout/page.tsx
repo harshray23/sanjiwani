@@ -21,7 +21,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: "INR",
-        name: "Sanjiwani Health",
+        name: "Sanjeevani",
         description: "Subscription Payment",
         order_id: order.id,
         callback_url: "/api/paymentverify",

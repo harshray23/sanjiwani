@@ -1,8 +1,8 @@
-# Sanjiwani  
+# Sanjeevani  
 **Unified Digital Healthcare Platform**
 
 ## 🏥 Overview
-**Sanjiwani** is a full-stack healthcare management platform designed to bring **hospitals, patients, doctors, clinics, and diagnostic laboratories** under a single digital ecosystem.  
+**Sanjeevani** is a full-stack healthcare management platform designed to bring **hospitals, patients, doctors, clinics, and diagnostic laboratories** under a single digital ecosystem.  
 The platform aims to improve the efficiency, transparency, and accessibility of the medical system by enabling real-time availability, seamless appointment booking, and digital healthcare services.
 
 ## 🎯 Vision
@@ -51,3 +51,4 @@ To create a smart, transparent, and accessible healthcare system where patients 
 - `beds` – Bed availability and booking records  
 - `diagnostic_centers` – Lab information  
 - `tests` – Diagnostic test details and bookings  
+

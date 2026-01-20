@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
       <p className="text-sm text-gray-500 mb-8">Last Updated: November 2025</p>
 
       <p className="mb-4">
-        <strong>Sanjiwani Health</strong> values your privacy and is committed
+        <strong>Sanjeevani</strong> values your privacy and is committed
         to protecting your personal data. This Privacy Policy explains how we
         collect, use, and safeguard your information when you visit our website
         or use our services.
@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
         7. Changes to This Policy
       </h2>
       <p className="mb-4">
-        Sanjiwani Health reserves the right to modify this Privacy Policy at any
+        Sanjeevani reserves the right to modify this Privacy Policy at any
         time. Updates will be posted on this page with the revised effective
         date.
       </p>
@@ -85,10 +85,10 @@ export default function PrivacyPolicy() {
         If you have any questions or concerns about this Privacy Policy, please
         reach out at{' '}
         <a
-          href="mailto:healthsanjiwani@gmail.com"
+          href="mailto:healthsanjeevani@gmail.com"
           className="text-teal-600 underline"
         >
-          healthsanjiwani@gmail.com
+          healthsanjeevani@gmail.com
         </a>
         .
       </p>

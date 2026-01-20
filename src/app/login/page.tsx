@@ -334,7 +334,7 @@ export default function LoginPage() {
                 />
                  <div className="relative z-10 text-center">
                     <Logo className="h-24 w-24 text-accent mx-auto"/>
-                    <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjiwani</h2>
+                    <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjeevani</h2>
                     <p className="mt-2 text-center text-foreground/80">Your trusted partner in health. Find doctors, book appointments, and manage your care seamlessly.</p>
                 </div>
             </div>

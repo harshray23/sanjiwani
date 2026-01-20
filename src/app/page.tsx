@@ -217,7 +217,7 @@ export default function HomePage() {
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjiwani Health provides a reliable, centralized platform that connects patients to hospitals <span className="font-semibold text-green-600 dark:text-green-300">instantly</span>, showing verified availability to save precious time.</p>
+                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjeevani provides a reliable, centralized platform that connects patients to hospitals <span className="font-semibold text-green-600 dark:text-green-300">instantly</span>, showing verified availability to save precious time.</p>
               </CardContent>
             </Card>
           </div>

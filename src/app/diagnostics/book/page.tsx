@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -35,10 +36,11 @@ async function handlePayment(
       key: order.keyId,
       amount: order.amount,
       currency: order.currency,
-      name: "Sanjiwani Health",
+      name: "Sanjeevani",
       description: `Test booking for ${test.name} at ${centre.name}`,
       order_id: order.orderId,
       handler: async function (response: any) {
+        setIsLoading(true);
         const { data } = await axios.post('/api/razorpay/verify', {
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_order_id: response.razorpay_order_id,

@@ -10,7 +10,7 @@ export default function TermsAndConditions() {
       <p className="text-sm text-gray-500 mb-8">Last Updated: November 2025</p>
 
       <p className="mb-4">
-        Welcome to <strong>Sanjiwani Health</strong>. By accessing or using our
+        Welcome to <strong>Sanjeevani</strong>. By accessing or using our
         website, mobile app, and services, you agree to comply with and be bound
         by the following terms and conditions. Please read them carefully.
       </p>
@@ -28,7 +28,7 @@ export default function TermsAndConditions() {
         2. Services Overview
       </h2>
       <p className="mb-4">
-        Sanjiwani Health is a digital healthcare platform that connects users
+        Sanjeevani is a digital healthcare platform that connects users
         with healthcare professionals, offers appointment booking, online
         consultations, and health-related digital services.
       </p>
@@ -49,7 +49,7 @@ export default function TermsAndConditions() {
       </h2>
       <p className="mb-4">
         All content, logos, graphics, and materials on this website are the
-        property of Sanjiwani Health and protected under applicable intellectual
+        property of Sanjeevani and protected under applicable intellectual
         property laws. Unauthorized use is strictly prohibited.
       </p>
 
@@ -57,7 +57,7 @@ export default function TermsAndConditions() {
         5. Limitation of Liability
       </h2>
       <p className="mb-4">
-        Sanjiwani Health is not responsible for any direct, indirect, or
+        Sanjeevani is not responsible for any direct, indirect, or
         consequential damages resulting from the use or inability to use our
         services, including delays or disruptions caused by technical issues.
       </p>
@@ -78,10 +78,10 @@ export default function TermsAndConditions() {
         For any questions or concerns regarding these Terms, please contact us
         at{' '}
         <a
-          href="mailto:healthsanjiwani@gmail.com"
+          href="mailto:healthsanjeevani@gmail.com"
           className="text-teal-600 underline"
         >
-          healthsanjiwani@gmail.com
+          healthsanjeevani@gmail.com
         </a>
         .
       </p>
