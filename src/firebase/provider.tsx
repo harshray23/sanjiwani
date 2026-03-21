@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext } from 'react';
@@ -13,6 +12,7 @@ interface FirebaseContextProps {
   auth: Auth;
 }
 
+// Internal context, not exported to force use of hooks
 const FirebaseContext = createContext<FirebaseContextProps | undefined>(
   undefined
 );
@@ -33,12 +33,11 @@ export const FirebaseProvider: React.FC<{
 
 export const useFirebase = () => {
   const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useFirebase must be used within a FirebaseProvider');
-  }
-  return context;
+  // During SSR or initial hydration, context might be undefined.
+  // We return null instead of throwing to allow components to handle loading states.
+  return context || null;
 };
 
-export const useFirebaseApp = () => useFirebase().firebaseApp;
-export const useFirestore = () => useFirebase().firestore;
-export const useAuth = () => useFirebase().auth;
+export const useFirebaseApp = () => useFirebase()?.firebaseApp || null;
+export const useFirestore = () => useFirebase()?.firestore || null;
+export const useAuth = () => useFirebase()?.auth || null;

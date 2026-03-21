@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,8 +8,8 @@ import {
   GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
-import { useAuth, useFirestore } from '../provider';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { useAuth, useFirestore } from '@/firebase/provider';
+import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 
 export function useUser() {
@@ -21,11 +20,16 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Check for legacy mock user first
+    // 1. Check for legacy mock user first (for backwards compatibility during demo)
     const storedMockUser = localStorage.getItem('mockUser');
     if (storedMockUser) {
       setUser(JSON.parse(storedMockUser));
+      // We don't return here because we want to listen for real Auth too
+    }
+
+    if (!auth || !db) {
       setLoading(false);
+      return;
     }
 
     // 2. Listen for real Firebase Auth changes
@@ -52,17 +56,21 @@ export function useUser() {
               role: 'patient',
               verified: false,
               sanjeevaniPoints: 0,
-              createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 }
+              createdAt: serverTimestamp() as any
             };
-            setDoc(userDocRef, newUser);
+            // Note: Optimistic update
             setUser(newUser);
+            setDoc(userDocRef, newUser).catch(err => console.error("Error creating profile:", err));
           }
           setLoading(false);
         });
         
         return () => unsubDoc();
-      } else if (!storedMockUser) {
-        setUser(null);
+      } else {
+        // No firebase user
+        if (!localStorage.getItem('mockUser')) {
+          setUser(null);
+        }
         setLoading(false);
       }
     });
@@ -71,6 +79,7 @@ export function useUser() {
   }, [auth, db]);
 
   const loginWithGoogle = async () => {
+    if (!auth) return;
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
   };
@@ -78,7 +87,7 @@ export function useUser() {
   const logout = async () => {
     localStorage.removeItem('mockUser');
     window.dispatchEvent(new Event('authChange'));
-    return signOut(auth);
+    if (auth) return signOut(auth);
   };
 
   return { user, firebaseUser, loading, loginWithGoogle, logout };
