@@ -51,10 +51,6 @@ const mockAppointments: Appointment[] = [
 const mockHospitals: Hospital[] = [
     { id: 'hosp-1', name: 'Metro General Hospital', location: { address: '1 Hospital Plaza, Metro City' }, contact: '555-111-1111', rating: 4.8, specialties: ['Emergency', 'Cardiology', 'General Surgery'], emergencyAvailable: true, beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: '/hos1.jpg', dataAiHint: 'hospital building', onChainVerified: true, lastVerificationHash: '0xabc123...' },
     { id: 'hosp-2', name: 'Hope Childrens Hospital', location: { address: '2 Hope St, Kidville' }, contact: '555-222-2222', rating: 4.9, specialties: ['Pediatrics', 'Maternity', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, lastUpdated: new Date(Date.now() - 3600000).toISOString(), imageUrl: '/hos2.jpg', dataAiHint: 'children hospital', onChainVerified: true, lastVerificationHash: '0xdef456...' },
-    { id: 'hosp-3', name: 'City Heart Institute', location: { address: '12 Cardiology Blvd, Heart City' }, contact: '555-333-3333', rating: 4.7, specialties: ['Cardiology', 'Cardiovascular Surgery'], emergencyAvailable: true, beds: { general: { total: 80, available: 10 }, icu: { total: 15, available: 2 }, ventilator: { total: 8, available: 4 }, oxygen: { total: 30, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp3/600/400', dataAiHint: 'modern hospital', onChainVerified: true },
-    { id: 'hosp-4', name: 'Lakeside Multispeciality', location: { address: '45 Lake View, Waterfront' }, contact: '555-444-4444', rating: 4.6, specialties: ['Orthopedics', 'Neurology', 'Internal Medicine'], emergencyAvailable: false, beds: { general: { total: 120, available: 45 }, icu: { total: 10, available: 0 }, ventilator: { total: 5, available: 0 }, oxygen: { total: 40, available: 20 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp4/600/400', dataAiHint: 'glass building hospital', onChainVerified: false },
-    { id: 'hosp-5', name: 'St. Mary\'s Trauma Center', location: { address: '99 Main St, Central District' }, contact: '555-555-5555', rating: 4.5, specialties: ['Emergency', 'Trauma Surgery', 'Radiology'], emergencyAvailable: true, beds: { general: { total: 200, available: 10 }, icu: { total: 40, available: 1 }, ventilator: { total: 20, available: 0 }, oxygen: { total: 100, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp5/600/400', dataAiHint: 'emergency center', onChainVerified: true },
-    { id: 'hosp-6', name: 'Zenith Oncology Clinic', location: { address: '7 Cancer Care Rd, Hope Valley' }, contact: '555-666-6666', rating: 4.9, specialties: ['Oncology', 'Hematology', 'Radiotherapy'], emergencyAvailable: false, beds: { general: { total: 40, available: 12 }, icu: { total: 5, available: 3 }, ventilator: { total: 2, available: 1 }, oxygen: { total: 15, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp6/600/400', dataAiHint: 'cancer hospital', onChainVerified: true },
 ];
 
 const mockMedicalRecords: MedicalRecord[] = [
@@ -156,8 +152,6 @@ export const createBedReservation = async (userId: string, hospitalId: string, b
         hospital: hospital
     };
     mockAppointments.push(newAppointment);
-    // Add reward for verified contributor if they update hospital status?
-    // Let's assume a reservation doesn't count as a "Hospital Update" reward yet.
     return Promise.resolve(newAppointment);
 }
 
@@ -168,4 +162,199 @@ export const getUsers = async (): Promise<User[]> => {
 export const comprehensiveHospitalDepartments = [
     'Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics',
     'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
+];
+
+export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
+  return Promise.resolve(mockClinics.find(c => c.id === id));
+};
+
+export const getClinics = async (): Promise<ClinicDetails[]> => {
+  return Promise.resolve(mockClinics);
+};
+
+export const getDoctorById = async (id: string): Promise<DoctorProfile | null> => {
+  const doc = mockDoctors.find(d => d.id === id || d.userId === id);
+  if (!doc) return Promise.resolve(null);
+  return Promise.resolve(doc as unknown as DoctorProfile);
+};
+
+export const getDoctors = async (): Promise<DoctorDetails[]> => {
+  return Promise.resolve(mockDoctors);
+};
+
+export const searchClinicsAndDoctors = async (queryText: string) => {
+  const lowerCaseQuery = queryText.toLowerCase();
+  const doctors = mockDoctors.filter(d => 
+    d.name.toLowerCase().includes(lowerCaseQuery) || 
+    d.specialization.toLowerCase().includes(lowerCaseQuery)
+  );
+  const clinics = mockClinics.filter(c => 
+    c.name.toLowerCase().includes(lowerCaseQuery) || 
+    c.address.toLowerCase().includes(lowerCaseQuery)
+  );
+  return { doctors, clinics };
+};
+
+export const createAppointment = async (patientId: string, doctorId: string, clinicId: string, slot: string, type: 'clinic' | 'video'): Promise<Appointment> => {
+    const doctor = mockDoctors.find(d => d.id === doctorId);
+    const clinic = mockClinics.find(c => c.id === clinicId);
+    const patient = mockUsers.find(u => u.uid === patientId);
+
+    const newAppointment: Appointment = {
+        id: `appt-${Date.now()}`,
+        patientId,
+        doctorId,
+        clinicId,
+        type,
+        status: 'confirmed',
+        scheduledAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        date: new Date().toISOString(),
+        patient: patient,
+        doctor: doctor as unknown as DoctorProfile,
+        clinic: clinic as unknown as ClinicProfile,
+        patientName: patient?.name || 'Unknown'
+    };
+    mockAppointments.push(newAppointment);
+    return Promise.resolve(newAppointment);
+}
+
+export const updateUserProfile = async (uid: string, data: Partial<User>) => {
+    const index = mockUsers.findIndex(u => u.uid === uid);
+    if (index !== -1) {
+        mockUsers[index] = { ...mockUsers[index], ...data };
+    }
+    return Promise.resolve();
+}
+
+export const updateDoctorProfile = async (uid: string, data: any) => {
+    const index = mockDoctors.findIndex(d => d.userId === uid);
+    if (index !== -1) {
+        mockDoctors[index] = { ...mockDoctors[index], ...data };
+    }
+    return Promise.resolve();
+}
+
+export const updateUserVerification = async (uid: string, verified: boolean) => {
+    const index = mockUsers.findIndex(u => u.uid === uid);
+    if (index !== -1) {
+        mockUsers[index].verified = verified;
+    }
+    return Promise.resolve();
+}
+
+// Diagnostics Centres Mock Data
+const mockDiagnosticsCentres: DiagnosticsCentre[] = [
+    {
+        id: 'diag-1',
+        name: 'City Diagnostics & Imaging',
+        location: 'Wellness City, Sector 4',
+        contact: { phone: '555-444-3333', email: 'info@citydiag.com' },
+        rating: 4.7,
+        imageUrl: '/diag1.jpg',
+        dataAiHint: 'diagnostic lab',
+        tests: [
+            { id: 'test-1', name: 'Full Body Checkup', price: 2500, category: 'Health Packages' },
+            { id: 'test-2', name: 'COVID-19 RT-PCR', price: 800, category: 'Microbiology' },
+            { id: 'test-3', name: 'Lipid Profile', price: 600, category: 'Biochemistry' },
+        ],
+        pathologists: [
+            { id: 'path-1', name: 'Dr. Anita Desai', qualifications: ['MD Pathology'], imageUrl: 'https://i.pravatar.cc/150?u=path1' }
+        ]
+    },
+    {
+        id: 'diag-2',
+        name: 'Prime Scan Centre',
+        location: 'Remedy Town, Main Road',
+        contact: { phone: '555-111-2222', email: 'booking@primescan.com' },
+        rating: 4.5,
+        imageUrl: '/diag2.jpg',
+        dataAiHint: 'mri scan room',
+        tests: [
+            { id: 'test-4', name: 'MRI Brain', price: 5000, category: 'Radiology' },
+            { id: 'test-5', name: 'Chest X-Ray', price: 500, category: 'Radiology' },
+        ],
+        pathologists: [
+            { id: 'path-2', name: 'Dr. Samuel K.', qualifications: ['MD Radiology'], imageUrl: 'https://i.pravatar.cc/150?u=path2' }
+        ]
+    }
+];
+
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+    return Promise.resolve(mockDiagnosticsCentres);
+}
+
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
+    return Promise.resolve(mockDiagnosticsCentres.find(c => c.id === id));
+}
+
+export const getTestById = async (id: string): Promise<DiagnosticTest | undefined> => {
+    for (const centre of mockDiagnosticsCentres) {
+        const test = centre.tests.find(t => t.id === id);
+        if (test) return test;
+    }
+    return undefined;
+}
+
+const mockTestAppointments: TestAppointment[] = [];
+
+export const createTestAppointment = async (patientId: string, centreId: string, testId: string): Promise<TestAppointment> => {
+    const centre = mockDiagnosticsCentres.find(c => c.id === centreId);
+    const test = centre?.tests.find(t => t.id === testId);
+    const patient = mockUsers.find(u => u.uid === patientId);
+
+    const newAppt: TestAppointment = {
+        id: `test-appt-${Date.now()}`,
+        patientId,
+        patientName: patient?.name || 'Unknown',
+        centreId,
+        test: test!,
+        date: new Date().toISOString(),
+        time: '10:00 AM',
+        status: 'Scheduled'
+    };
+    mockTestAppointments.push(newAppt);
+    
+    // Also push to unified appointments
+    mockAppointments.push({
+        id: newAppt.id,
+        patientId,
+        patientName: newAppt.patientName,
+        centreId,
+        type: 'test',
+        testName: test!.name,
+        status: 'confirmed',
+        scheduledAt: newAppt.date,
+        createdAt: new Date().toISOString(),
+        date: newAppt.date,
+        centre: centre
+    });
+
+    return Promise.resolve(newAppt);
+}
+
+export const getTestAppointmentById = async (id: string): Promise<TestAppointment | undefined> => {
+    return Promise.resolve(mockTestAppointments.find(a => a.id === id));
+}
+
+export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
+    return Promise.resolve(mockTestAppointments.filter(a => a.centreId === centreId));
+}
+
+export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
+    return Promise.resolve(mockAppointments.filter(a => a.clinicId === clinicId));
+}
+
+export const getDiagnosticsCentresByTest = async (testName: string): Promise<DiagnosticsCentre[]> => {
+    return Promise.resolve(mockDiagnosticsCentres.filter(c => c.tests.some(t => t.name.toLowerCase().includes(testName.toLowerCase()))));
+}
+
+export const comprehensiveTests: DiagnosticTest[] = [
+    { id: 'test-1', name: 'Full Body Checkup', price: 2500, category: 'Health Packages' },
+    { id: 'test-2', name: 'COVID-19 RT-PCR', price: 800, category: 'Microbiology' },
+    { id: 'test-3', name: 'Lipid Profile', price: 600, category: 'Biochemistry' },
+    { id: 'test-4', name: 'MRI Brain', price: 5000, category: 'Radiology' },
+    { id: 'test-5', name: 'Chest X-Ray', price: 500, category: 'Radiology' },
+    { id: 'test-6', name: 'Diabetes Screening', price: 400, category: 'Biochemistry' },
+    { id: 'test-7', name: 'CBC (Blood Count)', price: 300, category: 'Hematology' }
 ];
