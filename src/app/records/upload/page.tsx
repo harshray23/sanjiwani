@@ -8,17 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft, AlertTriangle } from "lucide-react";
-import { anchorDataToAvalanche, isMetaMaskInstalled } from '@/lib/blockchain';
+import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft, Info } from "lucide-react";
 import { createVerifiedRecord } from '@/lib/data';
 import type { User } from '@/lib/types';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function UploadRecordPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [hasMetaMask, setHasMetaMask] = useState(true);
   const [formData, setForm] = useState({
     patientName: '',
     age: '',
@@ -31,7 +29,6 @@ export default function UploadRecordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setHasMetaMask(isMetaMaskInstalled());
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) setUser(JSON.parse(storedUser));
     else router.push('/login');
@@ -45,25 +42,16 @@ export default function UploadRecordPage() {
       return;
     }
 
-    if (!isMetaMaskInstalled()) {
-        toast({
-            title: "MetaMask Required",
-            description: "Please install the MetaMask extension to verify your records on-chain.",
-            variant: "destructive"
-        });
-        setHasMetaMask(false);
-        return;
-    }
-
     setIsVerifying(true);
     try {
-      // Step 1: Create cryptographic hash of metadata + file name
+      // Step 1: Create cryptographic hash metadata
       const metadata = { ...formData, fileName: file.name };
       
-      // Step 2: Anchor to Avalanche
-      const anchorResult = await anchorDataToAvalanche(metadata);
+      // Step 2: Anchor to Avalanche via Server API (Zero Friction)
+      const response = await axios.post('/api/anchor', { data: metadata });
+      const anchorResult = response.data;
       
-      // Step 3: Save to Data Layer (simulated Firestore)
+      // Step 3: Save to Data Layer
       await createVerifiedRecord(
         user.uid,
         {
@@ -72,7 +60,7 @@ export default function UploadRecordPage() {
           hospitalName: formData.hospitalName,
           testType: formData.testType,
           testDate: formData.testDate,
-          fileUrl: URL.createObjectURL(file) // Mock URL
+          fileUrl: URL.createObjectURL(file) // Mock URL for demo
         },
         anchorResult.hash,
         anchorResult.txId
@@ -80,14 +68,14 @@ export default function UploadRecordPage() {
 
       toast({
         title: "Record Verified & Stored!",
-        description: "Your report has been anchored to Avalanche Fuji.",
+        description: "Your report has been anchored to Avalanche Fuji automatically.",
       });
 
       router.push('/records');
     } catch (error: any) {
       toast({
         title: "Verification Failed",
-        description: error.message || "Ensure MetaMask is on Fuji Testnet.",
+        description: error.response?.data?.error || "On-chain verification encountered an error. Simulating for demo.",
         variant: "destructive"
       });
     } finally {
@@ -97,29 +85,12 @@ export default function UploadRecordPage() {
 
   return (
     <div className="py-12 w-full max-w-2xl mx-auto">
-      {!hasMetaMask && (
-        <Card className="mb-8 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
-            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-6 w-6 text-orange-600" />
-                    <div>
-                        <p className="font-bold text-orange-800 dark:text-orange-400">MetaMask Extension Missing</p>
-                        <p className="text-sm text-orange-700 dark:text-orange-500">You need MetaMask to verify medical records on the blockchain.</p>
-                    </div>
-                </div>
-                <Button asChild variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white">
-                    <Link href="https://metamask.io/download/" target="_blank">Install MetaMask</Link>
-                </Button>
-            </CardContent>
-        </Card>
-      )}
-
       <div className="mb-6">
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/records"><ArrowLeft className="mr-2 h-4 w-4"/> Back to Records</Link>
         </Button>
         <h1 className="text-3xl font-bold font-headline text-accent">Upload Medical Record</h1>
-        <p className="text-muted-foreground">Prove the authenticity of your medical reports using blockchain verification.</p>
+        <p className="text-muted-foreground">Immutable audit trail of your health history, powered by Avalanche.</p>
       </div>
 
       <Card className="shadow-xl">
@@ -129,7 +100,7 @@ export default function UploadRecordPage() {
               <FileUp className="text-primary"/>
               Record Details
             </CardTitle>
-            <CardDescription>All details below will be hashed and anchored to the Avalanche C-Chain.</CardDescription>
+            <CardDescription>We automatically anchor a hash of these details to the blockchain for permanent verification.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -171,12 +142,15 @@ export default function UploadRecordPage() {
               {isVerifying ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin"/> Anchoring to Avalanche...</>
               ) : (
-                <><ShieldCheck className="mr-2 h-5 w-5"/> Submit & Verify on Blockchain</>
+                <><ShieldCheck className="mr-2 h-5 w-5"/> Submit & Secure on Blockchain</>
               )}
             </Button>
-            <p className="text-xs text-center text-muted-foreground italic">
-              <strong>Why this matters:</strong> Once anchored, this record's fingerprint is permanent. No one can silently alter your medical history.
-            </p>
+            <div className="bg-primary/5 p-3 rounded-lg flex gap-3 items-start">
+                <Info className="h-5 w-5 text-primary shrink-0 mt-0.5"/>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                    <strong>Zero-Friction Trust:</strong> No MetaMask required. Our system handles the blockchain interaction for you, ensuring your records are tamper-proof without the complexity of crypto wallets.
+                </p>
+            </div>
           </CardFooter>
         </form>
       </Card>
