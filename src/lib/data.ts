@@ -37,7 +37,7 @@ export const mockHospitals: Hospital[] = [
       beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, 
       bloodInventory: { 'A+': 12, 'A-': 4, 'B+': 1, 'B-': 0, 'O+': 0, 'O-': 0, 'AB+': 5, 'AB-': 2 },
       lastUpdated: new Date().toISOString(), 
-      imageUrl: '/hos1.jpg', 
+      imageUrl: 'https://picsum.photos/seed/hosp1/600/400', 
       dataAiHint: 'hospital building', 
       onChainVerified: true, 
       lastVerificationHash: '0xabc123...' 
@@ -53,7 +53,7 @@ export const mockHospitals: Hospital[] = [
       beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, 
       bloodInventory: { 'A+': 8, 'A-': 2, 'B+': 15, 'B-': 5, 'O+': 10, 'O-': 3, 'AB+': 4, 'AB-': 1 },
       lastUpdated: new Date(Date.now() - 3600000).toISOString(), 
-      imageUrl: '/hos2.jpg', 
+      imageUrl: 'https://picsum.photos/seed/hosp2/600/400', 
       dataAiHint: 'modern hospital', 
       onChainVerified: true, 
       lastVerificationHash: '0xdef456...' 
@@ -66,17 +66,31 @@ export const mockDonors: Donor[] = [
   { id: 'd3', name: 'Priya Singh', bloodGroup: 'O-', location: { lat: 28.58, lng: 77.25, address: 'Lajpat Nagar' }, available: true, lastDonated: '2023-12-20' },
 ];
 
+export const comprehensiveTests: DiagnosticTest[] = [
+  { id: 't1', name: 'Complete Blood Count (CBC)', price: 500, category: 'Hematology' },
+  { id: 't2', name: 'Lipid Profile', price: 800, category: 'Biochemistry' },
+  { id: 't3', name: 'HbA1c', price: 600, category: 'Diabetology' },
+  { id: 't4', name: 'Liver Function Test (LFT)', price: 1200, category: 'Biochemistry' },
+  { id: 't5', name: 'Thyroid Profile (T3, T4, TSH)', price: 900, category: 'Endocrinology' },
+];
+
 const mockDoctors: DoctorDetails[] = [
-  { id: 'doctor-1', userId: 'doctor-1', name: 'Dr. Emily Carter', email: 'emily.carter@test.com', specialization: 'Cardiology', licenseNo: 'DOC-L12345', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "02:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: '/doctor11.jpg', phone: '111-222-3333', clinicName: 'Sunnyvale Clinic' },
+  { id: 'doctor-1', userId: 'doctor-1', name: 'Dr. Emily Carter', email: 'emily.carter@test.com', specialization: 'Cardiology', licenseNo: 'DOC-L12345', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "02:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor1', phone: '111-222-3333', clinicName: 'Sunnyvale Clinic' },
+  { id: 'doctor-2', userId: 'doctor-2', name: 'Dr. James Wilson', email: 'james.wilson@test.com', specialization: 'Pediatrics', licenseNo: 'DOC-L67890', consultationFee: 600, availability: ["09:00 AM", "12:00 PM", "04:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doctor2', phone: '222-333-4444', clinicName: 'Sunnyvale Clinic' },
 ];
 
 const mockClinics: ClinicDetails[] = [
-  { id: 'clinic-1', userId: 'clinic-1', name: 'Sunnyvale Clinic', address: '123 Health St, Wellness City', licenseNo: 'CLN-A123', verified: true, imageUrl: '/clinic1.jpg', dataAiHint: 'clinic reception', doctors: [mockDoctors[0]] },
+  { id: 'clinic-1', userId: 'clinic-1', name: 'Sunnyvale Clinic', address: '123 Health St, Wellness City', licenseNo: 'CLN-A123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic1/400/200', dataAiHint: 'clinic reception', doctors: [mockDoctors[0], mockDoctors[1]] },
+];
+
+const mockDiagnosticsCentres: DiagnosticsCentre[] = [
+  { id: 'dc-1', name: 'Precision Diagnostics', location: '45 Lab Road, Metro City', contact: { phone: '111-222-3333', email: 'info@precision.com' }, rating: 4.7, imageUrl: 'https://picsum.photos/seed/lab1/400/200', dataAiHint: 'laboratory', tests: comprehensiveTests, pathologists: [] },
 ];
 
 const mockAppointments: Appointment[] = [];
 const mockMedicalRecords: MedicalRecord[] = [];
 const mockRewardActivities: RewardActivity[] = [];
+const mockTestAppointments: TestAppointment[] = [];
 
 // --- DATA FETCHING & MUTATION ---
 
@@ -133,13 +147,43 @@ export const getClinics = async (): Promise<ClinicDetails[]> => {
   return Promise.resolve(mockClinics);
 };
 
+export const getClinicById = async (id: string): Promise<ClinicProfile | null> => {
+  const clinic = mockClinics.find(c => c.id === id);
+  if (!clinic) return null;
+  return { ...clinic, uid: clinic.userId, email: 'clinic@test.com', phone: '123456789', role: 'clinic' } as unknown as ClinicProfile;
+};
+
 export const getDoctorById = async (id: string): Promise<DoctorProfile | null> => {
   const doc = mockDoctors.find(d => d.id === id || d.userId === id);
-  return Promise.resolve(doc as unknown as DoctorProfile || null);
+  if (!doc) return null;
+  return { ...doc, uid: doc.userId, role: 'doctor' } as unknown as DoctorProfile;
+};
+
+export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
+  const lowerCaseQuery = queryText.toLowerCase();
+  if (!lowerCaseQuery) return { clinics: mockClinics, doctors: mockDoctors };
+  
+  const filteredClinics = mockClinics.filter(c => c.name.toLowerCase().includes(lowerCaseQuery) || c.address.toLowerCase().includes(lowerCaseQuery));
+  const filteredDoctors = mockDoctors.filter(d => d.name.toLowerCase().includes(lowerCaseQuery) || d.specialization.toLowerCase().includes(lowerCaseQuery));
+  
+  return { clinics: filteredClinics, doctors: filteredDoctors };
 };
 
 export const createAppointment = async (patientId: string, doctorId: string, clinicId: string, slot: string, type: any): Promise<Appointment> => {
-    const newAppointment: Appointment = { id: `appt-${Date.now()}`, patientId, doctorId, clinicId, type, status: 'confirmed', scheduledAt: new Date().toISOString(), createdAt: new Date().toISOString(), date: new Date().toISOString(), patientName: 'User' };
+    const doctor = mockDoctors.find(d => d.id === doctorId);
+    const newAppointment: Appointment = { 
+      id: `appt-${Date.now()}`, 
+      patientId, 
+      doctorId, 
+      clinicId, 
+      type, 
+      status: 'confirmed', 
+      scheduledAt: new Date().toISOString(), 
+      createdAt: new Date().toISOString(), 
+      date: new Date().toISOString(), 
+      patientName: 'User',
+      doctor: doctor as any
+    };
     mockAppointments.push(newAppointment);
     return Promise.resolve(newAppointment);
 }
@@ -156,9 +200,65 @@ export const updateAppointmentWithProof = async (id: string, onChainHash: string
     }
 }
 
+export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
+  return Promise.resolve(mockDiagnosticsCentres);
+};
+
+export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | null> => {
+  return Promise.resolve(mockDiagnosticsCentres.find(dc => dc.id === id) || null);
+};
+
+export const getTestById = async (id: string): Promise<DiagnosticTest | null> => {
+  return Promise.resolve(comprehensiveTests.find(t => t.id === id) || null);
+};
+
+export const createTestAppointment = async (patientId: string, centreId: string, testId: string): Promise<TestAppointment> => {
+  const test = comprehensiveTests.find(t => t.id === testId);
+  const newAppointment: TestAppointment = {
+    id: `t-appt-${Date.now()}`,
+    patientId,
+    patientName: 'User',
+    centreId,
+    test: test!,
+    date: new Date().toISOString(),
+    time: "10:00 AM",
+    status: 'Scheduled'
+  };
+  mockTestAppointments.push(newAppointment);
+  return Promise.resolve(newAppointment);
+};
+
+export const getTestAppointmentById = async (id: string): Promise<TestAppointment | null> => {
+  return Promise.resolve(mockTestAppointments.find(ta => ta.id === id) || null);
+};
+
+export const createBedReservation = async (patientId: string, hospitalId: string, bedType: string, patientName: string): Promise<Appointment> => {
+  const hospital = mockHospitals.find(h => h.id === hospitalId);
+  const newReservation: Appointment = {
+    id: `bed-${Date.now()}`,
+    patientId,
+    patientName,
+    hospitalId,
+    type: 'bed',
+    bedType,
+    status: 'confirmed',
+    scheduledAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    date: new Date().toISOString(),
+    hospital: hospital
+  };
+  mockAppointments.push(newReservation);
+  return Promise.resolve(newReservation);
+};
+
 export const comprehensiveHospitalDepartments = [
     'Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics',
     'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
+];
+
+export const comprehensiveSpecialties = [
+    'Cardiology', 'Pediatrics', 'General Physician', 'Dermatology', 
+    'Neurology', 'Orthopedics', 'Gynecology', 'Dentistry', 'Ophthalmology'
 ];
 
 export const updateHospitalBloodInventory = async (hospitalId: string, inventory: any) => {
@@ -172,4 +272,38 @@ export const updateHospitalBloodInventory = async (hospitalId: string, inventory
 
 export const getDonorsByGroup = async (bloodGroup: string): Promise<Donor[]> => {
   return Promise.resolve(mockDonors.filter(d => d.bloodGroup === bloodGroup && d.available));
+};
+
+export const getUsers = async (): Promise<User[]> => {
+  return Promise.resolve(mockUsers);
+};
+
+export const getUserProfile = async (uid: string): Promise<User | null> => {
+  return Promise.resolve(mockUsers.find(u => u.uid === uid) || null);
+};
+
+export const updateUserProfile = async (uid: string, data: any): Promise<void> => {
+  const index = mockUsers.findIndex(u => u.uid === uid);
+  if (index !== -1) mockUsers[index] = { ...mockUsers[index], ...data };
+  return Promise.resolve();
+};
+
+export const updateDoctorProfile = async (uid: string, data: any): Promise<void> => {
+  const index = mockDoctors.findIndex(d => d.userId === uid);
+  if (index !== -1) mockDoctors[index] = { ...mockDoctors[index], ...data };
+  return Promise.resolve();
+};
+
+export const updateUserVerification = async (uid: string, status: boolean): Promise<void> => {
+  const index = mockUsers.findIndex(u => u.uid === uid);
+  if (index !== -1) mockUsers[index].verified = status;
+  return Promise.resolve();
+};
+
+export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
+  return Promise.resolve(mockAppointments.filter(a => a.clinicId === clinicId));
+};
+
+export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
+  return Promise.resolve(mockTestAppointments.filter(a => a.centreId === centreId));
 };
