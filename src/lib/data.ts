@@ -70,16 +70,22 @@ export const getMedicalRecords = async (userId: string): Promise<MedicalRecord[]
 };
 
 export const createVerifiedRecord = async (userId: string, record: Omit<MedicalRecord, 'id' | 'userId' | 'onChainHash' | 'txHash' | 'verified' | 'createdAt'>, hash: string, txHash: string): Promise<MedicalRecord> => {
+  // Ensure a truly unique ID by appending a random string to the timestamp
+  const uniqueId = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  
   const newRecord: MedicalRecord = {
     ...record,
-    id: `rec-${Date.now()}`,
+    id: uniqueId,
     userId,
     onChainHash: hash,
     txHash,
     verified: true,
     createdAt: new Date().toISOString()
   };
+  
+  // Explicitly push to the array to maintain history
   mockMedicalRecords.push(newRecord);
+  
   await rewardUser(userId, 'Record Upload', 10, txHash);
   return Promise.resolve(newRecord);
 };
