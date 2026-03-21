@@ -68,14 +68,19 @@ export interface Appointment {
   doctorId?: string;
   clinicId?: string;
   centreId?: string;
-  type: 'clinic' | 'video' | 'test';
+  hospitalId?: string;
+  type: 'clinic' | 'video' | 'test' | 'bed';
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   scheduledAt: any;
   createdAt: any;
-  date: any; // for clinic dashboard
+  date: any; // for display
+  bedType?: string;
+  testName?: string;
   patient?: User;
   doctor?: DoctorProfile;
   clinic?: ClinicProfile;
+  hospital?: Hospital;
+  centre?: DiagnosticsCentre;
 }
 
 export interface Report {

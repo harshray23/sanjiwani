@@ -1,5 +1,4 @@
 
-
 import type {
   User,
   DoctorProfile,
@@ -87,8 +86,6 @@ const mockClinics: ClinicDetails[] = [
 const mockAppointments: Appointment[] = [
   { id: 'appt-1', patientId: 'patient-1', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'clinic', status: 'confirmed', scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[0] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
   { id: 'appt-2', patientId: 'patient-1', doctorId: 'doctor-3', clinicId: 'clinic-1', type: 'clinic', status: 'completed', scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[2] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-  { id: 'appt-3', patientId: 'patient-2', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'clinic', status: 'confirmed', scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patientName: 'Jane Doe', doctor: mockDoctors[0] as unknown as DoctorProfile, date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() },
-  { id: 'appt-4', patientId: 'patient-3', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'video', status: 'confirmed', scheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patientName: 'Peter Pan', doctor: mockDoctors[0] as unknown as DoctorProfile, date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString() },
 ];
 
 export const comprehensiveTests: DiagnosticTest[] = [
@@ -116,55 +113,22 @@ const mockDiagnostics: DiagnosticsCentre[] = [
   { id: 'diag-1', name: 'City Diagnostics', location: '789 Test Ave, Lab City', contact: { phone: '555-444-3333', email: 'contact@citydiag.com' }, rating: 4.7, imageUrl: '/c1.jpg', dataAiHint: 'lab equipment', tests: comprehensiveTests.slice(0,4), pathologists: [mockPathologists[0]] },
   { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: '/c2.jpg', dataAiHint: 'mri scanner', tests: [comprehensiveTests[5], comprehensiveTests[6]], pathologists: [mockPathologists[1]] },
   { id: 'diag-3', name: 'Care Scans & Labs', location: '202 Health Blvd, Wellness City', contact: { phone: '555-666-7777', email: 'support@carescan.com' }, rating: 4.8, imageUrl: '/c3.jpg', dataAiHint: 'blood test', tests: comprehensiveTests, pathologists: [mockPathologists[0], mockPathologists[2]] },
-  { id: 'diag-4', name: 'The Burdwan Medical Centre', location: 'KHOSEBAGAN P.O.:, 23, RAMKRISHNA ROAD, Burdwan', contact: { phone: 'N/A', email: 'contact@burdwanmed.com' }, rating: 4.9, imageUrl: '/c4.jpg', dataAiHint: 'diagnostic center', tests: comprehensiveTests.slice(4,8), pathologists: [] },
-  { id: 'diag-5', name: 'Mitali Memorial Polyclinic', location: 'A9X/5S, Kalyani', contact: { phone: '094322 52863', email: 'contact@mitalipolyclinic.com' }, rating: 2.7, imageUrl: '/c5.jpg', dataAiHint: 'polyclinic building', tests: comprehensiveTests.slice(2,7), pathologists: [] },
-  { id: 'diag-6', name: 'Kalyani Diagnostic Centre', location: 'XFC6+PJ9, 46, Road, near Vidyasagar Mancha JN, Kalyani', contact: { phone: 'N/A', email: 'contact@kalyanidiag.com' }, rating: 3.9, imageUrl: '/c15.jpg', dataAiHint: 'diagnostic center', tests: comprehensiveTests.slice(0,5), pathologists: [] },
-  { id: 'diag-7', name: 'Suraksha Diagnostic Centre Kalyani', location: 'Central Park, B10/178, opposite SBI, Kalyani', contact: { phone: 'N/A', email: 'contact@surakshakalyani.com' }, rating: 5.0, imageUrl: '/c6.jpg', dataAiHint: 'modern clinic', tests: comprehensiveTests.slice(3,10), pathologists: [] },
-  { id: 'diag-8', name: 'Lupin Diagnostics', location: 'D-19/15(S), (Opp Kalyani Spinning Mill Kalyani, P.O...', contact: { phone: 'N/A', email: 'contact@lupindiag.com' }, rating: 5.0, imageUrl: '/c7.jpg', dataAiHint: 'pathology lab', tests: comprehensiveTests.slice(1,8), pathologists: [] },
-  { id: 'diag-9', name: 'Suraksha Diagnostics - Asansol', location: '9/190, Anand Appartment, G.T. Road, Asansol', contact: { phone: 'N/A', email: 'contact@surakshaasansol.com' }, rating: 4.6, imageUrl: '/c9.jpg', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0,6), pathologists: [] },
-  { id: 'diag-10', name: 'Avishkar Diagnostic, Asansol', location: 'Ground Floor, Sarada Enclave, Grand Trunk Rd, Asansol', contact: { phone: 'N/A', email: 'contact@avishkarasansol.com' }, rating: 2.7, imageUrl: '/c8.jpg', dataAiHint: 'testing centre', tests: comprehensiveTests.slice(5,10), pathologists: [] },
-  { id: 'diag-11', name: 'Asansol Diagnostics', location: 'Burnpur Rd, Asansol', contact: { phone: '081455 55593', email: 'contact@asansoldiag.com' }, rating: 4.0, imageUrl: '/c9.jpg', dataAiHint: 'diagnostic imaging', tests: comprehensiveTests.slice(2,8), pathologists: [] },
-  { id: 'diag-12', name: 'SONOSCAN', location: '44, CIT Rd, near Ladies Park, Kolkata', contact: { phone: '09775... (Number Incomplete)', email: 'contact@sonoscan.com' }, rating: 4.7, imageUrl: '/c10.jpg', dataAiHint: 'ultrasound scanner', tests: comprehensiveTests.slice(6, 9), pathologists: [] },
-  { id: 'diag-13', name: 'Vijaya Diagnostic Centre', location: 'D No. 173, 4/5, VIP Rd, beside O2 Hotel, Kolkata', contact: { phone: 'N/A', email: 'contact@vijayadiag.com' }, rating: 4.6, imageUrl: '/c11.jpg', dataAiHint: 'diagnostic clinic', tests: comprehensiveTests.slice(0, 7), pathologists: [] },
-  { id: 'diag-14', name: 'Aloka Medicare Pvt Ltd', location: '114B, Sarat Bose Rd, Kolkata', contact: { phone: '078900 78966', email: 'contact@alokamedicare.com' }, rating: 4.9, imageUrl: '/c12.jpg', dataAiHint: 'modern laboratory', tests: comprehensiveTests, pathologists: [] },
-  { id: 'diag-15', name: 'Burdwan Scan Centre Pvt. Ltd.', location: '7, R.B. Ghosh Rd, Burdwan', contact: { phone: '0342 255 0829', email: 'contact@burdwanscan.com' }, rating: 4.5, imageUrl: '/c13.jpg', dataAiHint: 'medical laboratory', tests: comprehensiveTests.slice(0,8), pathologists: [] },
-  { id: 'diag-16', name: 'Agilus Diagnostics - RB Ghosh Road', location: 'Shop No 30, Khoshbagan, R.B.Ghosh Rd, Burdwan', contact: { phone: '08071 3...', email: 'contact@agilusburdwan.com' }, rating: 4.9, imageUrl: '/c14.jpg', dataAiHint: 'diagnostic lab', tests: comprehensiveTests.slice(1,6), pathologists: [] },
 ];
 
 const mockHospitals: Hospital[] = [
     { id: 'hosp-1', name: 'Metro General Hospital', location: { address: '1 Hospital Plaza, Metro City' }, contact: '555-111-1111', rating: 4.8, specialties: ['Emergency', 'Cardiology', 'General Surgery'], emergencyAvailable: true, beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: '/hos1.jpg', dataAiHint: 'hospital building' },
     { id: 'hosp-2', name: 'Hope Childrens Hospital', location: { address: '2 Hope St, Kidville' }, contact: '555-222-2222', rating: 4.9, specialties: ['Pediatrics', 'Maternity', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, lastUpdated: new Date(Date.now() - 3600000).toISOString(), imageUrl: '/hos2.jpg', dataAiHint: 'children hospital' },
-    { id: 'hosp-3', name: 'HLG Memorial Hospital', location: { address: 'Sen Raliegh Rd, Asansol' }, contact: '08101880088', rating: 4.2, specialties: ['General Medicine', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 75, available: 18 }, icu: { total: 15, available: 2 }, ventilator: { total: 8, available: 1 }, oxygen: { total: 30, available: 12 } }, lastUpdated: new Date(Date.now() - 2 * 3600000).toISOString(), imageUrl: '/hos3.jpg', dataAiHint: 'hospital exterior' },
-    { id: 'hosp-4', name: 'Healthworld Hospitals, Asansol', location: { address: 'PW3X+M72, Asansol' }, contact: 'N/A', rating: 4.0, specialties: ['Multispeciality', 'Orthopedics'], emergencyAvailable: true, beds: { general: { total: 120, available: 30 }, icu: { total: 25, available: 5 }, ventilator: { total: 12, available: 3 }, oxygen: { total: 60, available: 22 } }, lastUpdated: new Date(Date.now() - 4 * 3600000).toISOString(), imageUrl: '/hos4.jpg', dataAiHint: 'modern hospital' },
-    { id: 'hosp-5', name: 'BLESS HOSPITAL', location: { address: 'Jyoti Nagar, Shakespeare Sarani, Asansol' }, contact: 'N/A', rating: 4.3, specialties: ['General Surgery', 'Gynaecology'], emergencyAvailable: true, beds: { general: { total: 60, available: 10 }, icu: { total: 10, available: 4 }, ventilator: { total: 5, available: 0 }, oxygen: { total: 25, available: 7 } }, lastUpdated: new Date(Date.now() - 8 * 3600000).toISOString(), imageUrl: '/hos5.jpg', dataAiHint: 'clinic building' },
-    { id: 'hosp-6', name: 'Sharanya Multispeciality Hospital', location: { address: 'Gopalnagar, West Bengal' }, contact: '094756 41904', rating: 4.3, specialties: ['General Hospital'], emergencyAvailable: true, beds: { general: { total: 50, available: 12 }, icu: { total: 8, available: 3 }, ventilator: { total: 4, available: 1 }, oxygen: { total: 20, available: 9 } }, lastUpdated: new Date(Date.now() - 1 * 3600000).toISOString(), imageUrl: '/hos6.jpg', dataAiHint: 'hospital building' },
-    { id: 'hosp-7', name: 'Teresa Memorial Hospital', location: { address: 'NH 2, beside Anamoy Superspeciality Hospital, Burdwan' }, contact: '074777 97607', rating: 4.4, specialties: ['Hospital'], emergencyAvailable: true, beds: { general: { total: 65, available: 22 }, icu: { total: 12, available: 5 }, ventilator: { total: 6, available: 2 }, oxygen: { total: 30, available: 15 } }, lastUpdated: new Date(Date.now() - 2 * 3600000).toISOString(), imageUrl: '/hos7.jpg', dataAiHint: 'modern hospital' },
-    { id: 'hosp-8', name: 'AHAD MULTISPECIALITY HOSPITAL', location: { address: 'Bardhaman, West Bengal' }, contact: '075869 56333', rating: 4.2, specialties: ['Hospital'], emergencyAvailable: true, beds: { general: { total: 80, available: 15 }, icu: { total: 15, available: 4 }, ventilator: { total: 7, available: 3 }, oxygen: { total: 40, available: 18 } }, lastUpdated: new Date(Date.now() - 3 * 3600000).toISOString(), imageUrl: '/hos8.jpg', dataAiHint: 'hospital exterior' },
-    { id: 'hosp-9', name: 'Rainbow Specialty Hospital', location: { address: 'B- 13/23 (CA), Near Central Park, Kalyani' }, contact: 'N/A', rating: 4.5, specialties: ['Specialty'], emergencyAvailable: true, beds: { general: { total: 90, available: 18 }, icu: { total: 18, available: 3 }, ventilator: { total: 9, available: 2 }, oxygen: { total: 45, available: 10 } }, lastUpdated: new Date(Date.now() - 1 * 3600000).toISOString(), imageUrl: '/hos9.jpg', dataAiHint: 'hospital building' },
-    { id: 'hosp-10', name: 'S.N.R Carnival Hospital', location: { address: 'Barrackpore - Kalyani Expy, Kalyani' }, contact: '091239 17718', rating: 4.7, specialties: ['Carnival'], emergencyAvailable: true, beds: { general: { total: 70, available: 14 }, icu: { total: 14, available: 4 }, ventilator: { total: 7, available: 1 }, oxygen: { total: 35, available: 11 } }, lastUpdated: new Date(Date.now() - 2 * 3600000).toISOString(), imageUrl: '/hos10.jpg', dataAiHint: 'modern hospital' },
-    { id: 'hosp-11', name: 'Jaymala Memorial Hospital', location: { address: 'A-1/3, Kalyani' }, contact: '082964 63015', rating: 3.7, specialties: ['Private Hospital'], emergencyAvailable: true, beds: { general: { total: 55, available: 11 }, icu: { total: 11, available: 2 }, ventilator: { total: 5, available: 1 }, oxygen: { total: 27, available: 8 } }, lastUpdated: new Date(Date.now() - 3 * 3600000).toISOString(), imageUrl: '/hos11.jpg', dataAiHint: 'clinic building' },
-    { id: 'hosp-12', name: 'Apollo Multispeciality Hospitals, Kolkata', location: { address: '58, Canal Circular Rd, Kolkata' }, contact: '080 6297 2764', rating: 4.7, specialties: ['Multispeciality'], emergencyAvailable: true, beds: { general: { total: 200, available: 40 }, icu: { total: 40, available: 8 }, ventilator: { total: 20, available: 3 }, oxygen: { total: 100, available: 25 } }, lastUpdated: new Date(Date.now() - 1 * 3600000).toISOString(), imageUrl: '/hos12.jpg', dataAiHint: 'city hospital' },
-    { id: 'hosp-13', name: 'Desun Hospital', location: { address: 'Desun More, 720, Eastern Metropolitan Bypass, Kolkata' }, contact: 'N/A', rating: 4.6, specialties: ['Private Hospital', 'Cardiology'], emergencyAvailable: true, beds: { general: { total: 300, available: 50 }, icu: { total: 75, available: 10 }, ventilator: { total: 40, available: 5 }, oxygen: { total: 150, available: 30 } }, lastUpdated: new Date(Date.now() - 2 * 3600000).toISOString(), imageUrl: '/hos13.jpg', dataAiHint: 'hospital building' },
-    { id: 'hosp-14', name: 'Manipal Hospitals Broadway', location: { address: 'JC-16 & 17, No. 3A, Broadway Rd, opp. to Stadium, Kolkata' }, contact: 'N/A', rating: 4.7, specialties: ['Private Hospital', 'Oncology'], emergencyAvailable: true, beds: { general: { total: 180, available: 35 }, icu: { total: 35, available: 7 }, ventilator: { total: 15, available: 2 }, oxygen: { total: 90, available: 18 } }, lastUpdated: new Date(Date.now() - 3 * 3600000).toISOString(), imageUrl: '/hos14.jpg', dataAiHint: 'modern hospital' },
-    { id: 'hosp-15', name: 'Manipal Hospital Vijayawada', location: { address: '12-570, near Kanakadurga Varadhi' }, contact: '1800 102 4647', rating: 4.8, specialties: ['Hospital'], emergencyAvailable: true, beds: { general: { total: 150, available: 30 }, icu: { total: 25, available: 5 }, ventilator: { total: 15, available: 2 }, oxygen: { total: 75, available: 15 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-15/600/400', dataAiHint: 'large hospital' },
-    { id: 'hosp-16', name: 'Harini Hospitals - Best Gastroenterologist', location: { address: '#29, 14-51, Prakasam Rd, near Pushpa Hotel Cent...' }, contact: 'N/A', rating: 4.9, specialties: ['Gastroenterology'], emergencyAvailable: true, beds: { general: { total: 40, available: 8 }, icu: { total: 10, available: 2 }, ventilator: { total: 5, available: 1 }, oxygen: { total: 20, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp-16/600/400', dataAiHint: 'specialty hospital' },
 ];
 
 const mockTestAppointments: TestAppointment[] = [
     { id: 't-appt-1', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-1', test: comprehensiveTests[0], date: new Date().toISOString(), time: '10:00 AM', status: 'Report Ready', reportUrl: '#' },
-    { id: 't-appt-2', patientId: 'patient-2', patientName: 'Jane Doe', centreId: 'diag-1', test: comprehensiveTests[1], date: new Date().toISOString(), time: '11:00 AM', status: 'Completed' },
-    { id: 't-appt-3', patientId: 'patient-3', patientName: 'Peter Pan', centreId: 'diag-3', test: comprehensiveTests[2], date: new Date(Date.now() + 86400000).toISOString(), time: '09:00 AM', status: 'Scheduled' },
-    { id: 't-appt-4', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-3', test: comprehensiveTests[7], date: new Date(Date.now() + 2 * 86400000).toISOString(), time: '12:00 PM', status: 'Scheduled' },
-]
+];
 
 // --- USER MANAGEMENT ---
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
-    console.log(`MOCK: getUserProfile for uid: ${uid}`);
     const user = mockUsers.find(u => u.uid === uid);
     if (user) return Promise.resolve(user);
-
-    // If not in users, check if it's a doctor (special case)
     const doctor = mockDoctors.find(d => d.userId === uid);
     if(doctor) {
         return Promise.resolve({
@@ -181,23 +145,18 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 };
 
 export const createUserInFirestore = async (user: FirebaseUser, role: Role, baseData: any, detailsData: any): Promise<any> => {
-    console.log("MOCK: createUserInFirestore called. No database action taken.", { user, role, baseData, detailsData });
-    // This function will now just simulate a successful creation without writing to any database.
     return Promise.resolve({ ...baseData, ...detailsData });
 }
 
 export const updateUserProfile = async (uid: string, data: Partial<User>): Promise<void> => {
-    console.log("MOCK: updateUserProfile called. No database action taken.", { uid, data });
     return Promise.resolve();
 };
 
 export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetails>): Promise<void> => {
-    console.log("MOCK: updateDoctorProfile called. No database action taken.", { uid, data });
     return Promise.resolve();
 };
 
 export const updateUserVerification = async (uid: string, verified: boolean): Promise<void> => {
-    console.log("MOCK: updateUserVerification called. No database action taken.", { uid, verified });
     const user = mockUsers.find(u => u.uid === uid);
     if(user) user.verified = verified;
     const doctor = mockDoctors.find(d => d.id === uid);
@@ -209,35 +168,23 @@ export const updateUserVerification = async (uid: string, verified: boolean): Pr
 // --- DATA FETCHING ---
 
 export const getDoctors = async (): Promise<DoctorDetails[]> => {
-    console.log("MOCK: getDoctors called.");
     return Promise.resolve(mockDoctors);
 };
 
 export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
-    console.log(`MOCK: getDoctorById for id: ${id}`);
     const doctorDetails = mockDoctors.find(d => d.id === id);
     if (!doctorDetails) return undefined;
-    
-    // Find the base user info, but don't fail if it's missing (it might be a doctor-only signup)
     const baseUser = mockUsers.find(u => u.uid === id);
-
-    return Promise.resolve({
-        ...baseUser, // Spread base user (could be undefined, which is fine)
-        uid: id, // Ensure uid is from the doctor's id
-        ...doctorDetails // Spread all details from the doctor record
-    } as DoctorProfile);
+    return Promise.resolve({ ...baseUser, uid: id, ...doctorDetails } as DoctorProfile);
 };
 
 export const getClinics = async (): Promise<ClinicDetails[]> => {
-    console.log("MOCK: getClinics called.");
     return Promise.resolve(mockClinics);
 };
 
 export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
-    console.log(`MOCK: getClinicById for id: ${id}`);
     const clinic = mockClinics.find(c => c.id === id);
     if (clinic) {
-        // Hydrate doctor details within the clinic
         clinic.doctors = clinic.doctors.map(doc => mockDoctors.find(d => d.id === (doc as any).id) || doc);
     }
     return Promise.resolve(clinic);
@@ -253,19 +200,12 @@ export const createAppointment = async (
   slot: string,
   type: 'clinic' | 'video'
 ): Promise<Appointment> => {
-    console.log("MOCK: createAppointment called.", { patientId, doctorId, clinicId, slot, type });
-
     const now = new Date();
     const [hours, minutesPart] = slot.split(':');
     const [minutes, period] = minutesPart.split(' ');
-    
     let hour = parseInt(hours);
-    if (period === 'PM' && hour < 12) {
-      hour += 12;
-    } else if (period === 'AM' && hour === 12) {
-      hour = 0;
-    }
-    
+    if (period === 'PM' && hour < 12) hour += 12;
+    else if (period === 'AM' && hour === 12) hour = 0;
     const scheduledAtDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minutes));
 
     const newAppointment: Appointment = {
@@ -277,58 +217,85 @@ export const createAppointment = async (
       status: 'confirmed',
       scheduledAt: scheduledAtDate.toISOString(),
       createdAt: new Date().toISOString(),
-      patientName: 'Mock Patient', // You might want to fetch this from patientId
+      patientName: 'Mock Patient',
       date: scheduledAtDate.toISOString()
     };
     mockAppointments.push(newAppointment);
     return Promise.resolve(newAppointment);
 };
 
+export const createBedReservation = async (
+    userId: string,
+    hospitalId: string,
+    bedType: string,
+    patientName: string
+): Promise<Appointment> => {
+    const hospital = mockHospitals.find(h => h.id === hospitalId);
+    const newAppointment: Appointment = {
+        id: `bed-${Date.now()}`,
+        patientId: userId,
+        patientName: patientName,
+        hospitalId: hospitalId,
+        type: 'bed',
+        status: 'confirmed',
+        bedType: bedType,
+        scheduledAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        date: new Date().toISOString(),
+        hospital: hospital
+    };
+    mockAppointments.push(newAppointment);
+    return Promise.resolve(newAppointment);
+}
+
 export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
-    console.log(`MOCK: searchClinicsAndDoctors for query: ${queryText}`);
-    
-    if (!queryText) {
-      return Promise.resolve({ clinics: mockClinics, doctors: mockDoctors });
-    }
-
+    if (!queryText) return Promise.resolve({ clinics: mockClinics, doctors: mockDoctors });
     const lowerCaseQuery = queryText.toLowerCase();
-
-    const filteredClinics = mockClinics.filter(clinic =>
-        clinic.name.toLowerCase().includes(lowerCaseQuery) ||
-        (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery))
-    );
-
-    const filteredDoctors = mockDoctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(lowerCaseQuery) ||
-        (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery))
-    );
-
+    const filteredClinics = mockClinics.filter(clinic => clinic.name.toLowerCase().includes(lowerCaseQuery) || (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery)));
+    const filteredDoctors = mockDoctors.filter(doctor => doctor.name.toLowerCase().includes(lowerCaseQuery) || (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery)));
     return Promise.resolve({ clinics: filteredClinics, doctors: filteredDoctors });
 };
 
 export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
-  console.log(`MOCK: getAppointmentsForUser for patientId: ${patientId}`);
-  const appointments = mockAppointments.filter(app => app.patientId === patientId);
-  for (const app of appointments) {
+  // Consolidate consultation appointments and test appointments
+  const consultations = mockAppointments.filter(app => app.patientId === patientId);
+  
+  for (const app of consultations) {
       if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
       if (app.clinicId && !app.clinic) app.clinic = await getClinicById(app.clinicId) as ClinicProfile;
+      if (app.hospitalId && !app.hospital) app.hospital = await getHospitalById(app.hospitalId);
   }
-  return Promise.resolve(appointments);
+
+  // Also pull in Diagnostic Test appointments
+  const tests = mockTestAppointments.filter(t => t.patientId === patientId).map(t => ({
+      id: t.id,
+      patientId: t.patientId,
+      patientName: t.patientName,
+      centreId: t.centreId,
+      type: 'test' as const,
+      status: (t.status === 'Scheduled' ? 'confirmed' : 'completed') as any,
+      scheduledAt: t.date,
+      createdAt: t.date,
+      date: t.date,
+      testName: t.test.name,
+      testPrice: t.test.price
+  } as unknown as Appointment));
+
+  return Promise.resolve([...consultations, ...tests].sort((a,b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()));
 };
 
 export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
-   console.log(`MOCK: getAppointmentById for id: ${id}`);
    const appointment = mockAppointments.find(app => app.id === id);
    if(appointment) {
        if (appointment.doctorId && !appointment.doctor) appointment.doctor = mockDoctors.find(d => d.id === appointment.doctorId) as unknown as DoctorProfile;
        if (appointment.clinicId && !appointment.clinic) appointment.clinic = mockClinics.find(c => c.id === appointment.clinicId) as unknown as ClinicProfile;
+       if (appointment.hospitalId && !appointment.hospital) appointment.hospital = await getHospitalById(appointment.hospitalId);
        if (appointment.patientId && !appointment.patient) appointment.patient = mockUsers.find(u => u.uid === appointment.patientId);
    }
    return Promise.resolve(appointment);
 };
 
 export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
-  console.log(`MOCK: getAppointmentsForClinic for clinicId: ${clinicId}`);
   const appointments = mockAppointments.filter(app => app.clinicId === clinicId);
    for (const app of appointments) {
       if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
@@ -337,7 +304,6 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 };
 
 export const getUsers = async (): Promise<User[]> => {
-    console.log("MOCK: getUsers called.");
     return Promise.resolve(mockUsers);
 }
 
@@ -357,17 +323,14 @@ export const comprehensiveHospitalDepartments = [
 
 
 export const getHospitals = async (): Promise<Hospital[]> => {
-    console.log("MOCK: getHospitals called.");
     return Promise.resolve(mockHospitals);
 }
 
 export const getHospitalById = async (id: string): Promise<Hospital | undefined> => {
-  console.log(`MOCK: getHospitalById for id: ${id}`);
   return Promise.resolve(mockHospitals.find(h => h.id === id));
 };
 
 export const searchHospitals = async (queryText: string): Promise<Hospital[]> => {
-  console.log(`MOCK: searchHospitals for query: ${queryText}`);
   if (!queryText) return Promise.resolve(mockHospitals);
   const lowerCaseQuery = queryText.toLowerCase();
   return Promise.resolve(mockHospitals.filter(h =>
@@ -378,17 +341,14 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
 };
 
 export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
-    console.log("MOCK: getDiagnosticsCentres called.");
     return Promise.resolve(mockDiagnostics);
 };
 
 export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
-    console.log(`MOCK: getDiagnosticsCentreById for id: ${id}`);
     return Promise.resolve(mockDiagnostics.find(d => d.id === id));
 };
 
 export const getTestById = async (id: string): Promise<DiagnosticTest | undefined> => {
-    console.log(`MOCK: getTestById for id: ${id}`);
     return Promise.resolve(comprehensiveTests.find(t => t.id === id));
 }
 
@@ -418,7 +378,6 @@ export const createTestAppointment = async (
 }
 
 export const getTestAppointmentById = async (id: string): Promise<TestAppointment | undefined> => {
-   console.log(`MOCK: getTestAppointmentById for id: ${id}`);
    const appointment = mockTestAppointments.find(app => app.id === id);
    if(appointment) {
        if (!appointment.test) {
@@ -431,6 +390,5 @@ export const getTestAppointmentById = async (id: string): Promise<TestAppointmen
 
 
 export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
-    console.log(`MOCK: getTestAppointmentsForCentre for centreId: ${centreId}`);
     return Promise.resolve(mockTestAppointments.filter(app => app.centreId === centreId));
 };

@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getHospitalById } from '@/lib/data';
+import { getHospitalById, createBedReservation } from '@/lib/data';
 import type { Hospital, User } from '@/lib/types';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
@@ -94,33 +94,38 @@ export default function HospitalDetailPage() {
         }
 
         setIsBooking(true);
-        // Simulate booking process
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Simulate processing time
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // In a real app, you would create a booking record in the database here
-        // and get a real booking ID.
-        const mockBooking = {
-            id: `bed-${Date.now()}`,
-            hospitalId: hospital?.id,
-            hospitalName: hospital?.name,
-            bedType: selectedBed,
-            patientName: patientName,
-            userId: user.uid,
-            reservedAt: new Date().toISOString()
-        };
+        try {
+            // ACTUALLY CREATE THE RESERVATION IN DATA LAYER
+            const reservation = await createBedReservation(
+                user.uid,
+                hospital!.id,
+                selectedBed,
+                patientName
+            );
 
-        // For mock purposes, we'll store it in session storage to pass to confirmation page
-        sessionStorage.setItem('bedBookingDetails', JSON.stringify(mockBooking));
+            // Store in session storage for the confirmation page ONLY (visual display)
+            sessionStorage.setItem('bedBookingDetails', JSON.stringify({
+                id: reservation.id,
+                hospitalName: hospital?.name,
+                bedType: selectedBed,
+                patientName: patientName,
+                reservedAt: reservation.createdAt
+            }));
 
-        setIsBooking(false);
+            toast({
+                title: "Bed Reserved Successfully!",
+                description: `Your record has been added to 'My Appointments'.`,
+            });
 
-        toast({
-            title: "Bed Reserved Successfully!",
-            description: `Redirecting to confirmation...`,
-        });
-
-        // Redirect to a confirmation page
-        router.push(`/hospitals/confirmed?bookingId=${mockBooking.id}`);
+            router.push(`/hospitals/confirmed?bookingId=${reservation.id}`);
+        } catch (err) {
+            toast({ title: "Reservation Failed", variant: "destructive" });
+        } finally {
+            setIsBooking(false);
+        }
     }
 
     if (isLoading) {
@@ -131,7 +136,7 @@ export default function HospitalDetailPage() {
         return (
             <Card className="w-full max-w-2xl mx-auto text-center p-8">
                 <CardTitle className="text-2xl text-destructive">Hospital Not Found</CardTitle>
-                <CardDescription>The hospital you are looking for does not exist or could not be loaded.</CardDescription>
+                <CardDescription>The hospital you are looking for does not exist.</CardDescription>
                 <Button asChild className="mt-4"><a href="/hospitals">Go Back</a></Button>
             </Card>
         );
@@ -229,5 +234,3 @@ export default function HospitalDetailPage() {
         </div>
     );
 }
-
-    
