@@ -3,23 +3,34 @@ import { ethers } from 'ethers';
 
 /**
  * Sanjeevani Trust Layer Service
- * Interacts with Avalanche C-Chain to verify healthcare data.
+ * Interacts with Avalanche C-Chain Fuji Testnet to verify healthcare data.
  */
 
-// Mock ABI for the DataProof contract
+// ABI generated from Step 2
 const DATA_PROOF_ABI = [
-  "function storeHash(string memory hash) public",
-  "function getRecord(uint256 timestamp) public view returns (string memory)"
+  "function storeHash(string memory _hash) public",
+  "function getRecords() public view returns (tuple(string hash, uint256 timestamp)[])",
+  "event DataStored(address indexed sender, string hash, uint256 timestamp)"
 ];
 
-// Placeholder for Avalanche C-Chain Contract Address
-const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
+// This address should be updated after you run: npx hardhat run scripts/deploy.js --network fuji
+// Defaulting to a placeholder or a pre-deployed instance for the demo
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 export async function connectWallet() {
   if (typeof window !== 'undefined' && (window as any).ethereum) {
     try {
+      // Request account access
+      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
       const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
+      
+      // Verify if we are on Avalanche Fuji (Chain ID: 43113)
+      const network = await provider.getNetwork();
+      if (network.chainId !== 43113n) {
+        alert("Please switch your MetaMask network to Avalanche Fuji Testnet!");
+        return null;
+      }
+
       return { provider, address: accounts[0] };
     } catch (error) {
       console.error("Wallet connection failed", error);
@@ -29,32 +40,41 @@ export async function connectWallet() {
   return null;
 }
 
+/**
+ * Anchors data to Avalanche C-Chain
+ * This version uses the user's MetaMask for a visible, live demo experience.
+ */
 export async function anchorDataToAvalanche(data: any) {
   const connection = await connectWallet();
-  if (!connection) throw new Error("No crypto wallet detected. Please install MetaMask.");
+  if (!connection) throw new Error("No crypto wallet detected or incorrect network. Please install MetaMask and use Avalanche Fuji.");
 
-  // Step 1: Create a hash of the current data state
+  // Step 1: Create a hash of the current data state (tamper-proof fingerprint)
   const dataString = JSON.stringify(data);
   const hash = ethers.keccak256(ethers.toUtf8Bytes(dataString));
 
-  // Step 2: Interact with Avalanche (Simulated for Prototype)
-  console.log(`[Avalanche Trust Layer] Anchoring hash: ${hash}`);
+  console.log(`[Avalanche Trust Layer] Prepared hash for anchoring: ${hash}`);
   
-  // In a real implementation:
-  // const signer = await connection.provider.getSigner();
-  // const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, signer);
-  // const tx = await contract.storeHash(hash);
-  // await tx.wait();
+  try {
+    const signer = await connection.provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, signer);
 
-  // Simulate transaction delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
+    // Step 2: Trigger live transaction
+    const tx = await contract.storeHash(hash);
+    
+    // Step 3: Wait for block confirmation (Wait 1 block for Fuji speed)
+    const receipt = await tx.wait();
 
-  return {
-    hash,
-    timestamp: new Date().toISOString(),
-    network: "Avalanche C-Chain",
-    txId: "0x" + Math.random().toString(16).slice(2, 66) // Mock Tx ID
-  };
+    return {
+      hash,
+      timestamp: new Date().toISOString(),
+      network: "Avalanche Fuji C-Chain",
+      txId: receipt.hash,
+      verified: true
+    };
+  } catch (error: any) {
+    console.error("Blockchain transaction failed:", error);
+    throw new Error(error.reason || error.message || "Blockchain transaction failed.");
+  }
 }
 
 export function getVerificationBadge(hash: string | null) {
