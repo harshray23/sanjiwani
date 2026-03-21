@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical, Shield, Star, Microscope } from "lucide-react";
+import { Stethoscope, Search, Phone, ArrowRight, Video, ScrollText, CalendarCheck, Hospital, BedDouble, HeartPulse, Building, Lightbulb, Target, Eye, Rocket, CheckCircle, FlaskConical, Shield, Star, Microscope, ShieldCheck, Coins } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
@@ -17,7 +17,7 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [images.length]);
@@ -32,12 +32,12 @@ export default function HomePage() {
   
   const stats = [
       { value: '14', label: 'Verified Doctors', icon: <Shield className="h-8 w-8 text-primary"/>},
-      { value: '14', label: 'Partner Hospitals', icon: <Hospital className="h-8 w-8 text-primary"/>},
+      { value: 'Avalanche', label: 'Trust Layer', icon: <ShieldCheck className="h-8 w-8 text-primary"/>},
       { value: '200+', label: 'Appointments Daily', icon: <CalendarCheck className="h-8 w-8 text-primary"/>},
       { value: '4.8/5', label: 'Patient Rating', icon: <Star className="h-8 w-8 text-primary fill-primary"/>},
   ]
 
-  const quote = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), karma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
+  const quote = "We don’t use blockchain for storing healthcare data—that would be inefficient. Instead, we use Avalanche as a verification layer to ensure that critical hospital data like ICU beds and blood availability cannot be tampered with. This creates trust in a system where misinformation can cost lives.";
 
   return (
     <div className="w-full space-y-20">
@@ -57,10 +57,10 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 p-4 animate-fade-in-up">
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
-              Your Health Journey <br/> <span className="text-orange-400">Starts Here</span>
+              Your Health Journey <br/> <span className="text-orange-400">Powered by Trust</span>
             </h1>
             <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-              Find trusted doctors, book appointments instantly, and get real-time hospital availability. Quality healthcare is just a click away.
+              Find trusted doctors and real-time hospital availability verified on the **Avalanche Blockchain**. Quality healthcare, anchored in truth.
             </p>
              <div className="max-w-2xl mx-auto bg-white/90 dark:bg-card/80 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-2xl transition-all duration-300 hover:shadow-primary/40 hover:shadow-2xl hover:-translate-y-1">
                 <form action="/search" method="GET" className="relative">
@@ -91,29 +91,35 @@ export default function HomePage() {
                     <Link href="/search">Book Appointment</Link>
                 </Button>
                  <Button asChild size="lg" variant="outline" className="h-12 text-base px-10 bg-white/90 text-primary border-primary hover:bg-white hover:text-primary">
-                    <Link href="/emergency">Find Emergency Care</Link>
+                    <Link href="/emergency">Emergency Verification</Link>
                 </Button>
             </div>
         </div>
       </section>
 
-      {/* Quick Access Section */}
-      <section id="quick-access" className="py-16 text-center animate-fade-in-up">
+      {/* Trust & Incentives Section */}
+      <section id="blockchain-layer" className="py-16 text-center animate-fade-in-up">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">Quick Access to Healthcare</h2>
-          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">Everything you need for your health journey in one place.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {quickAccessLinks.map((link) => (
-              <Link href={link.href} key={link.label}>
-                <Card className={`text-left p-6 feature-card ${link.hoverClass}`}>
-                    <div className="bg-muted p-4 rounded-lg inline-block mb-4">
-                        {link.icon}
-                    </div>
-                    <h3 className="text-xl font-bold font-headline mb-2">{link.label}</h3>
-                    <p className="text-muted-foreground">{link.description}</p>
-                </Card>
-              </Link>
-            ))}
+          <div className="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-bold mb-4">Verification Layer</div>
+          <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">The Avalanche Trust Protocol</h2>
+          <p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
+            We use Avalanche to create a tamper-proof audit trail of healthcare data. In high-stakes medical emergencies, misinformation is fatal.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Card className="p-8 text-left border-accent/20 bg-accent/5">
+              <ShieldCheck className="h-12 w-12 text-accent mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Immutable Verification</h3>
+              <p className="text-muted-foreground">
+                When a hospital updates its ICU bed count, a cryptographic hash is anchored to Avalanche. This ensures that availability data cannot be faked or retroactively changed.
+              </p>
+            </Card>
+            <Card className="p-8 text-left border-primary/20 bg-primary/5">
+              <Coins className="h-12 w-12 text-primary mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Incentive Rewards</h3>
+              <p className="text-muted-foreground">
+                Patients and community contributors who provide real-time updates on facility status or donate blood are rewarded with Sanjeevani Points, powered by Avalanche smart contracts.
+              </p>
+            </Card>
           </div>
         </div>
       </section>
@@ -122,10 +128,10 @@ export default function HomePage() {
        <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
         <div className="absolute flex">
             <p className="animate-marquee py-2 text-primary">
-                <span className="mx-16">{quote}</span>
+                <span className="mx-16 uppercase tracking-widest">{quote}</span>
             </p>
              <p className="animate-marquee py-2 text-primary" aria-hidden="true">
-                <span className="mx-16">{quote}</span>
+                <span className="mx-16 uppercase tracking-widest">{quote}</span>
             </p>
         </div>
       </div>
@@ -134,9 +140,8 @@ export default function HomePage() {
       <section id="how-it-works" className="py-16 text-center animate-fade-in-up">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-accent">How It Works</h2>
-          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">A seamless experience designed to get you the right care, right when you need it. In just three simple steps.</p>
+          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">A seamless experience designed to get you the right care, right when you need it.</p>
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 items-start">
-             {/* Dashed lines for desktop */}
             <div className="hidden md:block absolute top-1/2 left-0 w-full h-px -translate-y-1/2">
                 <svg width="100%" height="100%" className="overflow-visible">
                     <line x1="0" y1="0" x2="100%" y2="0" strokeWidth="2" strokeDasharray="8 8" className="stroke-primary/50" />
@@ -148,21 +153,21 @@ export default function HomePage() {
                 <Search className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-bold mb-2 font-headline">1. Find Your Care</h3>
-              <p className="text-muted-foreground">Search for hospitals, clinics, or doctors. Filter by specialty and real-time availability.</p>
+              <p className="text-muted-foreground">Search for hospitals or doctors. Filter by specialty and Avalanche-verified availability.</p>
             </div>
              <div className="relative flex flex-col items-center">
               <div className="bg-primary/10 text-primary rounded-full p-5 mb-4 border-4 border-background shadow-lg z-10">
-                <CalendarCheck className="h-10 w-10" />
+                <ShieldCheck className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-2 font-headline">2. Book Instantly</h3>
-              <p className="text-muted-foreground">Select a time slot or reserve a hospital bed with a secure, one-time online payment.</p>
+              <h3 className="text-xl font-bold mb-2 font-headline">2. Trust the Proof</h3>
+              <p className="text-muted-foreground">Check the blockchain anchor to confirm the data is current and tamper-proof.</p>
             </div>
              <div className="relative flex flex-col items-center">
               <div className="bg-primary/10 text-primary rounded-full p-5 mb-4 border-4 border-background shadow-lg z-10">
-                <HeartPulse className="h-10 w-10" />
+                <Coins className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-2 font-headline">3. Manage & Recover</h3>
-              <p className="text-muted-foreground">Access e-prescriptions, set medicine reminders, and get cashback on your visit.</p>
+              <h3 className="text-xl font-bold mb-2 font-headline">3. Verify & Earn</h3>
+              <p className="text-muted-foreground">Visit the clinic and earn community rewards for verifying the resource availability.</p>
             </div>
           </div>
         </div>
@@ -177,63 +182,16 @@ export default function HomePage() {
                   <Eye className="h-8 w-8" />
                 </div>
               <h2 className="text-3xl font-bold font-headline text-accent mb-4">Our Vision</h2>
-              <p className="text-lg text-muted-foreground">To create a transparent and accessible healthcare ecosystem where every individual has the power to find and receive the best possible care, instantly and without hassle.</p>
+              <p className="text-lg text-muted-foreground">To create a transparent and accessible healthcare ecosystem where decentralized trust empowers individuals to find care without misinformation.</p>
             </div>
              <div className="text-center md:text-left">
               <div className="inline-block bg-accent/10 text-accent p-3 rounded-full mb-4">
                   <Rocket className="h-8 w-8" />
                 </div>
               <h2 className="text-3xl font-bold font-headline text-accent mb-4">Our Mission</h2>
-              <p className="text-lg text-muted-foreground">To bridge the critical information gap in healthcare by providing a real-time, reliable platform that connects patients with hospitals and doctors, saving lives and reducing stress.</p>
+              <p className="text-lg text-muted-foreground">To bridge the critical information gap in healthcare using the Avalanche blockchain as a verification layer, saving lives through data integrity.</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Problem vs Solution Section */}
-      <section id="problem-solution" className="py-16 animate-fade-in-up">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 p-6 md:p-8 text-center md:text-left">
-              <CardHeader className="p-0">
-                <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
-                  <div className="bg-red-100 dark:bg-red-900/50 p-3 rounded-full">
-                    <Lightbulb className="h-10 w-10 text-red-500" />
-                  </div>
-                  <CardTitle className="text-2xl font-headline text-red-700 dark:text-red-400">The Problem</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <p className="text-base md:text-lg text-red-800 dark:text-red-300">Patients and their families face immense stress struggling to find real-time information on hospital bed and doctor availability during emergencies.</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 p-6 md:p-8 text-center md:text-left">
-              <CardHeader className="p-0">
-                <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 mb-4">
-                   <div className="bg-green-100 dark:bg-green-900/50 p-3 rounded-full">
-                    <Target className="h-10 w-10 text-green-500" />
-                  </div>
-                  <CardTitle className="text-2xl font-headline text-green-700 dark:text-green-400">Our Solution</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <p className="text-base md:text-lg text-green-800 dark:text-green-300">Sanjeevani provides a reliable, centralized platform that connects patients to hospitals <span className="font-semibold text-green-600 dark:text-green-300">instantly</span>, showing verified availability to save precious time.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Sanskrit Quote Section */}
-      <section className="py-16 animate-fade-in-up">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-3xl mx-auto p-8 text-center shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:shadow-accent/20">
-            <p className="text-2xl lg:text-3xl font-serif text-accent leading-loose">
-              धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम्।
-              <br />
-              स्वस्थस्य कुशलं श्रेयः स्वास्थ्यं सर्वार्थसाधनम्॥
-            </p>
-          </Card>
         </div>
       </section>
 
@@ -247,7 +205,7 @@ export default function HomePage() {
             Get In Touch
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Have questions, feedback, or need assistance? Our team is ready to help. We are also looking for pilot hospitals and partners to join us in transforming healthcare.
+            Ready to integrate Avalanche into your medical facility? Our team is looking for pilot hospitals to join our decentralized trust network.
           </p>
           <Button asChild size="lg" className="shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             <Link href="/contact">Contact Us</Link>

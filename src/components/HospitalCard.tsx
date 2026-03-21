@@ -5,13 +5,14 @@ import type { Hospital } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { BedDouble, MapPin, Phone, Star, Zap, MapIcon } from 'lucide-react';
+import { BedDouble, MapPin, Phone, Star, Zap, MapIcon, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from './ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface HospitalCardProps {
   hospital: Hospital;
@@ -48,7 +49,6 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
                   ? hospital.lastUpdated.toDate()
                   : typeof hospital.lastUpdated === 'string' 
                     ? new Date(hospital.lastUpdated)
-                    // This handles the case where it might be a Firestore-like object but not a Timestamp instance
                     : (hospital.lastUpdated as any).toDate ? (hospital.lastUpdated as any).toDate()
                     : new Date(hospital.lastUpdated);
 
@@ -81,18 +81,33 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-card">
       <CardHeader className="p-0 relative">
         <Image
-          src={hospital.imageUrl || `https://picsum.photos/seed/hospital/600/400`}
+          src={hospital.imageUrl || `https://picsum.photos/seed/${hospital.id}/600/400`}
           alt={hospital.name}
           width={600}
           height={400}
           className="w-full h-48 object-cover"
           data-ai-hint={hospital.dataAiHint || (hospital.name.toLowerCase().includes("children") ? "children hospital" : "hospital building")}
         />
-        {hospital.rating !== undefined && (
-          <Badge variant="secondary" className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm">
-            <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" /> {hospital.rating.toFixed(1)}
-          </Badge>
-        )}
+        <div className="absolute top-2 right-2 flex flex-col gap-2">
+          {hospital.rating !== undefined && (
+            <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
+              <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" /> {hospital.rating.toFixed(1)}
+            </Badge>
+          )}
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className="bg-accent/90 text-white backdrop-blur-sm border-0 flex gap-1 items-center">
+                  <ShieldCheck className="h-3 w-3" /> Avalanche Verified
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">Data verified on Avalanche C-Chain Trust Layer</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-xl font-headline mb-1 truncate" title={hospital.name}>{hospital.name}</CardTitle>

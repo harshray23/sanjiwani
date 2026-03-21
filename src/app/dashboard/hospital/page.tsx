@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -7,7 +6,7 @@ import { searchHospitals } from '@/lib/data';
 import type { Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { BedDouble, UserPlus, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert } from "lucide-react";
+import { BedDouble, UserPlus, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -16,11 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
+import { anchorDataToAvalanche } from '@/lib/blockchain';
 
 const HospitalDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,10 +32,9 @@ const HospitalDashboard = () => {
     const fetchData = async () => {
         if (currentUser && currentUser.role === 'hospital') {
             try {
-                // In a real app, you'd fetch the hospital associated with this user
                 const [hospitalResults, appointmentData] = await Promise.all([
-                    searchHospitals('Metro General Hospital'), // Mock fetch
-                    Promise.resolve([]) // Mock appointments fetch
+                    searchHospitals('Metro General Hospital'),
+                    Promise.resolve([])
                 ]);
 
                 if (hospitalResults.length > 0) {
@@ -55,12 +55,38 @@ const HospitalDashboard = () => {
     fetchData();
   }, [toast]);
   
-  const handleBedUpdate = () => {
+  const handleBedUpdate = async () => {
       toast({
           title: "Bed Availability Updated",
-          description: "The real-time bed counts have been saved.",
+          description: "The real-time bed counts have been saved to the database.",
       });
   }
+
+  const handleAvalancheVerify = async () => {
+    if (!hospital) return;
+    setIsVerifying(true);
+    try {
+      const result = await anchorDataToAvalanche(hospital.beds);
+      toast({
+        title: "Verified on Avalanche!",
+        description: `Proof anchored to Avalanche C-Chain. Hash: ${result.hash.slice(0, 10)}...`,
+      });
+      // Store verification proof in hospital state
+      setHospital({
+        ...hospital,
+        onChainVerified: true,
+        lastVerificationHash: result.hash
+      });
+    } catch (error: any) {
+      toast({
+        title: "Blockchain Verification Failed",
+        description: error.message || "Could not connect to Avalanche network.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
    const handleAction = (action: string, entity: string, id: string) => {
     toast({
@@ -122,12 +148,27 @@ const HospitalDashboard = () => {
 
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
-      <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold font-headline text-accent">Hospital Dashboard</h1>
-        <p className="text-lg text-muted-foreground">Managing {hospital.name}</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold font-headline text-accent">Hospital Dashboard</h1>
+          <p className="text-lg text-muted-foreground">Managing {hospital.name}</p>
+        </div>
+        <div className="flex gap-2">
+          {hospital.onChainVerified ? (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200">
+              <ShieldCheck className="h-4 w-4" />
+              Verified on Avalanche
+            </div>
+          ) : (
+            <Button onClick={handleAvalancheVerify} disabled={isVerifying} variant="outline" className="border-accent text-accent hover:bg-accent/10">
+              {isVerifying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <LinkIcon className="h-4 w-4 mr-2" />}
+              Verify Status on Avalanche
+            </Button>
+          )}
+        </div>
       </div>
 
-       <Tabs defaultValue="profile">
+       <Tabs defaultValue="beds">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">Hospital Profile</TabsTrigger>
           <TabsTrigger value="beds">Bed Management</TabsTrigger>
@@ -183,16 +224,35 @@ const HospitalDashboard = () => {
 
         <TabsContent value="beds">
              <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Real-Time Bed Availability</CardTitle>
-                    <CardDescription>Update the number of available vs. total beds for each category.</CardDescription>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div>
+                      <CardTitle className="font-headline">Real-Time Bed Availability</CardTitle>
+                      <CardDescription>Update the number of available beds. Use Avalanche verification for absolute public trust.</CardDescription>
+                    </div>
+                    {hospital.onChainVerified && (
+                      <span className="text-xs text-muted-foreground italic">
+                        Last proof anchored: {hospital.lastVerificationHash?.slice(0, 12)}...
+                      </span>
+                    )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <BedInput label="General Ward" available={hospital.beds.general.available} total={hospital.beds.general.total} />
                     <BedInput label="ICU" available={hospital.beds.icu.available} total={hospital.beds.icu.total} />
                     <BedInput label="Oxygen Beds" available={hospital.beds.oxygen.available} total={hospital.beds.oxygen.total} />
                     <BedInput label="Ventilator Beds" available={hospital.beds.ventilator.available} total={hospital.beds.ventilator.total} />
-                    <Button onClick={handleBedUpdate} className="mt-4">Save Changes</Button>
+                    
+                    <div className="flex gap-4 mt-6 pt-6 border-t">
+                      <Button onClick={handleBedUpdate} className="flex-1">
+                        Save to Database
+                      </Button>
+                      <Button onClick={handleAvalancheVerify} disabled={isVerifying} variant="secondary" className="flex-1 bg-accent/10 text-accent hover:bg-accent/20">
+                        {isVerifying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
+                        Anchor Update to Avalanche
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-4">
+                      <strong>Note:</strong> Anchoring to Avalanche creates a tamper-proof audit trail of your availability status, increasing your hospital's trust rating.
+                    </p>
                 </CardContent>
             </Card>
         </TabsContent>

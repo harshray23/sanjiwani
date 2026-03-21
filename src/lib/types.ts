@@ -1,5 +1,4 @@
 
-
 import type { Timestamp } from 'firebase/firestore';
 
 export interface User {
@@ -11,6 +10,8 @@ export interface User {
   verified: boolean;
   createdAt: any;
   medicalHistory?: any;
+  walletAddress?: string;
+  sanjeevaniPoints?: number;
 }
 
 export interface DoctorDetails {
@@ -169,6 +170,8 @@ export interface Hospital {
     oxygen: { total: number; available: number };
   };
   lastUpdated: any;
+  onChainVerified?: boolean;
+  lastVerificationHash?: string;
 }
 
 export interface Pathologist {
