@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield, FlaskConical } from 'lucide-react';
+import { Loader2, LogOut, User as UserIcon, LayoutDashboard, Building, Hospital, Shield, FlaskConical, Trophy, FileText, Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import type { User } from '@/lib/types';
@@ -105,10 +105,15 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-64" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Logged In</p>
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-bold leading-none">{user.name}</p>
+              <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] py-0">
+                <Coins className="h-2 w-2 mr-1"/> {user.sanjeevaniPoints || 0} pts
+              </Badge>
+            </div>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -120,6 +125,20 @@ export function UserNav() {
               <Link href="/profile">
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
+              </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+              <Link href="/rewards">
+                  <Trophy className="mr-2 h-4 w-4 text-yellow-500" />
+                  <span>Rewards & Impact</span>
+              </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+              <Link href="/records">
+                  <FileText className="mr-2 h-4 w-4 text-accent" />
+                  <span>Health Vault</span>
               </Link>
           </DropdownMenuItem>
 

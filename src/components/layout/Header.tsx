@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, FileText, Trophy } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -13,15 +13,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export function Header() {
   const serviceItems = [
-    { href: '/search', label: 'Find Doctors', icon: <Stethoscope/> },
-    { href: '/clinics', label: 'Find Clinics', icon: <Building/> },
-    { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital/> },
-    { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical/> },
+    { href: '/search', label: 'Find Doctors', icon: <Stethoscope className="h-4 w-4"/> },
+    { href: '/clinics', label: 'Find Clinics', icon: <Building className="h-4 w-4"/> },
+    { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital className="h-4 w-4"/> },
+    { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical className="h-4 w-4"/> },
   ];
 
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/appointments', label: 'My Appointments' },
+    { href: '/records', label: 'Health Vault', icon: <FileText className="h-4 w-4 mr-1.5"/> },
+    { href: '/rewards', label: 'Rewards', icon: <Trophy className="h-4 w-4 mr-1.5 text-yellow-500 fill-yellow-500"/> },
   ];
 
   return (
@@ -42,7 +44,8 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
             {navItems.map((item) => (
               <Button key={item.label} variant="ghost" asChild className="group">
-                <Link href={item.href}>
+                <Link href={item.href} className="flex items-center">
+                  {item.icon}
                   {item.label}
                   <span className="block max-w-0 group-hover:max-w-full transition-all duration-300 h-0.5 bg-primary"></span>
                 </Link>
@@ -93,7 +96,10 @@ export function Header() {
                 <nav className="flex flex-col space-y-4 mt-8">
                   {navItems.map((item) => (
                     <Button key={item.label} variant="ghost" className="justify-start text-lg" asChild>
-                      <Link href={item.href}>{item.label}</Link>
+                      <Link href={item.href} className="flex items-center">
+                        {item.icon}
+                        <span className="ml-2">{item.label}</span>
+                      </Link>
                     </Button>
                   ))}
                   <div className="border-t pt-4">

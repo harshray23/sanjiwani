@@ -91,6 +91,30 @@ export interface Report {
   createdAt: any;
 }
 
+export interface MedicalRecord {
+  id: string;
+  userId: string;
+  patientName: string;
+  age: number;
+  hospitalName: string;
+  testType: string;
+  testDate: string;
+  fileUrl: string;
+  onChainHash: string;
+  txHash: string;
+  verified: boolean;
+  createdAt: string;
+}
+
+export interface RewardActivity {
+  id: string;
+  userId: string;
+  action: 'Record Upload' | 'Hospital Update' | 'Blood Donation' | 'Doctor Verification';
+  points: number;
+  timestamp: string;
+  txHash?: string;
+}
+
 export interface Payment {
   id: string;
   userId: string;

@@ -10,7 +10,9 @@ import type {
   DiagnosticsCentre,
   TestAppointment,
   DiagnosticTest,
-  Pathologist
+  Pathologist,
+  MedicalRecord,
+  RewardActivity
 } from './types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { Role } from '@/app/login/page';
@@ -20,7 +22,7 @@ import { Timestamp } from 'firebase/firestore';
 // --- MOCK DATA ---
 
 export const mockUsers: User[] = [
-  { uid: 'patient-1', name: 'John Patient', email: 'patient@test.com', phone: '123-456-7890', role: 'patient', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
+  { uid: 'patient-1', name: 'John Patient', email: 'patient@test.com', phone: '123-456-7890', role: 'patient', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 }, sanjeevaniPoints: 120, walletAddress: '0x82a1...91d' },
   { uid: 'doctor-1', name: 'Emily Carter', email: 'emily.carter@test.com', phone: '111-222-3333', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doctor-2', name: 'John Smith', email: 'john.smith@test.com', phone: '444-555-6666', role: 'doctor', verified: false, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'clinic-1', name: 'Sunnyvale Clinic', email: 'clinic@test.com', phone: '987-654-3210', role: 'clinic', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
@@ -28,17 +30,6 @@ export const mockUsers: User[] = [
   { uid: 'diag-1', name: 'City Diagnostics', email: 'diag@test.com', phone: '555-444-3333', role: 'diagnostics_centres', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'hospital-1', name: 'Metro General Hospital', email: 'hospital@test.com', phone: '123-123-1234', role: 'hospital', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
   { uid: 'doctor-test', name: 'Dr. Kushal P. Anand', email: 'doctor@test.com', phone: '8420382000', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-ashutosh', name: 'Dr. Ashutosh Nayak', email: 'ashutosh.nayak@test.com', phone: '09073945866', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-prattay', name: 'Dr. Prattay Ghosh', email: 'prattay.ghosh@test.com', phone: '07679944040', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', phone: '09331926111', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', phone: '08336971217', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', phone: '07596878887', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', phone: '09147023666', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', phone: '07076642946', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
-  { uid: 'doc-nikhil', name: 'Dr. Nikhil', email: 'dr.nikhil@test.com', phone: 'N/A', role: 'doctor', verified: true, createdAt: { seconds: 1672531200, nanoseconds: 0 } },
 ];
 
 const mockDoctors: DoctorDetails[] = [
@@ -46,281 +37,85 @@ const mockDoctors: DoctorDetails[] = [
   { id: 'doctor-2', userId: 'doctor-2', name: 'Dr. John Smith', email: 'john.smith@test.com', specialization: 'Dermatology', licenseNo: 'DOC-L67890', consultationFee: 700, availability: ["09:00 AM", "11:30 AM"], clinicId: 'clinic-2', verified: false, imageUrl: '/doctor4.jpg', phone: '444-555-6666', clinicName: 'Oakwood Medical' },
   { id: 'doctor-3', userId: 'doctor-3', name: 'Dr. Sarah Lee', email: 'sarah.lee@test.com', specialization: 'Pediatrics', licenseNo: 'DOC-L54321', consultationFee: 1, availability: ["10:00 AM", "01:00 PM", "03:00 PM"], clinicId: 'clinic-1', verified: true, imageUrl: '/doctor10.jpg', phone: '777-888-9999', clinicName: 'Sunnyvale Clinic' },
   { id: 'doctor-test', userId: 'doctor-test', name: 'Dr. Kushal P. Anand', email: 'doctor@test.com', specialization: 'General Practice', licenseNo: 'DOC-TEST', consultationFee: 500, availability: ["09:00 AM", "10:00 AM", "11:00 AM"], clinicId: 'clinic-1', verified: true, imageUrl: '/Doc.jpg', phone: '8420382000', clinicName: 'Sunnyvale Clinic' },
-  { id: 'doc-ashutosh', userId: 'doc-ashutosh', name: 'Dr. Ashutosh Nayak', email: 'ashutosh.nayak@test.com', specialization: 'Surgeon', licenseNo: 'DOC-L98765', consultationFee: 1000, availability: ["04:00 PM", "05:00 PM"], clinicId: 'hosp-4', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc4', phone: '09073945866', clinicName: 'Healthworld Hospitals, Asansol' },
-  { id: 'doc-prattay', userId: 'doc-prattay', name: 'Dr. Prattay Ghosh', email: 'prattay.ghosh@test.com', specialization: 'General Physician', licenseNo: 'DOC-L87654', consultationFee: 900, availability: ["09:00 AM", "12:00 PM", "03:00 PM"], clinicId: 'hosp-12', verified: true, imageUrl: '/doctor5.jpg', phone: '07679944040', clinicName: 'Apollo Multispeciality Hospitals, Kolkata' },
-  { id: 'doc-amitabha', userId: 'doc-amitabha', name: 'Dr. Amitabha Saha', email: 'amitabha.saha@test.com', specialization: 'General Physician', licenseNo: 'DOC-L76543', consultationFee: 850, availability: ["10:00 AM", "01:00 PM"], clinicId: 'clinic-15', verified: true, imageUrl: '/doctor6.jpg', phone: 'N/A', clinicName: 'Apollo Clinic Beliaghata' },
-  { id: 'doc-rkgupta', userId: 'doc-rkgupta', name: 'Dr. R K Gupta', email: 'rk.gupta@test.com', specialization: 'General Physician', licenseNo: 'DOC-L65432', consultationFee: 950, availability: ["05:00 PM", "06:00 PM", "07:00 PM"], clinicId: 'clinic-16', verified: true, imageUrl: '/doctor1.jpg', phone: '09331926111', clinicName: 'Apollo Clinic Park Circus' },
-  { id: 'doc-saugat', userId: 'doc-saugat', name: 'Dr. Saugat Banerjee', email: 'saugat.banerjee@test.com', specialization: 'Doctor', licenseNo: 'DOC-L11223', consultationFee: 750, availability: ["06:00 PM", "07:00 PM", "08:00 PM"], clinicId: 'clinic-20', verified: true, imageUrl: '/doctor2.jpg', phone: '08336971217', clinicName: 'Seva Clinic' },
-  { id: 'doc-arvind', userId: 'doc-arvind', name: 'Dr. Arvind Kumar', email: 'arvind.kumar@test.com', specialization: 'Diabetologist', licenseNo: 'DOC-L22334', consultationFee: 800, availability: ["05:30 PM", "06:30 PM"], clinicId: 'clinic-7', verified: true, imageUrl: '/doctor7.jpg', phone: '07596878887', clinicName: 'Dr. Arvind Kumar Clinic' },
-  { id: 'doc-indranil', userId: 'doc-indranil', name: 'Prof. (Dr) Indranil Dutta', email: 'indranil.dutta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L33445', consultationFee: 1000, availability: ["03:00 PM", "04:00 PM"], clinicId: 'hosp-10', verified: true, imageUrl: '/doctor0.jpg', phone: 'N/A', clinicName: 'S.N.R Carnival Hospital' },
-  { id: 'doc-tania', userId: 'doc-tania', name: 'Dr. Tania Mukherjee', email: 'tania.mukherjee@test.com', specialization: 'ENT Specialist', licenseNo: 'DOC-L44556', consultationFee: 800, availability: ["10:00 AM", "11:00 AM", "04:00 PM", "05:00 PM"], clinicId: 'clinic-9', verified: true, imageUrl: '/doctor9.jpg', phone: 'N/A', clinicName: "Dr. Tania Mukherjee's Clinic" },
-  { id: 'doc-saptarshi', userId: 'doc-saptarshi', name: 'Dr. Saptarshi Bishnu', email: 'saptarshi.bishnu@test.com', specialization: 'Gastroenterologist', licenseNo: 'DOC-L55667', consultationFee: 1200, availability: ["04:00 PM", "05:00 PM", "06:00 PM"], clinicId: 'clinic-12', verified: true, imageUrl: '/doctor3.jpg', phone: '09147023666', clinicName: "Chittaranjan Clinic Pvt ltd" },
-  { id: 'doc-cngupta', userId: 'doc-cngupta', name: 'Dr. C.N. Gupta', email: 'cn.gupta@test.com', specialization: 'Doctor', licenseNo: 'DOC-L66778', consultationFee: 600, availability: ["05:00 PM", "06:00 PM"], clinicId: 'diag-4', verified: true, imageUrl: '/doctor8.jpg', phone: '07076642946', clinicName: "The Burdwan Medical Centre" },
-  { id: 'doc-nikhil', userId: 'doc-nikhil', name: 'Dr. Nikhil', email: 'dr.nikhil@test.com', specialization: 'Physician and Diabetologist', licenseNo: 'DOC-N54321', consultationFee: 800, availability: ["09:00 AM", "10:00 AM", "11:00 AM"], clinicId: 'clinic-21', verified: true, imageUrl: 'https://i.pravatar.cc/150?u=doc-nikhil', phone: 'N/A', clinicName: 'Dr. Nikhil Physician and Diabetologist Clinic' },
 ];
 
 const mockClinics: ClinicDetails[] = [
   { id: 'clinic-1', userId: 'clinic-1', name: 'Sunnyvale Clinic', address: '123 Health St, Wellness City', licenseNo: 'CLN-A123', verified: true, imageUrl: '/clinic1.jpg', dataAiHint: 'clinic reception', doctors: [mockDoctors[0], mockDoctors[2], mockDoctors[3]] },
   { id: 'clinic-2', userId: 'clinic-2', name: 'Oakwood Medical', address: '456 Cure Ave, Remedy Town', licenseNo: 'CLN-B456', verified: false, imageUrl: '/clinic2.jpg', dataAiHint: 'medical building', doctors: [mockDoctors[1]] },
-  { id: 'clinic-3', userId: 'clinic-3', name: '1 Mall Road Clinic', address: '1 Mall Road, Kolkata', licenseNo: 'CLN-C789', verified: true, imageUrl: '/clinic3.jpg', dataAiHint: 'city clinic', doctors: [] },
-  { id: 'clinic-4', userId: 'clinic-4', name: 'Suraksha Clinic', address: 'Central Pollution Board, Kolkata', licenseNo: 'CLN-D012', verified: true, imageUrl: '/clinic4.jpg', dataAiHint: 'urban clinic', doctors: [] },
-  { id: 'clinic-5', userId: 'clinic-5', name: 'Townsend Road Practice', address: '21, Townsend Rd, Kolkata', licenseNo: 'CLN-E345', verified: true, imageUrl: '/clinic5.jpg', dataAiHint: 'street clinic', doctors: [] },
-  { id: 'clinic-6', userId: 'clinic-6', name: 'B-9/20 Kalyani Clinic', address: 'B-9/20, Kalyani', licenseNo: 'CLN-F678', verified: true, imageUrl: '/clinc8.jpg', dataAiHint: 'local clinic', doctors: [] },
-  { id: 'clinic-7', userId: 'clinic-7', name: 'Dr. Arvind Kumar Clinic', address: 'B2/54, Kalyani', licenseNo: 'CLN-G901', verified: true, imageUrl: '/clinic9.jpg', dataAiHint: 'doctor office', doctors: [mockDoctors[9]] },
-  { id: 'clinic-8', userId: 'clinic-8', name: 'GICE NURSING HOME', address: 'A-3/3S Kalyani', licenseNo: 'CLN-H234', verified: true, imageUrl: '/clinic10.jpg', dataAiHint: 'nursing home', doctors: [] },
-  { id: 'clinic-9', userId: 'clinic-9', name: "Dr. Tania Mukherjee's Clinic", address: '62 N, S.B Gorai Road, opp. IMA House, Asansol', licenseNo: 'CLN-I567', verified: true, imageUrl: '/clinic11.jpg', dataAiHint: 'town clinic', doctors: [mockDoctors[11]] },
-  { id: 'clinic-10', userId: 'clinic-10', name: 'Bengal Institute of Gastroenterology', address: 'Burir Bagan, Rani Sayer North, 71, BB Ghosh Rd, Burdwan', licenseNo: 'CLN-J890', verified: true, imageUrl: '/clinic12.jpg', dataAiHint: 'specialty clinic', doctors: [] },
-  { id: 'clinic-11', userId: 'clinic-11', name: "Dr. C.N. Gupta's Clinic", address: 'RC Das Road, Burdwan', licenseNo: 'CLN-K123', verified: true, imageUrl: '/clinic13.jpg', dataAiHint: 'private practice', doctors: [mockDoctors[13]] },
-  { id: 'clinic-12', userId: 'clinic-12', name: 'Chittaranjan Clinic Pvt ltd', address: 'Ramkrishna Road, Burdwan', licenseNo: 'CLN-L456', verified: true, imageUrl: '/clinic14.jpg', dataAiHint: 'health center', doctors: [mockDoctors[12]] },
-  { id: 'clinic-13', userId: 'clinic-13', name: 'Astha Medical Centre', address: '6VW6+WJX, Burdwan', licenseNo: 'CLN-M789', verified: true, imageUrl: '/clinic15.jpg', dataAiHint: 'medical center', doctors: [] },
-  { id: 'clinic-14', userId: 'clinic-14', name: "Petals Woman's Clinic", address: '11 A, Sarojini Naidu Sarani, Rawdon St, Kolkata', licenseNo: 'CLN-N012', verified: true, imageUrl: '/clinic16.jpg', dataAiHint: 'women clinic', doctors: [] },
-  { id: 'clinic-15', userId: 'clinic-15', name: 'Apollo Clinic Beliaghata', address: '13A, Hem Chandra Naskar Rd, Kolkata', licenseNo: 'CLN-O345', verified: true, imageUrl: '/clinic6.jpg', dataAiHint: 'modern clinic', doctors: [mockDoctors[6]] },
-  { id: 'clinic-16', userId: 'clinic-16', name: 'Apollo Clinic Park Circus', address: '8, Circus Row, Kolkata', licenseNo: 'CLN-P678', verified: true, imageUrl: '/clinic7.jpg', dataAiHint: 'city clinic', doctors: [mockDoctors[7]] },
-  { id: 'clinic-17', userId: 'clinic-17', name: 'Healthworld Clinic Asansol', address: 'MWVX+2H2, Burnpur Rd, Asansol', licenseNo: 'CLN-Q901', verified: true, imageUrl: '/clinic17.jpg', dataAiHint: 'clinic building', doctors: [] },
-  { id: 'clinic-18', userId: 'clinic-18', name: 'The Mission Hospital Asansol Clinic', address: 'MXV2+J4V, Asansol-Neamatpur Rd, Asansol', licenseNo: 'CLN-R234', verified: true, imageUrl: '/clinic18.jpg', dataAiHint: 'hospital clinic', doctors: [] },
-  { id: 'clinic-19', userId: 'clinic-19', name: 'Ultra Clinic', address: 'Ground Floor, Sahara Apartment, Asansol', licenseNo: 'CLN-S567', verified: true, imageUrl: '/clinic19.jpg', dataAiHint: 'modern clinic', doctors: [] },
-  { id: 'clinic-20', userId: 'clinic-20', name: 'Seva Clinic', address: 'B-3/17, Kalyani', licenseNo: 'CLN-T890', verified: true, imageUrl: '/clinic20.jpg', dataAiHint: 'community clinic', doctors: [mockDoctors[8]] },
-  { id: 'clinic-21', userId: 'doc-nikhil', name: 'Dr. Nikhil Physician and Diabetologist Clinic', address: 'D 21-10/1-139 Srinagar Main Road, G.S.Raju Rd, near Drainage', licenseNo: 'CLN-U123', verified: true, imageUrl: 'https://picsum.photos/seed/clinic-21/400/200', doctors: [mockDoctors[14]] },
 ];
 
 const mockAppointments: Appointment[] = [
   { id: 'appt-1', patientId: 'patient-1', doctorId: 'doctor-1', clinicId: 'clinic-1', type: 'clinic', status: 'confirmed', scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[0] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
-  { id: 'appt-2', patientId: 'patient-1', doctorId: 'doctor-3', clinicId: 'clinic-1', type: 'clinic', status: 'completed', scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString(), patient: mockUsers[0], doctor: mockDoctors[2] as unknown as DoctorProfile, clinic: mockClinics[0] as unknown as ClinicProfile, patientName: 'John Patient', date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-];
-
-export const comprehensiveTests: DiagnosticTest[] = [
-  { id: 'test-1', name: 'Complete Blood Count (CBC)', category: 'Pathology', price: 300 },
-  { id: 'test-2', name: 'Lipid Profile', category: 'Pathology', price: 600 },
-  { id: 'test-3', name: 'Liver Function Test (LFT)', category: 'Pathology', price: 550 },
-  { id: 'test-4', name: 'Kidney Function Test (KFT)', category: 'Pathology', price: 500 },
-  { id: 'test-5', name: 'Thyroid Profile (T3, T4, TSH)', category: 'Hormonal', price: 700 },
-  { id: 'test-6', name: 'X-Ray Chest PA View', category: 'Radiology', price: 400 },
-  { id: 'test-7', name: 'Ultrasound Abdomen & Pelvis', category: 'Radiology', price: 1200 },
-  { id: 'test-8', name: 'ECG', category: 'Cardiology', price: 250 },
-  { id: 'test-9', name: 'HbA1c (Glycated Hemoglobin)', category: 'Pathology', price: 450 },
-  { id: 'test-10', name: 'Vitamin D, 25-Hydroxy', category: 'Vitamins', price: 1400 },
-  { id: 'test-11', name: 'Vitamin B12', category: 'Vitamins', price: 800 },
-  { id: 'test-12', name: 'Urine Routine & Microscopy', category: 'Pathology', price: 150 },
-];
-
-const mockPathologists: Pathologist[] = [
-    { id: 'path-1', name: 'Dr. Alan Grant', qualifications: ['MD Pathology'], imageUrl: 'https://i.pravatar.cc/150?u=path-1'},
-    { id: 'path-2', name: 'Dr. Ellie Sattler', qualifications: ['MBBS, DNB'], imageUrl: 'https://i.pravatar.cc/150?u=path-2'},
-    { id: 'path-3', name: 'Dr. Ian Malcolm', qualifications: ['MD, FRCPath'], imageUrl: 'https://i.pravatar.cc/150?u=path-3'},
-]
-
-const mockDiagnostics: DiagnosticsCentre[] = [
-  { id: 'diag-1', name: 'City Diagnostics', location: '789 Test Ave, Lab City', contact: { phone: '555-444-3333', email: 'contact@citydiag.com' }, rating: 4.7, imageUrl: '/c1.jpg', dataAiHint: 'lab equipment', tests: comprehensiveTests.slice(0,4), pathologists: [mockPathologists[0]] },
-  { id: 'diag-2', name: 'Advanced Imaging Center', location: '101 Scan Rd, Picture Town', contact: { phone: '555-555-5555', email: 'info@advancedimaging.com' }, rating: 4.9, imageUrl: '/c2.jpg', dataAiHint: 'mri scanner', tests: [comprehensiveTests[5], comprehensiveTests[6]], pathologists: [mockPathologists[1]] },
-  { id: 'diag-3', name: 'Care Scans & Labs', location: '202 Health Blvd, Wellness City', contact: { phone: '555-666-7777', email: 'support@carescan.com' }, rating: 4.8, imageUrl: '/c3.jpg', dataAiHint: 'blood test', tests: comprehensiveTests, pathologists: [mockPathologists[0], mockPathologists[2]] },
 ];
 
 const mockHospitals: Hospital[] = [
-    { id: 'hosp-1', name: 'Metro General Hospital', location: { address: '1 Hospital Plaza, Metro City' }, contact: '555-111-1111', rating: 4.8, specialties: ['Emergency', 'Cardiology', 'General Surgery'], emergencyAvailable: true, beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: '/hos1.jpg', dataAiHint: 'hospital building' },
-    { id: 'hosp-2', name: 'Hope Childrens Hospital', location: { address: '2 Hope St, Kidville' }, contact: '555-222-2222', rating: 4.9, specialties: ['Pediatrics', 'Maternity', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, lastUpdated: new Date(Date.now() - 3600000).toISOString(), imageUrl: '/hos2.jpg', dataAiHint: 'children hospital' },
+    { id: 'hosp-1', name: 'Metro General Hospital', location: { address: '1 Hospital Plaza, Metro City' }, contact: '555-111-1111', rating: 4.8, specialties: ['Emergency', 'Cardiology', 'General Surgery'], emergencyAvailable: true, beds: { general: { total: 100, available: 20 }, icu: { total: 20, available: 3 }, ventilator: { total: 10, available: 1 }, oxygen: { total: 50, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: '/hos1.jpg', dataAiHint: 'hospital building', onChainVerified: true, lastVerificationHash: '0xabc123...' },
+    { id: 'hosp-2', name: 'Hope Childrens Hospital', location: { address: '2 Hope St, Kidville' }, contact: '555-222-2222', rating: 4.9, specialties: ['Pediatrics', 'Maternity', 'Emergency'], emergencyAvailable: true, beds: { general: { total: 50, available: 15 }, icu: { total: 10, available: 5 }, ventilator: { total: 5, available: 2 }, oxygen: { total: 20, available: 8 } }, lastUpdated: new Date(Date.now() - 3600000).toISOString(), imageUrl: '/hos2.jpg', dataAiHint: 'children hospital', onChainVerified: true, lastVerificationHash: '0xdef456...' },
+    { id: 'hosp-3', name: 'City Heart Institute', location: { address: '12 Cardiology Blvd, Heart City' }, contact: '555-333-3333', rating: 4.7, specialties: ['Cardiology', 'Cardiovascular Surgery'], emergencyAvailable: true, beds: { general: { total: 80, available: 10 }, icu: { total: 15, available: 2 }, ventilator: { total: 8, available: 4 }, oxygen: { total: 30, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp3/600/400', dataAiHint: 'modern hospital', onChainVerified: true },
+    { id: 'hosp-4', name: 'Lakeside Multispeciality', location: { address: '45 Lake View, Waterfront' }, contact: '555-444-4444', rating: 4.6, specialties: ['Orthopedics', 'Neurology', 'Internal Medicine'], emergencyAvailable: false, beds: { general: { total: 120, available: 45 }, icu: { total: 10, available: 0 }, ventilator: { total: 5, available: 0 }, oxygen: { total: 40, available: 20 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp4/600/400', dataAiHint: 'glass building hospital', onChainVerified: false },
+    { id: 'hosp-5', name: 'St. Mary\'s Trauma Center', location: { address: '99 Main St, Central District' }, contact: '555-555-5555', rating: 4.5, specialties: ['Emergency', 'Trauma Surgery', 'Radiology'], emergencyAvailable: true, beds: { general: { total: 200, available: 10 }, icu: { total: 40, available: 1 }, ventilator: { total: 20, available: 0 }, oxygen: { total: 100, available: 5 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp5/600/400', dataAiHint: 'emergency center', onChainVerified: true },
+    { id: 'hosp-6', name: 'Zenith Oncology Clinic', location: { address: '7 Cancer Care Rd, Hope Valley' }, contact: '555-666-6666', rating: 4.9, specialties: ['Oncology', 'Hematology', 'Radiotherapy'], emergencyAvailable: false, beds: { general: { total: 40, available: 12 }, icu: { total: 5, available: 3 }, ventilator: { total: 2, available: 1 }, oxygen: { total: 15, available: 10 } }, lastUpdated: new Date().toISOString(), imageUrl: 'https://picsum.photos/seed/hosp6/600/400', dataAiHint: 'cancer hospital', onChainVerified: true },
 ];
 
-const mockTestAppointments: TestAppointment[] = [
-    { id: 't-appt-1', patientId: 'patient-1', patientName: 'John Patient', centreId: 'diag-1', test: comprehensiveTests[0], date: new Date().toISOString(), time: '10:00 AM', status: 'Report Ready', reportUrl: '#' },
+const mockMedicalRecords: MedicalRecord[] = [
+  { id: 'rec-1', userId: 'patient-1', patientName: 'John Patient', age: 30, hospitalName: 'Metro General', testType: 'Blood Test', testDate: '2024-03-10', fileUrl: '#', onChainHash: '0x83af...21bc', txHash: '0xabc...', verified: true, createdAt: new Date().toISOString() }
 ];
 
-// --- USER MANAGEMENT ---
+const mockRewardActivities: RewardActivity[] = [
+  { id: 'act-1', userId: 'patient-1', action: 'Blood Donation', points: 50, timestamp: '2024-03-01', txHash: '0xrew1' },
+  { id: 'act-2', userId: 'patient-1', action: 'Hospital Update', points: 15, timestamp: '2024-03-05', txHash: '0xrew2' },
+  { id: 'act-3', userId: 'patient-1', action: 'Record Upload', points: 10, timestamp: '2024-03-10', txHash: '0xrew3' },
+];
+
+// --- DATA FETCHING & MUTATION ---
+
+export const getMedicalRecords = async (userId: string): Promise<MedicalRecord[]> => {
+  return Promise.resolve(mockMedicalRecords.filter(r => r.userId === userId));
+};
+
+export const createVerifiedRecord = async (userId: string, record: Omit<MedicalRecord, 'id' | 'userId' | 'onChainHash' | 'txHash' | 'verified' | 'createdAt'>, hash: string, txHash: string): Promise<MedicalRecord> => {
+  const newRecord: MedicalRecord = {
+    ...record,
+    id: `rec-${Date.now()}`,
+    userId,
+    onChainHash: hash,
+    txHash,
+    verified: true,
+    createdAt: new Date().toISOString()
+  };
+  mockMedicalRecords.push(newRecord);
+  // Add reward for record upload
+  await rewardUser(userId, 'Record Upload', 10, txHash);
+  return Promise.resolve(newRecord);
+};
+
+export const getRewards = async (userId: string): Promise<{ points: number, history: RewardActivity[] }> => {
+  const history = mockRewardActivities.filter(a => a.userId === userId);
+  const points = history.reduce((acc, curr) => acc + curr.points, 0);
+  return Promise.resolve({ points, history });
+};
+
+export const rewardUser = async (userId: string, action: RewardActivity['action'], points: number, txHash?: string): Promise<void> => {
+  const user = mockUsers.find(u => u.uid === userId);
+  if (user) {
+    user.sanjeevaniPoints = (user.sanjeevaniPoints || 0) + points;
+    mockRewardActivities.unshift({
+      id: `act-${Date.now()}`,
+      userId,
+      action,
+      points,
+      timestamp: new Date().toISOString(),
+      txHash
+    });
+  }
+  return Promise.resolve();
+};
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
     const user = mockUsers.find(u => u.uid === uid);
     if (user) return Promise.resolve(user);
-    const doctor = mockDoctors.find(d => d.userId === uid);
-    if(doctor) {
-        return Promise.resolve({
-            uid: doctor.userId,
-            name: doctor.name,
-            email: doctor.email,
-            phone: doctor.phone || '',
-            role: 'doctor',
-            verified: doctor.verified || false,
-            createdAt: new Date().toISOString()
-        } as User);
-    }
     return Promise.resolve(null);
 };
-
-export const createUserInFirestore = async (user: FirebaseUser, role: Role, baseData: any, detailsData: any): Promise<any> => {
-    return Promise.resolve({ ...baseData, ...detailsData });
-}
-
-export const updateUserProfile = async (uid: string, data: Partial<User>): Promise<void> => {
-    return Promise.resolve();
-};
-
-export const updateDoctorProfile = async (uid: string, data: Partial<DoctorDetails>): Promise<void> => {
-    return Promise.resolve();
-};
-
-export const updateUserVerification = async (uid: string, verified: boolean): Promise<void> => {
-    const user = mockUsers.find(u => u.uid === uid);
-    if(user) user.verified = verified;
-    const doctor = mockDoctors.find(d => d.id === uid);
-    if(doctor) doctor.verified = verified;
-    return Promise.resolve();
-};
-
-
-// --- DATA FETCHING ---
-
-export const getDoctors = async (): Promise<DoctorDetails[]> => {
-    return Promise.resolve(mockDoctors);
-};
-
-export const getDoctorById = async (id: string): Promise<DoctorProfile | undefined> => {
-    const doctorDetails = mockDoctors.find(d => d.id === id);
-    if (!doctorDetails) return undefined;
-    const baseUser = mockUsers.find(u => u.uid === id);
-    return Promise.resolve({ ...baseUser, uid: id, ...doctorDetails } as DoctorProfile);
-};
-
-export const getClinics = async (): Promise<ClinicDetails[]> => {
-    return Promise.resolve(mockClinics);
-};
-
-export const getClinicById = async (id: string): Promise<ClinicDetails | undefined> => {
-    const clinic = mockClinics.find(c => c.id === id);
-    if (clinic) {
-        clinic.doctors = clinic.doctors.map(doc => mockDoctors.find(d => d.id === (doc as any).id) || doc);
-    }
-    return Promise.resolve(clinic);
-};
-
-
-// --- APPOINTMENTS ---
-
-export const createAppointment = async (
-  patientId: string, 
-  doctorId: string, 
-  clinicId: string, 
-  slot: string,
-  type: 'clinic' | 'video'
-): Promise<Appointment> => {
-    const now = new Date();
-    const [hours, minutesPart] = slot.split(':');
-    const [minutes, period] = minutesPart.split(' ');
-    let hour = parseInt(hours);
-    if (period === 'PM' && hour < 12) hour += 12;
-    else if (period === 'AM' && hour === 12) hour = 0;
-    const scheduledAtDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, parseInt(minutes));
-
-    const newAppointment: Appointment = {
-      id: `appt-${Date.now()}`,
-      patientId,
-      doctorId,
-      clinicId,
-      type,
-      status: 'confirmed',
-      scheduledAt: scheduledAtDate.toISOString(),
-      createdAt: new Date().toISOString(),
-      patientName: 'Mock Patient',
-      date: scheduledAtDate.toISOString()
-    };
-    mockAppointments.push(newAppointment);
-    return Promise.resolve(newAppointment);
-};
-
-export const createBedReservation = async (
-    userId: string,
-    hospitalId: string,
-    bedType: string,
-    patientName: string
-): Promise<Appointment> => {
-    const hospital = mockHospitals.find(h => h.id === hospitalId);
-    const newAppointment: Appointment = {
-        id: `bed-${Date.now()}`,
-        patientId: userId,
-        patientName: patientName,
-        hospitalId: hospitalId,
-        type: 'bed',
-        status: 'confirmed',
-        bedType: bedType,
-        scheduledAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        date: new Date().toISOString(),
-        hospital: hospital
-    };
-    mockAppointments.push(newAppointment);
-    return Promise.resolve(newAppointment);
-}
-
-export const searchClinicsAndDoctors = async (queryText: string): Promise<{ clinics: ClinicDetails[], doctors: DoctorDetails[] }> => {
-    if (!queryText) return Promise.resolve({ clinics: mockClinics, doctors: mockDoctors });
-    const lowerCaseQuery = queryText.toLowerCase();
-    const filteredClinics = mockClinics.filter(clinic => clinic.name.toLowerCase().includes(lowerCaseQuery) || (clinic.address && clinic.address.toLowerCase().includes(lowerCaseQuery)));
-    const filteredDoctors = mockDoctors.filter(doctor => doctor.name.toLowerCase().includes(lowerCaseQuery) || (doctor.specialization && doctor.specialization.toLowerCase().includes(lowerCaseQuery)));
-    return Promise.resolve({ clinics: filteredClinics, doctors: filteredDoctors });
-};
-
-export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
-  // Consolidate consultation appointments and test appointments
-  const consultations = mockAppointments.filter(app => app.patientId === patientId);
-  
-  for (const app of consultations) {
-      if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
-      if (app.clinicId && !app.clinic) app.clinic = await getClinicById(app.clinicId) as ClinicProfile;
-      if (app.hospitalId && !app.hospital) app.hospital = await getHospitalById(app.hospitalId);
-  }
-
-  // Also pull in Diagnostic Test appointments
-  const tests = mockTestAppointments.filter(t => t.patientId === patientId).map(t => ({
-      id: t.id,
-      patientId: t.patientId,
-      patientName: t.patientName,
-      centreId: t.centreId,
-      type: 'test' as const,
-      status: (t.status === 'Scheduled' ? 'confirmed' : 'completed') as any,
-      scheduledAt: t.date,
-      createdAt: t.date,
-      date: t.date,
-      testName: t.test.name,
-      testPrice: t.test.price
-  } as unknown as Appointment));
-
-  return Promise.resolve([...consultations, ...tests].sort((a,b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()));
-};
-
-export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
-   const appointment = mockAppointments.find(app => app.id === id);
-   if(appointment) {
-       if (appointment.doctorId && !appointment.doctor) appointment.doctor = mockDoctors.find(d => d.id === appointment.doctorId) as unknown as DoctorProfile;
-       if (appointment.clinicId && !appointment.clinic) appointment.clinic = mockClinics.find(c => c.id === appointment.clinicId) as unknown as ClinicProfile;
-       if (appointment.hospitalId && !appointment.hospital) appointment.hospital = await getHospitalById(appointment.hospitalId);
-       if (appointment.patientId && !appointment.patient) appointment.patient = mockUsers.find(u => u.uid === appointment.patientId);
-   }
-   return Promise.resolve(appointment);
-};
-
-export const getAppointmentsForClinic = async (clinicId: string): Promise<Appointment[]> => {
-  const appointments = mockAppointments.filter(app => app.clinicId === clinicId);
-   for (const app of appointments) {
-      if (app.doctorId && !app.doctor) app.doctor = await getDoctorById(app.doctorId) as DoctorProfile;
-  }
-  return Promise.resolve(appointments);
-};
-
-export const getUsers = async (): Promise<User[]> => {
-    return Promise.resolve(mockUsers);
-}
-
-// --- LEGACY OR MOCK FUNCTIONS ---
-
-export const comprehensiveSpecialties = [
-    "General Medicine", "Pediatrics", "Dermatology", "Psychiatry", "Radiology", 
-    "General Surgery", "Orthopedics", "Ophthalmology", "ENT", "Obstetrics & Gynecology", 
-    "Cardiology", "Neurology", "Nephrology", "Endocrinology", "Gastroenterology", "Surgeon", "General Physician",
-    "Doctor", "Diabetologist", "ENT Specialist", "Gastroenterologist"
-];
-
-export const comprehensiveHospitalDepartments = [
-    'Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics',
-    'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
-];
-
 
 export const getHospitals = async (): Promise<Hospital[]> => {
     return Promise.resolve(mockHospitals);
@@ -340,55 +135,37 @@ export const searchHospitals = async (queryText: string): Promise<Hospital[]> =>
   ));
 };
 
-export const getDiagnosticsCentres = async (): Promise<DiagnosticsCentre[]> => {
-    return Promise.resolve(mockDiagnostics);
+export const getAppointmentsForUser = async (patientId: string): Promise<Appointment[]> => {
+  const consultations = mockAppointments.filter(app => app.patientId === patientId);
+  return Promise.resolve(consultations.sort((a,b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()));
 };
 
-export const getDiagnosticsCentreById = async (id: string): Promise<DiagnosticsCentre | undefined> => {
-    return Promise.resolve(mockDiagnostics.find(d => d.id === id));
-};
-
-export const getTestById = async (id: string): Promise<DiagnosticTest | undefined> => {
-    return Promise.resolve(comprehensiveTests.find(t => t.id === id));
-}
-
-export const createTestAppointment = async (
-    patientId: string,
-    centreId: string,
-    testId: string
-): Promise<TestAppointment> => {
-    const patient = await getUserProfile(patientId);
-    const test = await getTestById(testId);
-    if (!patient || !test) {
-        throw new Error("Patient or Test not found");
-    }
-
-    const newAppt: TestAppointment = {
-        id: `t-appt-${Date.now()}`,
-        patientId,
-        patientName: patient.name,
-        centreId,
-        test,
+export const createBedReservation = async (userId: string, hospitalId: string, bedType: string, patientName: string): Promise<Appointment> => {
+    const hospital = mockHospitals.find(h => h.id === hospitalId);
+    const newAppointment: Appointment = {
+        id: `bed-${Date.now()}`,
+        patientId: userId,
+        patientName: patientName,
+        hospitalId: hospitalId,
+        type: 'bed',
+        status: 'confirmed',
+        bedType: bedType,
+        scheduledAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         date: new Date().toISOString(),
-        time: "10:00 AM", // Mock time
-        status: "Scheduled"
+        hospital: hospital
     };
-    mockTestAppointments.push(newAppt);
-    return Promise.resolve(newAppt);
+    mockAppointments.push(newAppointment);
+    // Add reward for verified contributor if they update hospital status?
+    // Let's assume a reservation doesn't count as a "Hospital Update" reward yet.
+    return Promise.resolve(newAppointment);
 }
 
-export const getTestAppointmentById = async (id: string): Promise<TestAppointment | undefined> => {
-   const appointment = mockTestAppointments.find(app => app.id === id);
-   if(appointment) {
-       if (!appointment.test) {
-           const foundTest = comprehensiveTests.find(t => t.id === (appointment.test as any));
-           if(foundTest) appointment.test = foundTest;
-       }
-   }
-   return Promise.resolve(appointment);
-};
+export const getUsers = async (): Promise<User[]> => {
+    return Promise.resolve(mockUsers);
+}
 
-
-export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
-    return Promise.resolve(mockTestAppointments.filter(app => app.centreId === centreId));
-};
+export const comprehensiveHospitalDepartments = [
+    'Emergency', 'Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics',
+    'Oncology', 'Gastroenterology', 'General Surgery', 'Radiology', 'Maternity'
+];
