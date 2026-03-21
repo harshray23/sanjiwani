@@ -195,6 +195,22 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Sanskrit Proverb Section */}
+      <section className="py-16 text-center animate-fade-in-up">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <h2 className="text-2xl md:text-4xl font-bold text-accent leading-relaxed">
+              धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम्।<br/>
+              स्वस्थस्य कुशलं श्रेयः स्वास्थ्यं सर्वार्थसाधनम्॥
+            </h2>
+            <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+            <p className="text-muted-foreground italic text-lg">
+              "Health is the supreme foundation for achieving the four goals of life: Righteousness, Prosperity, Desire, and Liberation."
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Us Section */}
       <section id="contact-us" className="py-16 text-center bg-muted rounded-lg animate-fade-in-up">
         <div className="container mx-auto px-4">
