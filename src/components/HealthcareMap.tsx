@@ -45,7 +45,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     if (typeof window === 'undefined') return;
     if (!containerRef.current || mapRef.current) return;
 
-    // Dynamically require the routing machine plugin
+    // Dynamically load the routing machine plugin
     if (!(L as any).Routing) {
       require("leaflet-routing-machine");
     }
@@ -89,25 +89,22 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     const setupRouting = (start: [number, number], end: [number, number], ambId: string) => {
       if (!mapRef.current || !isMountedRef.current) return;
 
-      // EXTREMELY DEFENSIVE CLEANUP
+      // Defensive Cleanup of existing control
       if (routingControlRef.current) {
         try {
           const ctrl = routingControlRef.current;
-          // Clear points to trigger internal line clearing before removal
-          if (ctrl.getPlan) ctrl.getPlan().setWaypoints([]);
-          if (mapRef.current && mapRef.current.removeControl) {
-            mapRef.current.removeControl(ctrl);
+          // Important: Stop any ongoing requests and clear visual state
+          if (ctrl.getPlan) {
+            ctrl.getPlan().setWaypoints([]);
           }
+          mapRef.current.removeControl(ctrl);
         } catch (e) {
-          console.warn("Soft-error during LRM control removal:", e);
+          console.warn("Soft-error during control swap:", e);
         }
         routingControlRef.current = null;
       }
 
-      if (!(L as any).Routing) {
-        console.error("L.Routing not available");
-        return;
-      }
+      if (!(L as any).Routing) return;
 
       try {
         const control = (L as any).Routing.control({
@@ -126,7 +123,9 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         routingControlRef.current = control;
 
         control.on('routesfound', (e: any) => {
-          if (!isMountedRef.current || !mapRef.current) return;
+          // Check if we are still mounted AND the control is still the active one
+          if (!isMountedRef.current || !mapRef.current || routingControlRef.current !== control) return;
+          
           const route = e.routes[0];
           if (onRouteFound && route) {
             onRouteFound({
@@ -136,12 +135,18 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
             });
           }
         });
+
+        control.on('routingerror', (e: any) => {
+          console.warn("Routing engine error:", e.error);
+        });
       } catch (err) {
         console.error("Failed to initialize LRM control:", err);
       }
     };
 
     const generateMockAmbulances = (lat: number, lon: number) => {
+      if (!mapRef.current || !isMountedRef.current) return;
+
       const ambs: Ambulance[] = [
         { id: 'AMB-101', lat: lat + 0.015, lng: lon + 0.01, status: 'available' },
         { id: 'AMB-202', lat: lat - 0.01, lng: lon + 0.02, status: 'available' },
@@ -151,7 +156,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
       ambs.forEach(amb => {
         if (!mapRef.current) return;
         const ambIcon = L.divIcon({
-          html: `<div class="bg-white p-1 rounded-full shadow-lg border-2 border-red-500 flex items-center justify-center w-8 h-8">🚑</div>`,
+          html: `<div class="bg-white p-1 rounded-full shadow-lg border-2 border-red-500 flex items-center justify-center w-8 h-8 text-sm">🚑</div>`,
           className: 'custom-amb-icon',
           iconSize: [32, 32]
         });
@@ -188,7 +193,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         data.elements.forEach((el: any) => {
           if (el.lat && el.lon && mapRef.current) {
             const hospitalIcon = L.divIcon({
-              html: `<div class="bg-white p-1 rounded-full shadow-lg border-2 border-blue-500 flex items-center justify-center w-8 h-8">🏥</div>`,
+              html: `<div class="bg-white p-1 rounded-full shadow-lg border-2 border-blue-500 flex items-center justify-center w-8 h-8 text-sm">🏥</div>`,
               className: 'custom-hosp-icon',
               iconSize: [32, 32]
             });
@@ -230,9 +235,14 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
       // CRITICAL: REMOVE ROUTING CONTROL BEFORE THE MAP
       if (routingControlRef.current && mapRef.current) {
         try {
-          mapRef.current.removeControl(routingControlRef.current);
+          const ctrl = routingControlRef.current;
+          // Clear waypoints to stop internal line drawing before removal
+          if (ctrl.getPlan) {
+            ctrl.getPlan().setWaypoints([]);
+          }
+          mapRef.current.removeControl(ctrl);
         } catch (e) {
-          // Ignore removal errors during unmount
+          // Ignore errors during unmount to prevent double-crash
         }
         routingControlRef.current = null;
       }
@@ -241,7 +251,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         try {
           mapRef.current.remove();
         } catch (e) {
-          // Ignore removal errors
+          // Ignore
         }
         mapRef.current = null;
       }
