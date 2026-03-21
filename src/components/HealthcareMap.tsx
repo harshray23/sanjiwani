@@ -4,8 +4,6 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
 // Fix for default marker icons in Leaflet
 const fixLeafletIcons = () => {
@@ -45,6 +43,15 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     if (typeof window === 'undefined') return;
     if (!containerRef.current || mapRef.current) return;
 
+    // Dynamically require the routing machine plugin to ensure L is available
+    // and to avoid ChunkLoadErrors during SSR/Dynamic hydration.
+    require("leaflet-routing-machine");
+    // Also ensure CSS is loaded for the routing machine
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css";
+    document.head.appendChild(link);
+
     fixLeafletIcons();
 
     // Initialize map
@@ -75,9 +82,14 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     };
 
     const setupRouting = (start: [number, number], end: [number, number], ambId: string) => {
+      if (!mapRef.current) return;
+
       if (routingControlRef.current) {
-        map.removeControl(routingControlRef.current);
+        mapRef.current.removeControl(routingControlRef.current);
       }
+
+      // Access routing control from L (injected by require call above)
+      if (!(L as any).Routing) return;
 
       const control = (L as any).Routing.control({
         waypoints: [
@@ -90,7 +102,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         lineOptions: {
           styles: [{ color: '#f97316', weight: 6, opacity: 0.8 }]
         }
-      }).addTo(map);
+      }).addTo(mapRef.current);
 
       routingControlRef.current = control;
 
@@ -128,7 +140,6 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
       if (onAmbulancesFound) onAmbulancesFound(ambs.length);
 
       // Find nearest using road routing logic
-      // For demo: pick the one with smallest straight line distance then run road route
       const nearest = ambs.sort((a, b) => 
         getHaversineDistance([lat, lon], [a.lat, a.lng]) - 
         getHaversineDistance([lat, lon], [b.lat, b.lng])
@@ -185,8 +196,9 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         () => {
           console.warn("Location access denied.");
           const defaultLoc: [number, number] = [28.6139, 77.2090]; // Delhi
+          if (!isMounted || !mapRef.current) return;
           setUserLoc(defaultLoc);
-          mapRef.current?.setView(defaultLoc, 14);
+          mapRef.current.setView(defaultLoc, 14);
           generateMockAmbulances(defaultLoc[0], defaultLoc[1]);
         }
       );
