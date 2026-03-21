@@ -12,7 +12,8 @@ import type {
   Pathologist,
   MedicalRecord,
   RewardActivity,
-  Donor
+  Donor,
+  AyurvedaRecommendation
 } from './types';
 
 // --- MOCK DATA ---
@@ -306,4 +307,94 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 
 export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
   return Promise.resolve(mockTestAppointments.filter(a => a.centreId === centreId));
+};
+
+/**
+ * Ayurveda supportive care mappings
+ */
+const AYURVEDA_MAPPING: Record<string, AyurvedaRecommendation> = {
+  fever: {
+    symptoms: ['Fever', 'Body Heat'],
+    remedies: ['Tulsi Kadha', 'Warm water', 'Rest'],
+    diet: {
+      eat: ['Rice gruel (Kanji)', 'Warm water', 'Boiled vegetables'],
+      avoid: ['Oily food', 'Cold drinks', 'Curd']
+    },
+    routine: [
+      { time: '06:00 AM', action: 'Wake up & sip warm water' },
+      { time: '07:30 AM', action: 'Deep breathing (Pranayama)' },
+      { time: '08:00 PM', action: 'Early, light dinner' }
+    ]
+  },
+  cough: {
+    symptoms: ['Cough', 'Sore Throat'],
+    remedies: ['Honey & Ginger', 'Steam inhalation', 'Turmeric milk'],
+    diet: {
+      eat: ['Warm soups', 'Honey', 'Ginger tea'],
+      avoid: ['Ice cream', 'Cold water', 'Banana']
+    },
+    routine: [
+      { time: '07:00 AM', action: 'Salt water gargle' },
+      { time: '10:00 AM', action: 'Tulsi tea session' },
+      { time: '09:00 PM', action: 'Warm turmeric milk before bed' }
+    ]
+  },
+  pain: {
+    symptoms: ['Body Pain', 'Headache'],
+    remedies: ['Ginger tea', 'Warm oil massage (Abhyanga)', 'Epsom salt soak'],
+    diet: {
+      eat: ['Warm, cooked food', 'Ghee', 'Nuts'],
+      avoid: ['Dry snacks', 'Caffeine', 'Cold food']
+    },
+    routine: [
+      { time: '06:30 AM', action: 'Gentle stretching / Yoga' },
+      { time: '07:00 AM', action: 'Warm sesame oil massage' },
+      { time: '10:00 PM', action: 'Ensure 8 hours of restful sleep' }
+    ]
+  },
+  breathing: {
+    symptoms: ['Breathing Difficulty'],
+    remedies: ['Pranayama (Deep breathing)', 'Steam inhalation with Ajwain'],
+    diet: {
+      eat: ['Light, warm food', 'Herbal teas'],
+      avoid: ['Heavy meals', 'Chilled water', 'Mucus-forming foods']
+    },
+    routine: [
+      { time: '06:00 AM', action: 'Nadi Shodhana Pranayama' },
+      { time: '08:00 AM', action: 'Steam inhalation' },
+      { time: '06:00 PM', action: 'Light evening walk' }
+    ]
+  },
+  rash: {
+    symptoms: ['Skin Rash', 'Itching'],
+    remedies: ['Aloe vera gel', 'Neem water wash', 'Coconut oil'],
+    diet: {
+      eat: ['Pomegranate', 'Cucumber', 'Cooling foods'],
+      avoid: ['Spicy food', 'Fermented food', 'Salty snacks']
+    },
+    routine: [
+      { time: '07:00 AM', action: 'Neem water bath' },
+      { time: '12:00 PM', action: 'Coconut water intake' },
+      { time: '05:00 PM', action: 'Relaxation in cool area' }
+    ]
+  },
+  fatigue: {
+    symptoms: ['Weakness', 'Tiredness'],
+    remedies: ['Ashwagandha tea', 'Dates & Almonds', 'Meditation'],
+    diet: {
+      eat: ['Fresh fruits', 'Moong dal', 'Ghee'],
+      avoid: ['Processed food', 'White sugar', 'Late night heavy meals']
+    },
+    routine: [
+      { time: '06:30 AM', action: 'Sun exposure (15 mins)' },
+      { time: '02:00 PM', action: 'Brief afternoon rest (Vam-kushi)' },
+      { time: '09:00 PM', action: 'Digital detox before bed' }
+    ]
+  }
+};
+
+export const getAyurvedaCare = async (symptoms: string[]): Promise<AyurvedaRecommendation | null> => {
+  // Find first matching category for demo
+  const category = symptoms.find(s => AYURVEDA_MAPPING[s.toLowerCase()])?.toLowerCase();
+  return Promise.resolve(category ? AYURVEDA_MAPPING[category] : null);
 };

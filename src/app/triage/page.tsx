@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -22,11 +21,15 @@ import {
   Stethoscope, 
   FlaskConical,
   Camera,
-  History
+  History,
+  Leaf
 } from "lucide-react";
 import { performTriage } from '@/ai/flows/triage-flow';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { getAyurvedaCare } from '@/lib/data';
+import { AyurvedaCare } from '@/components/AyurvedaCare';
+import { AyurvedaRecommendation } from '@/lib/types';
 
 const COMMON_SYMPTOMS = [
   { id: 'fever', label: 'Fever' },
@@ -49,6 +52,7 @@ export default function TriagePage() {
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [ayurvedaResult, setAyurvedaResult] = useState<AyurvedaRecommendation | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -72,7 +76,12 @@ export default function TriagePage() {
     setIsAnalyzing(true);
     try {
       const summary = `Patient reports: ${selectedSymptoms.join(', ')}. Severity: ${severity[0]}/100. Duration: ${duration}.`;
-      const triageResult = await performTriage({ symptoms: summary });
+      
+      // Parallel fetch for Clinical and Ayurveda
+      const [triageResult, ayurveda] = await Promise.all([
+        performTriage({ symptoms: summary }),
+        getAyurvedaCare(selectedSymptoms)
+      ]);
       
       // Transform AI output to include likelihood for the "Radar" UI
       const enrichedResult = {
@@ -84,6 +93,7 @@ export default function TriagePage() {
       };
       
       setResult(enrichedResult);
+      setAyurvedaResult(ayurveda);
       setStep(3);
     } catch (error: any) {
       toast({ title: "Analysis Failed", variant: "destructive" });
@@ -194,18 +204,21 @@ export default function TriagePage() {
         );
       case 3:
         return (
-          <div className="space-y-8 animate-in fade-in zoom-in-95">
-            {/* Risk Radar Section */}
+          <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
+            {/* Clinical Assessment Header */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Activity className="text-primary h-5 w-5" /> Health Radar
+                <h3 className="text-xl font-bold font-headline flex items-center gap-2">
+                  <Activity className="text-primary h-6 w-6" /> Clinical Assessment
                 </h3>
                 <Badge className={result.severity === 'High' ? 'bg-red-600' : 'bg-green-600'}>
                   {result.severity} Urgency
                 </Badge>
               </div>
+              
+              {/* Risk Radar Section */}
               <div className="bg-muted/30 p-6 rounded-2xl border border-primary/10 space-y-6">
+                <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Health Correlation Radar</p>
                 {result.likelihoods.map((l: any) => (
                   <div key={l.name} className="space-y-2">
                     <div className="flex justify-between text-sm">
@@ -217,6 +230,11 @@ export default function TriagePage() {
                 ))}
               </div>
             </div>
+
+            {/* Ayurveda supportive care section */}
+            {ayurvedaResult && (
+              <AyurvedaCare data={ayurvedaResult} />
+            )}
 
             {/* Action Pathways */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,7 +274,7 @@ export default function TriagePage() {
               </Button>
             )}
 
-            <Button variant="ghost" className="w-full" onClick={() => {setResult(null); setStep(0); setSelectedSymptoms([]);}}>
+            <Button variant="ghost" className="w-full" onClick={() => {setResult(null); setStep(0); setSelectedSymptoms([]); setAyurvedaResult(null);}}>
               Reset Assessment
             </Button>
           </div>
@@ -271,7 +289,7 @@ export default function TriagePage() {
           <History className="h-12 w-12 text-primary" />
         </div>
         <h1 className="text-4xl font-bold font-headline text-accent">Symptom-to-Action Engine</h1>
-        <p className="text-lg text-muted-foreground mt-2">Professional triage & structured clinical decision support.</p>
+        <p className="text-lg text-muted-foreground mt-2">Professional triage & holistic supportive care plan.</p>
       </div>
 
       <div className="relative">
@@ -281,13 +299,13 @@ export default function TriagePage() {
           ))}
         </div>
 
-        <Card className="shadow-2xl border-primary/10 overflow-hidden">
+        <Card className="shadow-2xl border-primary/10 overflow-hidden bg-card">
           <CardHeader className="bg-muted/20 border-b">
-            <CardTitle className="text-xl">
+            <CardTitle className="text-xl font-headline">
               {step === 0 ? "Select Primary Symptoms" : step === 1 ? "Provide Specific Context" : step === 2 ? "Final Evidence" : "Assessment Complete"}
             </CardTitle>
             <CardDescription>
-              {step < 3 ? "Follow the clinical path for a verified action plan." : "Review your potential conditions and verified next steps."}
+              {step < 3 ? "Follow the clinical path for a verified action plan." : "Review your potential conditions and holistic recovery steps."}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-8">
@@ -298,7 +316,8 @@ export default function TriagePage() {
               <AlertCircle className="h-5 w-5 text-orange-500 shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
                 <strong>Disclaimer:</strong> This is a decision support tool, not a professional medical diagnosis. 
-                Data is anchored to Avalanche for integrity audit trails. In emergencies, dial 108.
+                Data is anchored to Avalanche for integrity audit trails. 
+                Ayurvedic care is supportive wellness guidance. In emergencies, dial 108.
               </p>
             </div>
           </CardFooter>

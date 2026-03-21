@@ -200,3 +200,16 @@ export interface AppointmentFeedback {
     overallService: number;
     comments: string;
 }
+
+export interface AyurvedaRecommendation {
+  symptoms: string[];
+  remedies: string[];
+  diet: {
+    eat: string[];
+    avoid: string[];
+  };
+  routine: {
+    time: string;
+    action: string;
+  }[];
+}
