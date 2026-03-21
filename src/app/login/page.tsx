@@ -28,7 +28,7 @@ import { useUser } from "@/firebase";
 import { mockUsers } from "@/lib/data";
 import type { User } from "@/lib/types";
 
-const roleEnum = z.enum(["patient", "doctor", "clinic", "diag_centre", "admin"]);
+const roleEnum = z.enum(["patient", "doctor", "clinic", "hospital", "diagnostics_centres", "admin"]);
 export type Role = z.infer<typeof roleEnum>;
 
 const emailValidation = z.string().refine(
@@ -108,7 +108,8 @@ const SignUpForm = () => {
                         <SelectItem value="patient">Patient</SelectItem>
                         <SelectItem value="doctor">Doctor</SelectItem>
                         <SelectItem value="clinic">Clinic</SelectItem>
-                        <SelectItem value="diag_centre">Diagnostics Centre</SelectItem>
+                        <SelectItem value="hospital">Hospital</SelectItem>
+                        <SelectItem value="diagnostics_centres">Diagnostics Centre</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -166,7 +167,12 @@ export default function LoginPage() {
       toast({ title: "Signed In Successfully", description: "Welcome to Sanjeevani!" });
       router.push('/');
     } catch (error: any) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+      console.error("Google Login Error:", error);
+      let description = error.message;
+      if (error.code === 'auth/unauthorized-domain') {
+        description = "This domain is not authorized in Firebase. Please add it to 'Authorized domains' in the Firebase Console (Authentication > Settings).";
+      }
+      toast({ title: "Login Failed", description, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
