@@ -203,6 +203,8 @@ export interface AppointmentFeedback {
 
 export interface AyurvedaRecommendation {
   disease: string;
+  hindi_name: string;
+  marathi_name: string;
   doshas: string[];
   prakriti: string;
   herbs: string[];
@@ -218,4 +220,7 @@ export interface AyurvedaRecommendation {
   }[];
   prevention: string;
   severity: string;
+  prognosis: string;
+  medical_intervention: string[];
+  complications: string[];
 }

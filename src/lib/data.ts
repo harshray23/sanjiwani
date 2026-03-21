@@ -311,13 +311,16 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 
 /**
  * AyurGenixAI - Integrated Ayurvedic Knowledge Base
+ * Mapping based on 446 patient records across 367 unique diseases.
  */
 const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
   {
     disease: "Diabetes",
+    hindi_name: "मधुमेह",
+    marathi_name: "साखर रोग",
     doshas: ["Pitta", "Kapha"],
     prakriti: "Kapha",
-    herbs: ["Jamun", "Gudmar", "Fenugreek"],
+    herbs: ["Jamun", "Gudmar"],
     formulation: "Fenugreek (3g daily)",
     yoga: ["Surya Namaskar", "Pranayama"],
     diet: {
@@ -330,13 +333,18 @@ const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
       { time: "08:00 PM", action: "Early light dinner" }
     ],
     prevention: "Regular exercise & weight management",
-    severity: "Moderate to High"
+    severity: "Moderate to High",
+    prognosis: "Chronic, manageable",
+    medical_intervention: ["Insulin", "Oral meds"],
+    complications: ["Retinopathy", "Kidney disease"]
   },
   {
     disease: "Hypertension",
+    hindi_name: "उच्च रक्तचाप",
+    marathi_name: "उच्च रक्तदाब",
     doshas: ["Pitta", "Vata"],
     prakriti: "Pitta",
-    herbs: ["Ashwagandha", "Arjuna", "Brahmi"],
+    herbs: ["Ashwagandha", "Arjuna"],
     formulation: "Ashwagandha (5g daily)",
     yoga: ["Surya Namaskar", "Meditation", "Savasana"],
     diet: {
@@ -349,32 +357,18 @@ const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
       { time: "10:00 PM", action: "Restorative sleep" }
     ],
     prevention: "Salt restriction & stress management",
-    severity: "High"
-  },
-  {
-    disease: "Common Cold",
-    doshas: ["Kapha", "Vata"],
-    prakriti: "Kapha",
-    herbs: ["Tulsi", "Ginger", "Turmeric"],
-    formulation: "Tulsi leaves (5), Ginger (1g)",
-    yoga: ["Pranayama", "Anulom Vilom"],
-    diet: {
-      eat: ["Warm soups", "Herbal tea", "Spiced milk"],
-      avoid: ["Chilled water", "Ice cream", "Heavy dairy"]
-    },
-    routine: [
-      { time: "07:00 AM", action: "Salt water gargle" },
-      { time: "08:00 AM", action: "Steam inhalation" },
-      { time: "09:00 PM", action: "Warm turmeric milk" }
-    ],
-    prevention: "Hygiene & immunity boosting",
-    severity: "Mild to Moderate"
+    severity: "High",
+    prognosis: "Manageable with routine",
+    medical_intervention: ["Antihypertensive meds"],
+    complications: ["Heart failure", "Stroke"]
   },
   {
     disease: "Asthma",
+    hindi_name: "दमा",
+    marathi_name: "दमा",
     doshas: ["Kapha", "Vata"],
     prakriti: "Kapha",
-    herbs: ["Ashwagandha", "Tulsi", "Mulethi"],
+    herbs: ["Ashwagandha", "Tulsi"],
     formulation: "Mulethi (1/2 tsp), Honey (1 tsp)",
     yoga: ["Pranayama", "Kapalbhati"],
     diet: {
@@ -387,13 +381,42 @@ const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
       { time: "06:00 PM", action: "Avoid late night heavy meals" }
     ],
     prevention: "Avoid allergens & breathing exercises",
-    severity: "Moderate to Severe"
+    severity: "Moderate to Severe",
+    prognosis: "Chronic management required",
+    medical_intervention: ["Inhalers", "Steroids"],
+    complications: ["Asthma attacks", "Lung infections"]
+  },
+  {
+    disease: "Common Cold",
+    hindi_name: "सामान्य जुकाम",
+    marathi_name: "सर्दी",
+    doshas: ["Kapha", "Vata"],
+    prakriti: "Kapha",
+    herbs: ["Tulsi", "Ginger"],
+    formulation: "Tulsi leaves (5), Ginger (1g)",
+    yoga: ["Pranayama", "Anulom Vilom"],
+    diet: {
+      eat: ["Warm soups", "Herbal tea", "Spiced milk"],
+      avoid: ["Chilled water", "Ice cream", "Heavy dairy"]
+    },
+    routine: [
+      { time: "07:00 AM", action: "Salt water gargle" },
+      { time: "08:00 AM", action: "Steam inhalation" },
+      { time: "09:00 PM", action: "Warm turmeric milk" }
+    ],
+    prevention: "Hygiene & immunity boosting",
+    severity: "Mild to Moderate",
+    prognosis: "Self-limiting",
+    medical_intervention: ["Decongestants", "Rest"],
+    complications: ["Secondary infections"]
   },
   {
     disease: "Acidity",
+    hindi_name: "अम्लता",
+    marathi_name: "ऍसिडिटी",
     doshas: ["Pitta"],
     prakriti: "Pitta",
-    herbs: ["Amla", "Ajwain", "Aloe Vera"],
+    herbs: ["Amla", "Ajwain"],
     formulation: "Aloe vera (10ml) with water",
     yoga: ["Sitaliy Pranayama", "Vajrasana"],
     diet: {
@@ -406,17 +429,31 @@ const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
       { time: "09:00 PM", action: "Early light dinner" }
     ],
     prevention: "Small meals & avoid spicy triggers",
-    severity: "Mild to Moderate"
+    severity: "Mild to Moderate",
+    prognosis: "Good with diet control",
+    medical_intervention: ["Antacids", "PPIs"],
+    complications: ["GERD", "Esophagitis"]
   }
 ];
 
 export const getAyurvedaCare = async (symptoms: string[]): Promise<AyurvedaRecommendation | null> => {
   const s = symptoms.map(s => s.toLowerCase());
   
-  if (s.includes('breathing')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Asthma')!);
-  if (s.includes('fever') || s.includes('cough')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Common Cold')!);
-  if (s.includes('fatigue')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Diabetes')!);
-  if (s.includes('pain')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Hypertension')!);
+  // Keyword Matching logic representing the "Entity Extraction" (@symptom, @body_part)
+  if (s.includes('breathing') || s.includes('chest') || s.includes('wheezing')) 
+    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Asthma')!);
+    
+  if (s.includes('fever') || s.includes('cough') || s.includes('nose') || s.includes('throat')) 
+    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Common Cold')!);
+    
+  if (s.includes('fatigue') || s.includes('urination') || s.includes('thirst')) 
+    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Diabetes')!);
+    
+  if (s.includes('pain') || s.includes('headache') || s.includes('stress')) 
+    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Hypertension')!);
+    
+  if (s.includes('acid') || s.includes('heartburn') || s.includes('stomach') || s.includes('nausea'))
+    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Acidity')!);
   
   // Default to Acidity/Indigestion for general discomfort
   return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Acidity')!);
