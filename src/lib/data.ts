@@ -310,91 +310,114 @@ export const getTestAppointmentsForCentre = async (centreId: string): Promise<Te
 };
 
 /**
- * Ayurveda supportive care mappings
+ * AyurGenixAI - Integrated Ayurvedic Knowledge Base
  */
-const AYURVEDA_MAPPING: Record<string, AyurvedaRecommendation> = {
-  fever: {
-    symptoms: ['Fever', 'Body Heat'],
-    remedies: ['Tulsi Kadha', 'Warm water', 'Rest'],
+const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
+  {
+    disease: "Diabetes",
+    doshas: ["Pitta", "Kapha"],
+    prakriti: "Kapha",
+    herbs: ["Jamun", "Gudmar", "Fenugreek"],
+    formulation: "Fenugreek (3g daily)",
+    yoga: ["Surya Namaskar", "Pranayama"],
     diet: {
-      eat: ['Rice gruel (Kanji)', 'Warm water', 'Boiled vegetables'],
-      avoid: ['Oily food', 'Cold drinks', 'Curd']
+      eat: ["Low-GI foods", "Green vegetables", "Bitter melon"],
+      avoid: ["Sugary foods", "Processed carb", "Heavy sweets"]
     },
     routine: [
-      { time: '06:00 AM', action: 'Wake up & sip warm water' },
-      { time: '07:30 AM', action: 'Deep breathing (Pranayama)' },
-      { time: '08:00 PM', action: 'Early, light dinner' }
-    ]
+      { time: "06:00 AM", action: "Wake up & drink warm water" },
+      { time: "07:00 AM", action: "Pranayama & Surya Namaskar" },
+      { time: "08:00 PM", action: "Early light dinner" }
+    ],
+    prevention: "Regular exercise & weight management",
+    severity: "Moderate to High"
   },
-  cough: {
-    symptoms: ['Cough', 'Sore Throat'],
-    remedies: ['Honey & Ginger', 'Steam inhalation', 'Turmeric milk'],
+  {
+    disease: "Hypertension",
+    doshas: ["Pitta", "Vata"],
+    prakriti: "Pitta",
+    herbs: ["Ashwagandha", "Arjuna", "Brahmi"],
+    formulation: "Ashwagandha (5g daily)",
+    yoga: ["Surya Namaskar", "Meditation", "Savasana"],
     diet: {
-      eat: ['Warm soups', 'Honey', 'Ginger tea'],
-      avoid: ['Ice cream', 'Cold water', 'Banana']
+      eat: ["Whole grains", "Fruits", "Low-salt meals"],
+      avoid: ["Spicy foods", "Excessive salt", "Caffeine"]
     },
     routine: [
-      { time: '07:00 AM', action: 'Salt water gargle' },
-      { time: '10:00 AM', action: 'Tulsi tea session' },
-      { time: '09:00 PM', action: 'Warm turmeric milk before bed' }
-    ]
+      { time: "06:30 AM", action: "Meditation & deep breathing" },
+      { time: "05:00 PM", action: "Gentle evening walk" },
+      { time: "10:00 PM", action: "Restorative sleep" }
+    ],
+    prevention: "Salt restriction & stress management",
+    severity: "High"
   },
-  pain: {
-    symptoms: ['Body Pain', 'Headache'],
-    remedies: ['Ginger tea', 'Warm oil massage (Abhyanga)', 'Epsom salt soak'],
+  {
+    disease: "Common Cold",
+    doshas: ["Kapha", "Vata"],
+    prakriti: "Kapha",
+    herbs: ["Tulsi", "Ginger", "Turmeric"],
+    formulation: "Tulsi leaves (5), Ginger (1g)",
+    yoga: ["Pranayama", "Anulom Vilom"],
     diet: {
-      eat: ['Warm, cooked food', 'Ghee', 'Nuts'],
-      avoid: ['Dry snacks', 'Caffeine', 'Cold food']
+      eat: ["Warm soups", "Herbal tea", "Spiced milk"],
+      avoid: ["Chilled water", "Ice cream", "Heavy dairy"]
     },
     routine: [
-      { time: '06:30 AM', action: 'Gentle stretching / Yoga' },
-      { time: '07:00 AM', action: 'Warm sesame oil massage' },
-      { time: '10:00 PM', action: 'Ensure 8 hours of restful sleep' }
-    ]
+      { time: "07:00 AM", action: "Salt water gargle" },
+      { time: "08:00 AM", action: "Steam inhalation" },
+      { time: "09:00 PM", action: "Warm turmeric milk" }
+    ],
+    prevention: "Hygiene & immunity boosting",
+    severity: "Mild to Moderate"
   },
-  breathing: {
-    symptoms: ['Breathing Difficulty'],
-    remedies: ['Pranayama (Deep breathing)', 'Steam inhalation with Ajwain'],
+  {
+    disease: "Asthma",
+    doshas: ["Kapha", "Vata"],
+    prakriti: "Kapha",
+    herbs: ["Ashwagandha", "Tulsi", "Mulethi"],
+    formulation: "Mulethi (1/2 tsp), Honey (1 tsp)",
+    yoga: ["Pranayama", "Kapalbhati"],
     diet: {
-      eat: ['Light, warm food', 'Herbal teas'],
-      avoid: ['Heavy meals', 'Chilled water', 'Mucus-forming foods']
+      eat: ["Light warm meals", "Ginger", "Black pepper"],
+      avoid: ["Cold drinks", "Dusty environments", "Fermented foods"]
     },
     routine: [
-      { time: '06:00 AM', action: 'Nadi Shodhana Pranayama' },
-      { time: '08:00 AM', action: 'Steam inhalation' },
-      { time: '06:00 PM', action: 'Light evening walk' }
-    ]
+      { time: "06:00 AM", action: "Nadi Shodhana Pranayama" },
+      { time: "08:00 AM", action: "Chest massage with warm oil" },
+      { time: "06:00 PM", action: "Avoid late night heavy meals" }
+    ],
+    prevention: "Avoid allergens & breathing exercises",
+    severity: "Moderate to Severe"
   },
-  rash: {
-    symptoms: ['Skin Rash', 'Itching'],
-    remedies: ['Aloe vera gel', 'Neem water wash', 'Coconut oil'],
+  {
+    disease: "Acidity",
+    doshas: ["Pitta"],
+    prakriti: "Pitta",
+    herbs: ["Amla", "Ajwain", "Aloe Vera"],
+    formulation: "Aloe vera (10ml) with water",
+    yoga: ["Sitaliy Pranayama", "Vajrasana"],
     diet: {
-      eat: ['Pomegranate', 'Cucumber', 'Cooling foods'],
-      avoid: ['Spicy food', 'Fermented food', 'Salty snacks']
+      eat: ["Cucumber", "Coconut water", "Fennel seeds"],
+      avoid: ["Fried foods", "Spicy masalas", "Citrus fruits"]
     },
     routine: [
-      { time: '07:00 AM', action: 'Neem water bath' },
-      { time: '12:00 PM', action: 'Coconut water intake' },
-      { time: '05:00 PM', action: 'Relaxation in cool area' }
-    ]
-  },
-  fatigue: {
-    symptoms: ['Weakness', 'Tiredness'],
-    remedies: ['Ashwagandha tea', 'Dates & Almonds', 'Meditation'],
-    diet: {
-      eat: ['Fresh fruits', 'Moong dal', 'Ghee'],
-      avoid: ['Processed food', 'White sugar', 'Late night heavy meals']
-    },
-    routine: [
-      { time: '06:30 AM', action: 'Sun exposure (15 mins)' },
-      { time: '02:00 PM', action: 'Brief afternoon rest (Vam-kushi)' },
-      { time: '09:00 PM', action: 'Digital detox before bed' }
-    ]
+      { time: "07:00 AM", action: "Aloe vera juice intake" },
+      { time: "01:00 PM", action: "Post-lunch Vajrasana (5 mins)" },
+      { time: "09:00 PM", action: "Early light dinner" }
+    ],
+    prevention: "Small meals & avoid spicy triggers",
+    severity: "Mild to Moderate"
   }
-};
+];
 
 export const getAyurvedaCare = async (symptoms: string[]): Promise<AyurvedaRecommendation | null> => {
-  // Find first matching category for demo
-  const category = symptoms.find(s => AYURVEDA_MAPPING[s.toLowerCase()])?.toLowerCase();
-  return Promise.resolve(category ? AYURVEDA_MAPPING[category] : null);
+  const s = symptoms.map(s => s.toLowerCase());
+  
+  if (s.includes('breathing')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Asthma')!);
+  if (s.includes('fever') || s.includes('cough')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Common Cold')!);
+  if (s.includes('fatigue')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Diabetes')!);
+  if (s.includes('pain')) return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Hypertension')!);
+  
+  // Default to Acidity/Indigestion for general discomfort
+  return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Acidity')!);
 };

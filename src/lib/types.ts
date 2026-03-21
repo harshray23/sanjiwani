@@ -202,8 +202,12 @@ export interface AppointmentFeedback {
 }
 
 export interface AyurvedaRecommendation {
-  symptoms: string[];
-  remedies: string[];
+  disease: string;
+  doshas: string[];
+  prakriti: string;
+  herbs: string[];
+  formulation: string;
+  yoga: string[];
   diet: {
     eat: string[];
     avoid: string[];
@@ -212,4 +216,6 @@ export interface AyurvedaRecommendation {
     time: string;
     action: string;
   }[];
+  prevention: string;
+  severity: string;
 }
