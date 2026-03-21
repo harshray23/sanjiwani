@@ -201,8 +201,28 @@ export interface AppointmentFeedback {
     comments: string;
 }
 
-export interface AyurvedaRecommendation {
+// Unified Knowledge Engine Types
+export interface UnifiedDiseaseProfile {
+  id: string;
   disease: string;
+  scientific_name: string;
+  description: string;
+  category: string;
+  symptoms: string[];
+  causes: string[];
+  treatment: {
+    medications: string[];
+    therapies: string[];
+    lifestyle_modifications: string[];
+  };
+  severity: 'Mild' | 'Mild to Moderate' | 'Moderate' | 'Moderate to Severe' | 'Severe' | 'Severe to Fatal' | 'Variable' | 'Unknown';
+  lab_test_indicators: string[];
+  geographical_prevalence: string;
+  comorbidities: string[];
+  ayurveda: AyurvedaRecommendation;
+}
+
+export interface AyurvedaRecommendation {
   hindi_name: string;
   marathi_name: string;
   doshas: string[];
@@ -219,7 +239,6 @@ export interface AyurvedaRecommendation {
     action: string;
   }[];
   prevention: string;
-  severity: string;
   prognosis: string;
   medical_intervention: string[];
   complications: string[];

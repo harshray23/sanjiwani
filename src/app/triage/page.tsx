@@ -22,14 +22,17 @@ import {
   FlaskConical,
   Camera,
   History,
-  Leaf
+  Leaf,
+  Globe,
+  Microscope,
+  Info
 } from "lucide-react";
 import { performTriage } from '@/ai/flows/triage-flow';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
-import { getAyurvedaCare } from '@/lib/data';
+import { getDiseaseProfile } from '@/lib/data';
 import { AyurvedaCare } from '@/components/AyurvedaCare';
-import { AyurvedaRecommendation } from '@/lib/types';
+import { UnifiedDiseaseProfile } from '@/lib/types';
 
 const COMMON_SYMPTOMS = [
   { id: 'fever', label: 'Fever' },
@@ -52,7 +55,8 @@ export default function TriagePage() {
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [ayurvedaResult, setAyurvedaResult] = useState<AyurvedaRecommendation | null>(null);
+  const [clinicalProfile, setClinicalProfile] = useState<UnifiedDiseaseProfile | null>(null);
+  
   const { toast } = useToast();
   const router = useRouter();
 
@@ -77,23 +81,22 @@ export default function TriagePage() {
     try {
       const summary = `Patient reports: ${selectedSymptoms.join(', ')}. Severity: ${severity[0]}/100. Duration: ${duration}.`;
       
-      // Parallel fetch for Clinical and Ayurveda
-      const [triageResult, ayurveda] = await Promise.all([
+      // Parallel fetch for Clinical AI and Deep Profile Registry
+      const [triageResult, profile] = await Promise.all([
         performTriage({ symptoms: summary }),
-        getAyurvedaCare(selectedSymptoms)
+        getDiseaseProfile(selectedSymptoms)
       ]);
       
-      // Transform AI output to include likelihood for the "Radar" UI
       const enrichedResult = {
         ...triageResult,
         likelihoods: triageResult.possibleConditions.map((c: string, i: number) => ({
           name: c,
-          value: 90 - (i * 20) // Mock scores for visual radar
+          value: 90 - (i * 20)
         }))
       };
       
       setResult(enrichedResult);
-      setAyurvedaResult(ayurveda);
+      setClinicalProfile(profile);
       setStep(3);
     } catch (error: any) {
       toast({ title: "Analysis Failed", variant: "destructive" });
@@ -197,7 +200,7 @@ export default function TriagePage() {
             <div className="flex gap-4">
               <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Back</Button>
               <Button className="flex-[2] h-12 text-lg font-bold" onClick={handleTriage} disabled={isAnalyzing}>
-                {isAnalyzing ? <><Loader2 className="mr-2 animate-spin" /> Analyzing...</> : "Start Clinical Assessment"}
+                {isAnalyzing ? <><Loader2 className="mr-2 animate-spin" /> Analyzing Knowledge Base...</> : "Start Clinical Assessment"}
               </Button>
             </div>
           </div>
@@ -206,19 +209,62 @@ export default function TriagePage() {
         return (
           <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
             {/* Clinical Assessment Header */}
+            {clinicalProfile && (
+              <Card className="border-primary/20 shadow-lg overflow-hidden">
+                <CardHeader className="bg-primary/5 border-b border-primary/10">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-2xl font-headline text-primary">{clinicalProfile.disease}</CardTitle>
+                      <CardDescription className="italic font-medium text-accent">{clinicalProfile.scientific_name}</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="bg-white">{clinicalProfile.category}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        <Activity className="h-4 w-4"/> Diagnostic indicators
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {clinicalProfile.lab_test_indicators.map(test => (
+                          <Badge key={test} variant="secondary" className="bg-accent/10 text-accent border-accent/20">
+                            <Microscope className="h-3 w-3 mr-1"/> {test}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        <Globe className="h-4 w-4"/> Prevalence
+                      </div>
+                      <p className="text-sm font-medium">{clinicalProfile.geographical_prevalence}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/30 p-4 rounded-lg border space-y-2">
+                    <p className="text-xs font-bold uppercase text-muted-foreground">Lifestyle modifications</p>
+                    <ul className="text-sm grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 list-disc pl-4">
+                      {clinicalProfile.treatment.lifestyle_modifications.map(mod => (
+                        <li key={mod}>{mod}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold font-headline flex items-center gap-2">
-                  <Activity className="text-primary h-6 w-6" /> Clinical Assessment
+                  <Activity className="text-primary h-6 w-6" /> Symptom Correlation Radar
                 </h3>
                 <Badge className={result.severity === 'High' ? 'bg-red-600' : 'bg-green-600'}>
                   {result.severity} Urgency
                 </Badge>
               </div>
               
-              {/* Risk Radar Section */}
               <div className="bg-muted/30 p-6 rounded-2xl border border-primary/10 space-y-6">
-                <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Health Correlation Radar</p>
                 {result.likelihoods.map((l: any) => (
                   <div key={l.name} className="space-y-2">
                     <div className="flex justify-between text-sm">
@@ -231,12 +277,10 @@ export default function TriagePage() {
               </div>
             </div>
 
-            {/* Ayurveda supportive care section */}
-            {ayurvedaResult && (
-              <AyurvedaCare data={ayurvedaResult} />
+            {clinicalProfile?.ayurveda && (
+              <AyurvedaCare data={clinicalProfile.ayurveda} diseaseName={clinicalProfile.disease} />
             )}
 
-            {/* Action Pathways */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-accent/5 border-accent/20">
                 <CardHeader className="p-4 pb-2">
@@ -267,14 +311,13 @@ export default function TriagePage() {
               </Card>
             </div>
 
-            {/* Emergency Action */}
-            {(result.severity === 'High' || result.severity === 'Medium') && (
+            {result.severity === 'High' && (
               <Button className="w-full h-14 text-lg bg-red-600 hover:bg-red-700 shadow-xl shadow-red-100" onClick={() => router.push('/emergency')}>
                 Trigger Emergency Dispatch <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             )}
 
-            <Button variant="ghost" className="w-full" onClick={() => {setResult(null); setStep(0); setSelectedSymptoms([]); setAyurvedaResult(null);}}>
+            <Button variant="ghost" className="w-full" onClick={() => {setResult(null); setStep(0); setSelectedSymptoms([]); setClinicalProfile(null);}}>
               Reset Assessment
             </Button>
           </div>
@@ -288,8 +331,8 @@ export default function TriagePage() {
         <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
           <History className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl font-bold font-headline text-accent">Symptom-to-Action Engine</h1>
-        <p className="text-lg text-muted-foreground mt-2">Professional triage & holistic supportive care plan.</p>
+        <h1 className="text-4xl font-bold font-headline text-accent">Clinical Intelligence Hub</h1>
+        <p className="text-lg text-muted-foreground mt-2">Deep disease profiling & holistic supportive care path.</p>
       </div>
 
       <div className="relative">
@@ -302,7 +345,7 @@ export default function TriagePage() {
         <Card className="shadow-2xl border-primary/10 overflow-hidden bg-card">
           <CardHeader className="bg-muted/20 border-b">
             <CardTitle className="text-xl font-headline">
-              {step === 0 ? "Select Primary Symptoms" : step === 1 ? "Provide Specific Context" : step === 2 ? "Final Evidence" : "Assessment Complete"}
+              {step === 0 ? "Identify Core Symptoms" : step === 1 ? "Clinical Context" : step === 2 ? "Visual Triage" : "Assessment Results"}
             </CardTitle>
             <CardDescription>
               {step < 3 ? "Follow the clinical path for a verified action plan." : "Review your potential conditions and holistic recovery steps."}
@@ -314,11 +357,12 @@ export default function TriagePage() {
           <CardFooter className="bg-orange-50/50 dark:bg-orange-950/10 border-t py-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-orange-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong>Disclaimer:</strong> This is a decision support tool, not a professional medical diagnosis. 
-                Data is anchored to Avalanche for integrity audit trails. 
-                Ayurvedic care is supportive wellness guidance. In emergencies, dial 108.
-              </p>
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                <p className="font-bold">Medical Disclaimer:</p>
+                This is a clinical decision support tool for informational purposes. 
+                All data is anchored to the **Avalanche C-Chain** for integrity. 
+                Consult a qualified practitioner before following any advice.
+              </div>
             </div>
           </CardFooter>
         </Card>

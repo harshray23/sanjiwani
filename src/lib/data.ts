@@ -13,8 +13,171 @@ import type {
   MedicalRecord,
   RewardActivity,
   Donor,
-  AyurvedaRecommendation
+  UnifiedDiseaseProfile
 } from './types';
+
+// --- UNIFIED KNOWLEDGE REGISTRY (Modern + Ayurveda) ---
+
+export const UNIFIED_DISEASE_REGISTRY: UnifiedDiseaseProfile[] = [
+  {
+    id: "diabetes",
+    disease: "Diabetes",
+    scientific_name: "Diabetes Mellitus",
+    description: "A chronic condition characterized by high levels of sugar in the blood.",
+    category: "Nutritional/Metabolic",
+    symptoms: ["Frequent urination", "Fatigue", "Increased thirst", "Weight loss"],
+    causes: ["Obesity", "Genetics", "Sedentary Life"],
+    treatment: {
+      medications: ["Insulin", "Metformin", "SGLT2 inhibitors"],
+      therapies: ["Glucose monitoring", "Bariatric surgery"],
+      lifestyle_modifications: ["Regular exercise", "Low-GI diet", "Weight management"]
+    },
+    severity: "Moderate to Severe",
+    lab_test_indicators: ["HbA1c test", "Fast Blood Glucose", "Oral Glucose Tolerance"],
+    geographical_prevalence: "Worldwide",
+    comorbidities: ["Retinopathy", "Kidney disease", "Heart disease"],
+    ayurveda: {
+      hindi_name: "मधुमेह",
+      marathi_name: "साखर रोग",
+      doshas: ["Pitta", "Kapha"],
+      prakriti: "Kapha",
+      herbs: ["Jamun", "Gudmar"],
+      formulation: "Fenugreek (3g daily)",
+      yoga: ["Surya Namaskar", "Pranayama"],
+      diet: {
+        eat: ["Low-GI foods", "Green vegetables", "Bitter melon"],
+        avoid: ["Sugary foods", "Processed carb", "Heavy sweets"]
+      },
+      routine: [
+        { time: "06:00 AM", action: "Wake up & drink warm water" },
+        { time: "07:00 AM", action: "Pranayama & Surya Namaskar" },
+        { time: "08:00 PM", action: "Early light dinner" }
+      ],
+      prevention: "Regular exercise & weight management",
+      prognosis: "Chronic, manageable",
+      medical_intervention: ["Insulin", "Oral meds"],
+      complications: ["Retinopathy", "Kidney disease"]
+    }
+  },
+  {
+    id: "ebola",
+    disease: "Ebola Virus Hemorrhagic Fever",
+    scientific_name: "Ebola virus",
+    description: "A severe, often fatal illness in humans caused by infection with an Ebola virus.",
+    category: "Viral",
+    symptoms: ["Fever", "Severe headache", "Vomiting", "Bleeding"],
+    causes: ["Infection with Ebola virus"],
+    treatment: {
+      medications: ["Experimental antiviral treatments"],
+      therapies: ["Supportive care", "Rehydration"],
+      lifestyle_modifications: ["Strict isolation"]
+    },
+    severity: "Severe to Fatal",
+    lab_test_indicators: ["PCR for viral RNA", "ELISA", "Virus isolation"],
+    geographical_prevalence: "Sub-Saharan Africa",
+    comorbidities: ["Organ failure", "Severe dehydration", "Hemorrhage"],
+    ayurveda: {
+      hindi_name: "इबोला",
+      marathi_name: "इबोला",
+      doshas: ["Pitta", "Vata"],
+      prakriti: "Pitta",
+      herbs: ["Guduchi", "Neem"],
+      formulation: "Guduchi Satva (500mg twice daily)",
+      yoga: ["Deep Breathing", "Restorative Yoga"],
+      diet: {
+        eat: ["Hydrating fluids", "Coconut water", "Mung dal soup"],
+        avoid: ["Solid food", "Spicy food", "Heavy dairy"]
+      },
+      routine: [
+        { time: "06:00 AM", action: "Hydration monitoring" },
+        { time: "12:00 PM", action: "Light liquid intake" }
+      ],
+      prevention: "Avoid contact with infected fluids",
+      prognosis: "Guarded, high mortality",
+      medical_intervention: ["Antivirals", "ICU support"],
+      complications: ["Multiorgan failure"]
+    }
+  },
+  {
+    id: "hypertension",
+    disease: "Hypertension",
+    scientific_name: "Hypertensio arterialis",
+    description: "A condition in which the force of the blood against the artery walls is too high.",
+    category: "Autoimmune/Inflammatory",
+    symptoms: ["High blood pressure", "Headache", "Stress", "Dizziness"],
+    causes: ["Salt intake", "Stress", "Sedentary life", "Genetics"],
+    treatment: {
+      medications: ["Beta-blockers", "ACE inhibitors", "Diuretics"],
+      therapies: ["Stress management", "CBT"],
+      lifestyle_modifications: ["Reduce salt", "Regular yoga", "Aerobic exercise"]
+    },
+    severity: "Moderate to Severe",
+    lab_test_indicators: ["Blood pressure monitoring", "Lipid profile", "Kidney function test"],
+    geographical_prevalence: "Worldwide",
+    comorbidities: ["Heart failure", "Stroke", "Kidney disease"],
+    ayurveda: {
+      hindi_name: "उच्च रक्तचाप",
+      marathi_name: "उच्च रक्तदाब",
+      doshas: ["Pitta", "Vata"],
+      prakriti: "Pitta",
+      herbs: ["Ashwagandha", "Arjuna"],
+      formulation: "Ashwagandha (5g daily)",
+      yoga: ["Surya Namaskar", "Meditation", "Savasana"],
+      diet: {
+        eat: ["Whole grains", "Fruits", "Low-salt meals"],
+        avoid: ["Spicy foods", "Excessive salt", "Caffeine"]
+      },
+      routine: [
+        { time: "06:30 AM", action: "Meditation & deep breathing" },
+        { time: "05:00 PM", action: "Gentle evening walk" },
+        { time: "10:00 PM", action: "Restorative sleep" }
+      ],
+      prevention: "Salt restriction & stress management",
+      prognosis: "Manageable with routine",
+      medical_intervention: ["Antihypertensive meds"],
+      complications: ["Heart failure", "Stroke"]
+    }
+  },
+  {
+    id: "migraine",
+    disease: "Migraine",
+    scientific_name: "Migraena",
+    description: "A primary headache disorder characterized by recurrent headaches that are moderate to severe.",
+    category: "Neurological",
+    symptoms: ["Severe headache", "Nausea", "Sensitivity to light", "Vomiting"],
+    causes: ["Stress", "Hormonal changes", "Environmental triggers"],
+    treatment: {
+      medications: ["Pain relievers", "Triptans", "Botox"],
+      therapies: ["Biofeedback", "Massage"],
+      lifestyle_modifications: ["Regular sleep", "Hydration", "Avoid bright lights"]
+    },
+    severity: "Moderate to Severe",
+    lab_test_indicators: ["MRI", "CT Scan", "Neurological exam"],
+    geographical_prevalence: "Worldwide",
+    comorbidities: ["Anxiety", "Depression", "Stroke risk"],
+    ayurveda: {
+      hindi_name: "आधासीसी",
+      marathi_name: "अर्धशिशी",
+      doshas: ["Pitta", "Vata"],
+      prakriti: "Pitta-Vata",
+      herbs: ["Brahmi", "Jatamansi"],
+      formulation: "Peppermint (2 drops in water)",
+      yoga: ["Anulom Vilom", "Pranayama"],
+      diet: {
+        eat: ["Regular warm meals", "Soaked almonds", "Ghee"],
+        avoid: ["Bright lights", "Skipping meals", "Old cheese"]
+      },
+      routine: [
+        { time: "06:00 AM", action: "Nadi Shodhana Pranayama" },
+        { time: "10:00 PM", action: "Dark room relaxation" }
+      ],
+      prevention: "Stress management & hydration",
+      prognosis: "Episodic, manageable",
+      medical_intervention: ["Pain relievers", "Botox"],
+      complications: ["Stroke", "Anxiety"]
+    }
+  }
+];
 
 // --- MOCK DATA ---
 
@@ -94,6 +257,24 @@ const mockRewardActivities: RewardActivity[] = [];
 const mockTestAppointments: TestAppointment[] = [];
 
 // --- DATA FETCHING & MUTATION ---
+
+export const getDiseaseProfile = async (symptoms: string[]): Promise<UnifiedDiseaseProfile | null> => {
+  const s = symptoms.map(sym => sym.toLowerCase());
+  
+  if (s.includes('breathing') || s.includes('wheezing')) 
+    return Promise.resolve(UNIFIED_DISEASE_REGISTRY.find(d => d.id === 'ebola')!); // Mocking high risk for breathing
+    
+  if (s.includes('fever') || s.includes('bleeding')) 
+    return Promise.resolve(UNIFIED_DISEASE_REGISTRY.find(d => d.id === 'ebola')!);
+    
+  if (s.includes('fatigue') || s.includes('urination')) 
+    return Promise.resolve(UNIFIED_DISEASE_REGISTRY.find(d => d.id === 'diabetes')!);
+    
+  if (s.includes('headache') || s.includes('light')) 
+    return Promise.resolve(UNIFIED_DISEASE_REGISTRY.find(d => d.id === 'migraine')!);
+    
+  return Promise.resolve(UNIFIED_DISEASE_REGISTRY.find(d => d.id === 'hypertension')!);
+};
 
 export const getMedicalRecords = async (userId: string): Promise<MedicalRecord[]> => {
   return Promise.resolve(mockMedicalRecords.filter(r => r.userId === userId));
@@ -307,154 +488,4 @@ export const getAppointmentsForClinic = async (clinicId: string): Promise<Appoin
 
 export const getTestAppointmentsForCentre = async (centreId: string): Promise<TestAppointment[]> => {
   return Promise.resolve(mockTestAppointments.filter(a => a.centreId === centreId));
-};
-
-/**
- * AyurGenixAI - Integrated Ayurvedic Knowledge Base
- * Mapping based on 446 patient records across 367 unique diseases.
- */
-const AYURVEDA_DATABASE: AyurvedaRecommendation[] = [
-  {
-    disease: "Diabetes",
-    hindi_name: "मधुमेह",
-    marathi_name: "साखर रोग",
-    doshas: ["Pitta", "Kapha"],
-    prakriti: "Kapha",
-    herbs: ["Jamun", "Gudmar"],
-    formulation: "Fenugreek (3g daily)",
-    yoga: ["Surya Namaskar", "Pranayama"],
-    diet: {
-      eat: ["Low-GI foods", "Green vegetables", "Bitter melon"],
-      avoid: ["Sugary foods", "Processed carb", "Heavy sweets"]
-    },
-    routine: [
-      { time: "06:00 AM", action: "Wake up & drink warm water" },
-      { time: "07:00 AM", action: "Pranayama & Surya Namaskar" },
-      { time: "08:00 PM", action: "Early light dinner" }
-    ],
-    prevention: "Regular exercise & weight management",
-    severity: "Moderate to High",
-    prognosis: "Chronic, manageable",
-    medical_intervention: ["Insulin", "Oral meds"],
-    complications: ["Retinopathy", "Kidney disease"]
-  },
-  {
-    disease: "Hypertension",
-    hindi_name: "उच्च रक्तचाप",
-    marathi_name: "उच्च रक्तदाब",
-    doshas: ["Pitta", "Vata"],
-    prakriti: "Pitta",
-    herbs: ["Ashwagandha", "Arjuna"],
-    formulation: "Ashwagandha (5g daily)",
-    yoga: ["Surya Namaskar", "Meditation", "Savasana"],
-    diet: {
-      eat: ["Whole grains", "Fruits", "Low-salt meals"],
-      avoid: ["Spicy foods", "Excessive salt", "Caffeine"]
-    },
-    routine: [
-      { time: "06:30 AM", action: "Meditation & deep breathing" },
-      { time: "05:00 PM", action: "Gentle evening walk" },
-      { time: "10:00 PM", action: "Restorative sleep" }
-    ],
-    prevention: "Salt restriction & stress management",
-    severity: "High",
-    prognosis: "Manageable with routine",
-    medical_intervention: ["Antihypertensive meds"],
-    complications: ["Heart failure", "Stroke"]
-  },
-  {
-    disease: "Asthma",
-    hindi_name: "दमा",
-    marathi_name: "दमा",
-    doshas: ["Kapha", "Vata"],
-    prakriti: "Kapha",
-    herbs: ["Ashwagandha", "Tulsi"],
-    formulation: "Mulethi (1/2 tsp), Honey (1 tsp)",
-    yoga: ["Pranayama", "Kapalbhati"],
-    diet: {
-      eat: ["Light warm meals", "Ginger", "Black pepper"],
-      avoid: ["Cold drinks", "Dusty environments", "Fermented foods"]
-    },
-    routine: [
-      { time: "06:00 AM", action: "Nadi Shodhana Pranayama" },
-      { time: "08:00 AM", action: "Chest massage with warm oil" },
-      { time: "06:00 PM", action: "Avoid late night heavy meals" }
-    ],
-    prevention: "Avoid allergens & breathing exercises",
-    severity: "Moderate to Severe",
-    prognosis: "Chronic management required",
-    medical_intervention: ["Inhalers", "Steroids"],
-    complications: ["Asthma attacks", "Lung infections"]
-  },
-  {
-    disease: "Common Cold",
-    hindi_name: "सामान्य जुकाम",
-    marathi_name: "सर्दी",
-    doshas: ["Kapha", "Vata"],
-    prakriti: "Kapha",
-    herbs: ["Tulsi", "Ginger"],
-    formulation: "Tulsi leaves (5), Ginger (1g)",
-    yoga: ["Pranayama", "Anulom Vilom"],
-    diet: {
-      eat: ["Warm soups", "Herbal tea", "Spiced milk"],
-      avoid: ["Chilled water", "Ice cream", "Heavy dairy"]
-    },
-    routine: [
-      { time: "07:00 AM", action: "Salt water gargle" },
-      { time: "08:00 AM", action: "Steam inhalation" },
-      { time: "09:00 PM", action: "Warm turmeric milk" }
-    ],
-    prevention: "Hygiene & immunity boosting",
-    severity: "Mild to Moderate",
-    prognosis: "Self-limiting",
-    medical_intervention: ["Decongestants", "Rest"],
-    complications: ["Secondary infections"]
-  },
-  {
-    disease: "Acidity",
-    hindi_name: "अम्लता",
-    marathi_name: "ऍसिडिटी",
-    doshas: ["Pitta"],
-    prakriti: "Pitta",
-    herbs: ["Amla", "Ajwain"],
-    formulation: "Aloe vera (10ml) with water",
-    yoga: ["Sitaliy Pranayama", "Vajrasana"],
-    diet: {
-      eat: ["Cucumber", "Coconut water", "Fennel seeds"],
-      avoid: ["Fried foods", "Spicy masalas", "Citrus fruits"]
-    },
-    routine: [
-      { time: "07:00 AM", action: "Aloe vera juice intake" },
-      { time: "01:00 PM", action: "Post-lunch Vajrasana (5 mins)" },
-      { time: "09:00 PM", action: "Early light dinner" }
-    ],
-    prevention: "Small meals & avoid spicy triggers",
-    severity: "Mild to Moderate",
-    prognosis: "Good with diet control",
-    medical_intervention: ["Antacids", "PPIs"],
-    complications: ["GERD", "Esophagitis"]
-  }
-];
-
-export const getAyurvedaCare = async (symptoms: string[]): Promise<AyurvedaRecommendation | null> => {
-  const s = symptoms.map(s => s.toLowerCase());
-  
-  // Keyword Matching logic representing the "Entity Extraction" (@symptom, @body_part)
-  if (s.includes('breathing') || s.includes('chest') || s.includes('wheezing')) 
-    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Asthma')!);
-    
-  if (s.includes('fever') || s.includes('cough') || s.includes('nose') || s.includes('throat')) 
-    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Common Cold')!);
-    
-  if (s.includes('fatigue') || s.includes('urination') || s.includes('thirst')) 
-    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Diabetes')!);
-    
-  if (s.includes('pain') || s.includes('headache') || s.includes('stress')) 
-    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Hypertension')!);
-    
-  if (s.includes('acid') || s.includes('heartburn') || s.includes('stomach') || s.includes('nausea'))
-    return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Acidity')!);
-  
-  // Default to Acidity/Indigestion for general discomfort
-  return Promise.resolve(AYURVEDA_DATABASE.find(d => d.disease === 'Acidity')!);
 };
