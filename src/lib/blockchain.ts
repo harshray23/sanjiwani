@@ -16,28 +16,43 @@ const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x00000000
 const RPC_URL = process.env.AVAX_RPC || "https://api.avax-test.network/ext/bc/C/rpc";
 
 /**
+ * Validates if a string is a valid Ethereum private key (64 hex chars, optional 0x prefix)
+ */
+function isValidPrivateKey(key: string | undefined): boolean {
+  if (!key) return false;
+  const cleanKey = key.startsWith('0x') ? key.slice(2) : key;
+  return /^[0-9a-fA-F]{64}$/.test(cleanKey);
+}
+
+/**
  * Anchors any data object to Avalanche Fuji using the server's private key.
  * This function is intended to be called from Server Actions or API Routes.
  */
 export async function anchorDataToServerWallet(data: any) {
   const privateKey = process.env.AVAX_PRIVATE_KEY;
 
-  if (!privateKey || privateKey === "YOUR_PRIVATE_KEY_HERE") {
-    console.warn("AVAX_PRIVATE_KEY is missing. Simulating on-chain anchor for demo.");
+  // GRACEFUL FALLBACK: If the key is missing, a placeholder, or invalid hex
+  if (!isValidPrivateKey(privateKey)) {
+    console.warn("AVAX_PRIVATE_KEY is missing or invalid. Simulating on-chain anchor for demo.");
     const dataString = JSON.stringify(data);
     const hash = ethers.keccak256(ethers.toUtf8Bytes(dataString));
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     return {
       hash,
       txId: "simulated-tx-" + Math.random().toString(36).substring(7),
       network: "Avalanche Fuji (Simulated)",
       timestamp: new Date().toISOString(),
-      simulated: true
+      simulated: true,
+      message: "Running in Demo Mode. Add a valid AVAX_PRIVATE_KEY to .env for live transactions."
     };
   }
 
   try {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const wallet = new ethers.Wallet(privateKey, provider);
+    const wallet = new ethers.Wallet(privateKey!, provider);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, wallet);
 
     const dataString = JSON.stringify(data);
