@@ -2,18 +2,18 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Loader2, Siren, MapPin, Navigation, Clock, Zap, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-// Load map only on the client
+// Load map only on the client with a persistent loader to prevent layout shifts
 const HealthcareMap = dynamic(() => import("@/components/HealthcareMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-muted/20 animate-pulse">
+    <div className="flex flex-col items-center justify-center h-full w-full bg-muted/20">
       <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
       <p className="text-muted-foreground font-medium">Initializing AI Dispatcher...</p>
     </div>
@@ -25,6 +25,15 @@ export default function EmergencyPage() {
   const [routeInfo, setRouteInfo] = useState<{ distance: number; time: number; ambulanceId: string } | null>(null);
   const [isDispatching, setIsDispatching] = useState(false);
   const [ambulanceCount, setAmbulanceCount] = useState(0);
+
+  // Memoize callbacks to prevent the map from re-initializing when state changes
+  const handleRouteFound = useCallback((info: { distance: number; time: number; ambulanceId: string }) => {
+    setRouteInfo(info);
+  }, []);
+
+  const handleAmbulancesFound = useCallback((count: number) => {
+    setAmbulanceCount(count);
+  }, []);
 
   const handleDispatch = () => {
     setIsDispatching(true);
@@ -42,8 +51,8 @@ export default function EmergencyPage() {
       {/* Left Column: Interactive Map */}
       <div className="flex-grow rounded-2xl overflow-hidden shadow-2xl border-4 border-white/50 relative bg-muted/10">
         <HealthcareMap 
-          onRouteFound={(info) => setRouteInfo(info)} 
-          onAmbulancesFound={(count) => setAmbulanceCount(count)}
+          onRouteFound={handleRouteFound} 
+          onAmbulancesFound={handleAmbulancesFound}
         />
         
         {/* Map Overlays */}

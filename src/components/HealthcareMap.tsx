@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -39,13 +39,22 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
   const mapRef = useRef<L.Map | null>(null);
   const routingControlRef = useRef<any>(null);
   const isMountedRef = useRef<boolean>(true);
+  
+  // Use refs for callbacks to avoid re-initializing map when callbacks change
+  const onRouteFoundRef = useRef(onRouteFound);
+  const onAmbulancesFoundRef = useRef(onAmbulancesFound);
+
+  useEffect(() => {
+    onRouteFoundRef.current = onRouteFound;
+    onAmbulancesFoundRef.current = onAmbulancesFound;
+  }, [onRouteFound, onAmbulancesFound]);
 
   useEffect(() => {
     isMountedRef.current = true;
     if (typeof window === 'undefined') return;
     if (!containerRef.current || mapRef.current) return;
 
-    // Dynamically load the routing machine plugin
+    // Dynamically load the routing machine plugin exactly once
     if (!(L as any).Routing) {
       require("leaflet-routing-machine");
     }
@@ -93,7 +102,6 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
       if (routingControlRef.current) {
         try {
           const ctrl = routingControlRef.current;
-          // Important: Stop any ongoing requests and clear visual state
           if (ctrl.getPlan) {
             ctrl.getPlan().setWaypoints([]);
           }
@@ -123,24 +131,19 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
         routingControlRef.current = control;
 
         control.on('routesfound', (e: any) => {
-          // Check if we are still mounted AND the control is still the active one
           if (!isMountedRef.current || !mapRef.current || routingControlRef.current !== control) return;
           
           const route = e.routes[0];
-          if (onRouteFound && route) {
-            onRouteFound({
+          if (onRouteFoundRef.current && route) {
+            onRouteFoundRef.current({
               distance: route.summary.totalDistance,
               time: route.summary.totalTime,
               ambulanceId: ambId
             });
           }
         });
-
-        control.on('routingerror', (e: any) => {
-          console.warn("Routing engine error:", e.error);
-        });
       } catch (err) {
-        console.error("Failed to initialize LRM control:", err);
+        console.error("Failed to initialize routing control:", err);
       }
     };
 
@@ -166,7 +169,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
           .bindPopup(`<b>Ambulance ${amb.id}</b><br/>Status: ${amb.status}`);
       });
 
-      if (onAmbulancesFound) onAmbulancesFound(ambs.length);
+      if (onAmbulancesFoundRef.current) onAmbulancesFoundRef.current(ambs.length);
 
       const nearest = ambs.sort((a, b) => 
         getHaversineDistance([lat, lon], [a.lat, a.lng]) - 
@@ -214,7 +217,7 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
 
           L.marker([lat, lon])
             .addTo(mapRef.current)
-            .bindPopup("📍 Your Location (Emergency Origin)")
+            .bindPopup("📍 Your Location")
             .openPopup();
 
           generateMockAmbulances(lat, lon);
@@ -232,31 +235,25 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     return () => {
       isMountedRef.current = false;
       
-      // CRITICAL: REMOVE ROUTING CONTROL BEFORE THE MAP
       if (routingControlRef.current && mapRef.current) {
         try {
           const ctrl = routingControlRef.current;
-          // Clear waypoints to stop internal line drawing before removal
           if (ctrl.getPlan) {
             ctrl.getPlan().setWaypoints([]);
           }
           mapRef.current.removeControl(ctrl);
-        } catch (e) {
-          // Ignore errors during unmount to prevent double-crash
-        }
+        } catch (e) {}
         routingControlRef.current = null;
       }
 
       if (mapRef.current) {
         try {
           mapRef.current.remove();
-        } catch (e) {
-          // Ignore
-        }
+        } catch (e) {}
         mapRef.current = null;
       }
     };
-  }, [onRouteFound, onAmbulancesFound]);
+  }, []); // Run only once on mount
 
   return (
     <div className="relative w-full h-full">
