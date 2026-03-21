@@ -19,33 +19,56 @@ const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x00000000
  * Client-side: Connect to user's MetaMask wallet
  */
 export async function connectWallet() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      
-      const network = await provider.getNetwork();
-      // Avalanche Fuji Chain ID is 43113
-      if (network.chainId !== 43113n) {
-        alert("Please switch your MetaMask network to Avalanche Fuji Testnet!");
-        return null;
-      }
+  if (typeof window === 'undefined') return null;
 
-      return { provider, address: accounts[0] };
-    } catch (error) {
-      console.error("Wallet connection failed", error);
-      return null;
-    }
+  const ethereum = (window as any).ethereum;
+  if (!ethereum) {
+    throw new Error("MetaMask is not installed. Please install the MetaMask extension to verify data on-chain.");
   }
-  return null;
+
+  try {
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    const provider = new ethers.BrowserProvider(ethereum);
+    
+    const network = await provider.getNetwork();
+    // Avalanche Fuji Chain ID is 43113
+    if (Number(network.chainId) !== 43113) {
+      try {
+        await ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xa869' }], // 43113 in hex
+        });
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0xa869',
+              chainName: 'Avalanche Fuji Testnet',
+              nativeCurrency: { name: 'AVAX', symbol: 'AVAX', decimals: 18 },
+              rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
+              blockExplorerUrls: ['https://testnet.snowtrace.io/']
+            }],
+          });
+        } else {
+          throw switchError;
+        }
+      }
+    }
+
+    return { provider, address: accounts[0] };
+  } catch (error: any) {
+    console.error("Wallet connection failed", error);
+    throw new Error(error.message || "Failed to connect wallet.");
+  }
 }
 
 /**
- * Client-side: Anchors data using MetaMask (good for manual updates like hospital beds)
+ * Client-side: Anchors data using MetaMask
  */
 export async function anchorDataToAvalanche(data: any) {
   const connection = await connectWallet();
-  if (!connection) throw new Error("No crypto wallet detected or incorrect network. Please use MetaMask on Avalanche Fuji.");
+  if (!connection) throw new Error("Wallet connection failed.");
 
   const dataString = JSON.stringify(data);
   const hash = ethers.keccak256(ethers.toUtf8Bytes(dataString));
@@ -61,7 +84,7 @@ export async function anchorDataToAvalanche(data: any) {
       hash,
       timestamp: new Date().toISOString(),
       network: "Avalanche Fuji C-Chain",
-      txId: receipt.hash,
+      txId: receipt?.hash,
       verified: true
     };
   } catch (error: any) {
@@ -71,7 +94,7 @@ export async function anchorDataToAvalanche(data: any) {
 }
 
 /**
- * Server-side: Anchors data using a private key (for automated proofs like payment)
+ * Server-side: Anchors data using a private key
  */
 export async function anchorPaymentServer(paymentData: { id: string, amount: number, email: string }) {
   const rpcUrl = process.env.AVAX_RPC || "https://api.avax-test.network/ext/bc/C/rpc";
@@ -87,22 +110,20 @@ export async function anchorPaymentServer(paymentData: { id: string, amount: num
     const wallet = new ethers.Wallet(privateKey, provider);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, wallet);
 
-    // Create a deterministic hash of stable payment fields
     const paymentString = JSON.stringify({
       id: paymentData.id,
       amount: paymentData.amount,
       email: paymentData.email,
-      timestamp: new Date().toISOString().split('T')[0] // Day accuracy for privacy
+      timestamp: new Date().toISOString().split('T')[0]
     });
     const hash = ethers.keccak256(ethers.toUtf8Bytes(paymentString));
 
-    // Sign and send transaction
     const tx = await contract.storeHash(hash);
     const receipt = await tx.wait();
 
     return {
       hash,
-      txId: receipt.hash,
+      txId: receipt?.hash,
       verified: true
     };
   } catch (error) {

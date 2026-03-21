@@ -72,7 +72,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Suspense fallback={<Button>Login</Button>}>
+            <Suspense fallback={<Button disabled>Loading...</Button>}>
               <UserNav />
             </Suspense>
           </nav>

@@ -10,6 +10,7 @@ import { Suspense } from 'react';
 import { AppLoader } from '@/components/layout/AppLoader';
 import { PageTransitionWrapper } from '@/components/layout/PageTransitionWrapper';
 import BotpressChat from '@/components/BotpressChat';
+import { FirebaseClientProvider } from '@/firebase';
  
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -32,17 +33,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", fontSans.variable)}>
-        <AppLoader>
-          <Header />
-          <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
-            <PageTransitionWrapper>
-              {children}
-            </PageTransitionWrapper>
-          </main>
-          <Footer />
-          <Toaster />
-          <BotpressChat />
-        </AppLoader>
+        <FirebaseClientProvider>
+          <AppLoader>
+            <Header />
+            <main className="flex-grow flex items-start justify-center container mx-auto px-4 py-8">
+              <PageTransitionWrapper>
+                {children}
+              </PageTransitionWrapper>
+            </main>
+            <Footer />
+            <Toaster />
+            <BotpressChat />
+          </AppLoader>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
