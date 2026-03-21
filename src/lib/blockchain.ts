@@ -16,6 +16,13 @@ const DATA_PROOF_ABI = [
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 /**
+ * Check if MetaMask is installed
+ */
+export function isMetaMaskInstalled() {
+  return typeof window !== 'undefined' && !!(window as any).ethereum;
+}
+
+/**
  * Client-side: Connect to user's MetaMask wallet
  */
 export async function connectWallet() {
@@ -23,7 +30,7 @@ export async function connectWallet() {
 
   const ethereum = (window as any).ethereum;
   if (!ethereum) {
-    throw new Error("MetaMask is not installed. Please install the MetaMask extension to verify data on-chain.");
+    throw new Error("MetaMask is not installed. Please install the MetaMask extension from metamask.io to verify data on-chain.");
   }
 
   try {

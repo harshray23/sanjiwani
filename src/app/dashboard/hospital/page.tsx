@@ -6,7 +6,7 @@ import { searchHospitals } from '@/lib/data';
 import type { Hospital, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { BedDouble, UserPlus, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2, ExternalLink } from "lucide-react";
+import { BedDouble, UserPlus, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2, ExternalLink, AlertTriangle } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -15,16 +15,19 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { anchorDataToAvalanche } from '@/lib/blockchain';
+import { anchorDataToAvalanche, isMetaMaskInstalled } from '@/lib/blockchain';
 
 const HospitalDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
   const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [hasMetaMask, setHasMetaMask] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
+    setHasMetaMask(isMetaMaskInstalled());
+    
     const storedUser = localStorage.getItem('mockUser');
     const currentUser = storedUser ? JSON.parse(storedUser) : null;
     setUserProfile(currentUser);
@@ -64,6 +67,16 @@ const HospitalDashboard = () => {
 
   const handleAvalancheVerify = async () => {
     if (!hospital) return;
+    if (!isMetaMaskInstalled()) {
+        toast({
+            title: "MetaMask Required",
+            description: "Please install the MetaMask extension to verify data on-chain.",
+            variant: "destructive"
+        });
+        setHasMetaMask(false);
+        return;
+    }
+
     setIsVerifying(true);
     try {
       // LIVE ANCHORING: This now triggers a MetaMask transaction
@@ -143,6 +156,23 @@ const HospitalDashboard = () => {
 
   return (
     <div className="py-12 w-full max-w-5xl mx-auto">
+      {!hasMetaMask && (
+        <Card className="mb-8 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-6 w-6 text-orange-600" />
+                    <div>
+                        <p className="font-bold text-orange-800 dark:text-orange-400">MetaMask Extension Missing</p>
+                        <p className="text-sm text-orange-700 dark:text-orange-500">You need MetaMask to anchor data to the Avalanche blockchain.</p>
+                    </div>
+                </div>
+                <Button asChild variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white">
+                    <Link href="https://metamask.io/download/" target="_blank">Install MetaMask</Link>
+                </Button>
+            </CardContent>
+        </Card>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-accent">Hospital Dashboard</h1>

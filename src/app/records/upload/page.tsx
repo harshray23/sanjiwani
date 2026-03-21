@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft } from "lucide-react";
-import { anchorDataToAvalanche } from '@/lib/blockchain';
+import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft, AlertTriangle } from "lucide-react";
+import { anchorDataToAvalanche, isMetaMaskInstalled } from '@/lib/blockchain';
 import { createVerifiedRecord } from '@/lib/data';
 import type { User } from '@/lib/types';
 import Link from 'next/link';
@@ -18,6 +18,7 @@ export default function UploadRecordPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [hasMetaMask, setHasMetaMask] = useState(true);
   const [formData, setForm] = useState({
     patientName: '',
     age: '',
@@ -30,6 +31,7 @@ export default function UploadRecordPage() {
   const router = useRouter();
 
   useEffect(() => {
+    setHasMetaMask(isMetaMaskInstalled());
     const storedUser = localStorage.getItem('mockUser');
     if (storedUser) setUser(JSON.parse(storedUser));
     else router.push('/login');
@@ -41,6 +43,16 @@ export default function UploadRecordPage() {
     if (!file) {
       toast({ title: "No file selected", description: "Please upload a report file.", variant: "destructive" });
       return;
+    }
+
+    if (!isMetaMaskInstalled()) {
+        toast({
+            title: "MetaMask Required",
+            description: "Please install the MetaMask extension to verify your records on-chain.",
+            variant: "destructive"
+        });
+        setHasMetaMask(false);
+        return;
     }
 
     setIsVerifying(true);
@@ -85,6 +97,23 @@ export default function UploadRecordPage() {
 
   return (
     <div className="py-12 w-full max-w-2xl mx-auto">
+      {!hasMetaMask && (
+        <Card className="mb-8 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-6 w-6 text-orange-600" />
+                    <div>
+                        <p className="font-bold text-orange-800 dark:text-orange-400">MetaMask Extension Missing</p>
+                        <p className="text-sm text-orange-700 dark:text-orange-500">You need MetaMask to verify medical records on the blockchain.</p>
+                    </div>
+                </div>
+                <Button asChild variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white">
+                    <Link href="https://metamask.io/download/" target="_blank">Install MetaMask</Link>
+                </Button>
+            </CardContent>
+        </Card>
+      )}
+
       <div className="mb-6">
         <Button asChild variant="ghost" className="mb-4">
           <Link href="/records"><ArrowLeft className="mr-2 h-4 w-4"/> Back to Records</Link>
