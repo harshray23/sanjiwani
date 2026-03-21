@@ -47,7 +47,31 @@ export const performTriage = ai.defineFlow(
     outputSchema: TriageOutputSchema,
   },
   async (input) => {
-    const { output } = await triagePrompt(input);
-    return output!;
+    try {
+      const { output } = await triagePrompt(input);
+      return output!;
+    } catch (error: any) {
+      console.error("AI Triage Flow Error:", error);
+      
+      // Fallback for Demo Mode if AI service is not configured
+      if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('not found') || error.message?.includes('403')) {
+        const symptoms = input.symptoms.toLowerCase();
+        
+        // Simple keyword-based logic for demo stability
+        const isHigh = symptoms.includes('chest pain') || symptoms.includes('bleed') || symptoms.includes('breath') || symptoms.includes('accident');
+        
+        return {
+          severity: isHigh ? 'High' : 'Medium',
+          possibleConditions: isHigh ? ['Acute Cardiovascular Event', 'Severe Trauma'] : ['Viral Infection', 'Moderate Fatigue'],
+          recommendedResources: {
+            icuBed: isHigh,
+            bloodGroup: symptoms.includes('bleed') ? 'O-' : undefined,
+            specialty: isHigh ? 'Emergency Medicine' : 'General Physician'
+          },
+          advice: "Demo Mode: Based on your input, we recommend immediate medical attention. Please proceed to the nearest emergency facility."
+        };
+      }
+      throw error;
+    }
   }
 );

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Activity, ShieldAlert, HeartPulse, Send, ArrowRight } from "lucide-react";
+import { Loader2, Activity, ShieldAlert, HeartPulse, Send, ArrowRight, Info } from "lucide-react";
 import { performTriage } from '@/ai/flows/triage-flow';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,8 +17,12 @@ export default function TriagePage() {
   const router = useRouter();
 
   const handleTriage = async () => {
-    if (symptoms.length < 10) {
-      toast({ title: "More detail needed", description: "Please describe your symptoms in at least 10 characters.", variant: "destructive" });
+    if (symptoms.trim().length < 10) {
+      toast({ 
+        title: "More detail needed", 
+        description: "Please describe your symptoms in at least 10 characters.", 
+        variant: "destructive" 
+      });
       return;
     }
 
@@ -26,8 +30,20 @@ export default function TriagePage() {
     try {
       const triageResult = await performTriage({ symptoms });
       setResult(triageResult);
-    } catch (error) {
-      toast({ title: "Analysis Failed", description: "AI service is currently busy. Please try again.", variant: "destructive" });
+      
+      if (triageResult.advice.includes("Demo Mode")) {
+        toast({
+          title: "Demo Mode Active",
+          description: "AI service is offline. Using local emergency matching.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Triage Error:", error);
+      toast({ 
+        title: "Analysis Failed", 
+        description: "The AI dispatcher is currently unreachable. Please ensure your Gemini API key is configured.", 
+        variant: "destructive" 
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -132,6 +148,13 @@ export default function TriagePage() {
                   <p className="text-sm leading-relaxed">{result.advice}</p>
                 </div>
               </div>
+              
+              {result.advice.includes("Demo Mode") && (
+                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-100 rounded-lg text-xs text-yellow-700">
+                  <Info className="h-4 w-4" />
+                  AI service offline. Result generated via local fallback logic.
+                </div>
+              )}
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               {result.severity === 'High' || result.severity === 'Medium' ? (
