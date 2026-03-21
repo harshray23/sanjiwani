@@ -8,15 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft, Info } from "lucide-react";
+import { Loader2, ShieldCheck, FileUp, Hash, ExternalLink, ArrowLeft, Info, SearchCheck } from "lucide-react";
 import { createVerifiedRecord } from '@/lib/data';
 import type { User } from '@/lib/types';
 import Link from 'next/link';
 import axios from 'axios';
+import { validateMedicalRecord } from '@/ai/flows/validate-record-flow';
 
 export default function UploadRecordPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [formData, setForm] = useState({
     patientName: '',
     age: '',
@@ -34,6 +36,15 @@ export default function UploadRecordPage() {
     else router.push('/login');
   }, [router]);
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -43,15 +54,34 @@ export default function UploadRecordPage() {
     }
 
     setIsVerifying(true);
+    setValidationMessage("AI: Analyzing record content...");
+
     try {
-      // Step 1: Create cryptographic hash metadata
+      // Step 1: AI Reading & Validation
+      const fileDataUri = await fileToBase64(file);
+      const validation = await validateMedicalRecord({ fileDataUri });
+
+      if (!validation.isMedicalRecord) {
+        toast({
+          title: "Invalid Document",
+          description: validation.reason || "The uploaded file does not appear to be a medical record.",
+          variant: "destructive"
+        });
+        setIsVerifying(false);
+        setValidationMessage(null);
+        return;
+      }
+
+      setValidationMessage("Integrity Layer: Anchoring to Avalanche...");
+
+      // Step 2: Create cryptographic hash metadata
       const metadata = { ...formData, fileName: file.name };
       
-      // Step 2: Anchor to Avalanche via Server API (Zero Friction)
+      // Step 3: Anchor to Avalanche via Server API
       const response = await axios.post('/api/anchor', { data: metadata });
       const anchorResult = response.data;
       
-      // Step 3: Save to Data Layer
+      // Step 4: Save to Data Layer
       await createVerifiedRecord(
         user.uid,
         {
@@ -68,18 +98,20 @@ export default function UploadRecordPage() {
 
       toast({
         title: "Record Verified & Stored!",
-        description: "Your report has been anchored to Avalanche Fuji automatically.",
+        description: "Your report has been AI-validated and anchored to Avalanche.",
       });
 
       router.push('/records');
     } catch (error: any) {
+      console.error(error);
       toast({
-        title: "Verification Failed",
-        description: error.response?.data?.error || "On-chain verification encountered an error. Simulating for demo.",
+        title: "Process Failed",
+        description: error.response?.data?.error || "An error occurred during validation or anchoring.",
         variant: "destructive"
       });
     } finally {
       setIsVerifying(false);
+      setValidationMessage(null);
     }
   };
 
@@ -90,7 +122,7 @@ export default function UploadRecordPage() {
           <Link href="/records"><ArrowLeft className="mr-2 h-4 w-4"/> Back to Records</Link>
         </Button>
         <h1 className="text-3xl font-bold font-headline text-accent">Upload Medical Record</h1>
-        <p className="text-muted-foreground">Immutable audit trail of your health history, powered by Avalanche.</p>
+        <p className="text-muted-foreground">AI-validated medical proofs, powered by Avalanche.</p>
       </div>
 
       <Card className="shadow-xl">
@@ -100,7 +132,7 @@ export default function UploadRecordPage() {
               <FileUp className="text-primary"/>
               Record Details
             </CardTitle>
-            <CardDescription>We automatically anchor a hash of these details to the blockchain for permanent verification.</CardDescription>
+            <CardDescription>Our AI will read the file to ensure it is a valid medical record before anchoring.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -140,15 +172,15 @@ export default function UploadRecordPage() {
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full h-12 text-lg" disabled={isVerifying}>
               {isVerifying ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin"/> Anchoring to Avalanche...</>
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin"/> {validationMessage}</>
               ) : (
-                <><ShieldCheck className="mr-2 h-5 w-5"/> Submit & Secure on Blockchain</>
+                <><SearchCheck className="mr-2 h-5 w-5"/> Validate & Secure</>
               )}
             </Button>
             <div className="bg-primary/5 p-3 rounded-lg flex gap-3 items-start">
                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5"/>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                    <strong>Zero-Friction Trust:</strong> No MetaMask required. Our system handles the blockchain interaction for you, ensuring your records are tamper-proof without the complexity of crypto wallets.
+                    <strong>Zero-Friction Integrity:</strong> We use Gemini AI to verify document authenticity and then anchor it to Avalanche for immutable proof.
                 </p>
             </div>
           </CardFooter>

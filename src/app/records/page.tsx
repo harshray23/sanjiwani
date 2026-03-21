@@ -32,6 +32,14 @@ export default function RecordsPage() {
     }
   }, []);
 
+  const handleViewReport = (url: string) => {
+    if (url === '#') {
+      alert("This is a demo record. In a real scenario, this would open the verified document.");
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
@@ -79,55 +87,62 @@ export default function RecordsPage() {
         </Card>
       ) : (
         <div className="grid gap-6">
-          {records.map(record => (
-            <Card key={record.id} className="overflow-hidden border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3 bg-muted/30">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <ShieldCheck className="h-6 w-6 text-green-600"/>
+          {records.map(record => {
+            const isSimulated = record.txHash?.startsWith('simulated-');
+            return (
+              <Card key={record.id} className="overflow-hidden border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3 bg-muted/30">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <ShieldCheck className="h-6 w-6 text-green-600"/>
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-headline">{record.testType}</CardTitle>
+                        <CardDescription className="flex items-center gap-2">
+                          <Clock className="h-3 w-3"/> Verified on {new Date(record.createdAt).toLocaleDateString()}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-xl font-headline">{record.testType}</CardTitle>
-                      <CardDescription className="flex items-center gap-2">
-                        <Clock className="h-3 w-3"/> Verified on {new Date(record.createdAt).toLocaleDateString()}
-                      </CardDescription>
-                    </div>
+                    <Badge className="bg-green-600">On-Chain Verified</Badge>
                   </div>
-                  <Badge className="bg-green-600">On-Chain Verified</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="py-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div className="space-y-1">
-                  <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Patient</p>
-                  <p className="font-semibold flex items-center gap-2"><UserIcon className="h-4 w-4"/> {record.patientName} ({record.age}y)</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Facility</p>
-                  <p className="font-semibold">{record.hospitalName}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Test Date</p>
-                  <p className="font-semibold">{record.testDate}</p>
-                </div>
-              </CardContent>
-              <CardFooter className="bg-muted/10 border-t py-3 flex flex-col sm:flex-row justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
-                  <Hash className="h-3 w-3"/> Fingerprint: {record.onChainHash.slice(0, 16)}...
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
-                    <Link href={`https://testnet.snowtrace.io/tx/${record.txHash}`} target="_blank">
-                      <ExternalLink className="mr-2 h-3 w-3"/> View Avalanche Proof
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="secondary" className="flex-1 sm:flex-none">
-                    View Report
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent className="py-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Patient</p>
+                    <p className="font-semibold flex items-center gap-2"><UserIcon className="h-4 w-4"/> {record.patientName} ({record.age}y)</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Facility</p>
+                    <p className="font-semibold">{record.hospitalName}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground uppercase text-xs font-bold tracking-wider">Test Date</p>
+                    <p className="font-semibold">{record.testDate}</p>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-muted/10 border-t py-3 flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+                    <Hash className="h-3 w-3"/> Fingerprint: {record.onChainHash.slice(0, 16)}...
+                  </div>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    {isSimulated ? (
+                      <Badge variant="outline" className="h-9 px-4 border-dashed">Simulation Mode Proof</Badge>
+                    ) : (
+                      <Button variant="outline" size="sm" asChild className="flex-1 sm:flex-none">
+                        <Link href={`https://testnet.snowtrace.io/tx/${record.txHash}`} target="_blank">
+                          <ExternalLink className="mr-2 h-3 w-3"/> View Avalanche Proof
+                        </Link>
+                      </Button>
+                    )}
+                    <Button size="sm" variant="secondary" className="flex-1 sm:flex-none" onClick={() => handleViewReport(record.fileUrl)}>
+                      View Report
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
