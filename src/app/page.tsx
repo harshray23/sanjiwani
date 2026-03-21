@@ -38,6 +38,7 @@ export default function HomePage() {
   ]
 
   const quote = "We don’t use blockchain for storing healthcare data—that would be inefficient. Instead, we use Avalanche as a verification layer to ensure that critical hospital data like ICU beds and blood availability cannot be tampered with. This creates trust in a system where misinformation can cost lives.";
+  const visionMeaning = "Health is the supreme foundation of dharma (righteousness), artha (prosperity), karma (pleasure), and mokṣa (liberation). For one who is healthy, welfare and success are assured. Health indeed is the means for the attainment of all goals of life.";
 
   return (
     <div className="w-full space-y-20">
@@ -125,14 +126,26 @@ export default function HomePage() {
       </section>
       
       {/* Running Text Animation Section */}
-       <div className="bg-primary/10 text-primary-foreground dark:text-primary-foreground font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
-        <div className="absolute flex">
-            <p className="animate-marquee py-2 text-primary">
-                <span className="mx-16 uppercase tracking-widest">{quote}</span>
-            </p>
-             <p className="animate-marquee py-2 text-primary" aria-hidden="true">
-                <span className="mx-16 uppercase tracking-widest">{quote}</span>
-            </p>
+      <div className="space-y-1">
+        <div className="bg-primary/10 text-primary font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+          <div className="absolute flex">
+              <p className="animate-marquee py-2">
+                  <span className="mx-16 uppercase tracking-widest">{quote}</span>
+              </p>
+              <p className="animate-marquee py-2" aria-hidden="true">
+                  <span className="mx-16 uppercase tracking-widest">{quote}</span>
+              </p>
+          </div>
+        </div>
+        <div className="bg-accent/10 text-accent font-semibold overflow-hidden whitespace-nowrap relative h-10 flex items-center">
+          <div className="absolute flex">
+              <p className="animate-marquee py-2" style={{ animationDirection: 'reverse' }}>
+                  <span className="mx-16 uppercase tracking-widest">{visionMeaning}</span>
+              </p>
+              <p className="animate-marquee py-2" aria-hidden="true" style={{ animationDirection: 'reverse' }}>
+                  <span className="mx-16 uppercase tracking-widest">{visionMeaning}</span>
+              </p>
+          </div>
         </div>
       </div>
       
