@@ -80,7 +80,6 @@ export const createVerifiedRecord = async (userId: string, record: Omit<MedicalR
     createdAt: new Date().toISOString()
   };
   mockMedicalRecords.push(newRecord);
-  // Add reward for record upload
   await rewardUser(userId, 'Record Upload', 10, txHash);
   return Promise.resolve(newRecord);
 };
@@ -217,6 +216,18 @@ export const createAppointment = async (patientId: string, doctorId: string, cli
     };
     mockAppointments.push(newAppointment);
     return Promise.resolve(newAppointment);
+}
+
+export const getAppointmentById = async (id: string): Promise<Appointment | undefined> => {
+    return Promise.resolve(mockAppointments.find(a => a.id === id));
+}
+
+export const updateAppointmentWithProof = async (id: string, onChainHash: string, txHash: string): Promise<void> => {
+    const index = mockAppointments.findIndex(a => a.id === id);
+    if (index !== -1) {
+        mockAppointments[index].onChainHash = onChainHash;
+        mockAppointments[index].txHash = txHash;
+    }
 }
 
 export const updateUserProfile = async (uid: string, data: Partial<User>) => {

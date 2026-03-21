@@ -81,6 +81,9 @@ export interface Appointment {
   clinic?: ClinicProfile;
   hospital?: Hospital;
   centre?: DiagnosticsCentre;
+  // Blockchain Proofs
+  onChainHash?: string;
+  txHash?: string;
 }
 
 export interface Report {
@@ -109,7 +112,7 @@ export interface MedicalRecord {
 export interface RewardActivity {
   id: string;
   userId: string;
-  action: 'Record Upload' | 'Hospital Update' | 'Blood Donation' | 'Doctor Verification';
+  action: 'Record Upload' | 'Hospital Update' | 'Blood Donation' | 'Doctor Verification' | 'Payment Proof';
   points: number;
   timestamp: string;
   txHash?: string;
@@ -122,6 +125,8 @@ export interface Payment {
   amount: number;
   status: 'pending' | 'success' | 'failed' | 'refunded';
   createdAt: any;
+  onChainHash?: string;
+  txHash?: string;
 }
 
 export interface AdminLog {
@@ -242,4 +247,6 @@ export interface TestAppointment {
   time: string;
   status: 'Scheduled' | 'Completed' | 'Report Ready' | 'Cancelled';
   reportUrl?: string;
+  onChainHash?: string;
+  txHash?: string;
 }

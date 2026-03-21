@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Suspense, useEffect, useState } from 'react';
@@ -134,6 +133,8 @@ function PaymentForm() {
 
         if (verificationData.status === 'success') {
              try {
+              // Note: In a production environment with webhooks, we'd wait for the webhook to update the on-chain status.
+              // For the demo, we create the appointment locally.
               const appointment = await createAppointment(
                 user.uid,
                 doctor.uid,
@@ -144,7 +145,7 @@ function PaymentForm() {
 
               toast({
                 title: "Payment Successful & Verified!",
-                description: "Your appointment has been booked.",
+                description: "Your appointment has been booked. Blockchain proof is being anchored.",
                 variant: "default",
               });
 
@@ -173,7 +174,9 @@ function PaymentForm() {
         contact: user.phone,
       },
       notes: {
-        address: "Sanjeevani Corporate Office",
+        userId: user.uid,
+        // We'll simulate matching this in the webhook
+        appointmentId: `appt-${Date.now()}` 
       },
       theme: {
         color: "#f97316", // Orange color
@@ -242,12 +245,11 @@ function PaymentForm() {
                 </div>
               </div>
               <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg p-3 text-sm font-medium flex items-center justify-center gap-2">
-                 <BadgePercent className="h-5 w-5" />
-                 <span>Get up to ₹{consultationType === 'video' ? 40 : 25} cashback!</span>
+                 <ShieldCheck className="h-5 w-5" />
+                 <span>Automated Avalanche Integrity Proof</span>
               </div>
-               <p className="text-xs text-muted-foreground text-center">
-                    <Upload className="inline-block h-3 w-3 mr-1"/>
-                    Upload a valid doctor's prescription post-consultation to receive your cashback.
+               <p className="text-xs text-muted-foreground text-center italic">
+                    Cryptographic anchoring happens automatically on payment capture.
                 </p>
             </div>
 

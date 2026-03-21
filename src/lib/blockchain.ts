@@ -6,25 +6,24 @@ import { ethers } from 'ethers';
  * Interacts with Avalanche C-Chain Fuji Testnet to verify healthcare data.
  */
 
-// ABI generated from Step 2
+// ABI for the DataProof contract
 const DATA_PROOF_ABI = [
   "function storeHash(string memory _hash) public",
   "function getRecords() public view returns (tuple(string hash, uint256 timestamp)[])",
   "event DataStored(address indexed sender, string hash, uint256 timestamp)"
 ];
 
-// This address should be updated after you run: npx hardhat run scripts/deploy.js --network fuji
-// Defaulting to a placeholder or a pre-deployed instance for the demo
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
 
+/**
+ * Client-side: Connect to user's MetaMask wallet
+ */
 export async function connectWallet() {
   if (typeof window !== 'undefined' && (window as any).ethereum) {
     try {
-      // Request account access
       const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
       const provider = new ethers.BrowserProvider((window as any).ethereum);
       
-      // Verify if we are on Avalanche Fuji (Chain ID: 43113)
       const network = await provider.getNetwork();
       if (network.chainId !== 43113n) {
         alert("Please switch your MetaMask network to Avalanche Fuji Testnet!");
@@ -41,27 +40,20 @@ export async function connectWallet() {
 }
 
 /**
- * Anchors data to Avalanche C-Chain
- * This version uses the user's MetaMask for a visible, live demo experience.
+ * Client-side: Anchors data using MetaMask (good for manual updates like hospital beds)
  */
 export async function anchorDataToAvalanche(data: any) {
   const connection = await connectWallet();
-  if (!connection) throw new Error("No crypto wallet detected or incorrect network. Please install MetaMask and use Avalanche Fuji.");
+  if (!connection) throw new Error("No crypto wallet detected or incorrect network. Please use MetaMask on Avalanche Fuji.");
 
-  // Step 1: Create a hash of the current data state (tamper-proof fingerprint)
   const dataString = JSON.stringify(data);
   const hash = ethers.keccak256(ethers.toUtf8Bytes(dataString));
 
-  console.log(`[Avalanche Trust Layer] Prepared hash for anchoring: ${hash}`);
-  
   try {
     const signer = await connection.provider.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, signer);
 
-    // Step 2: Trigger live transaction
     const tx = await contract.storeHash(hash);
-    
-    // Step 3: Wait for block confirmation (Wait 1 block for Fuji speed)
     const receipt = await tx.wait();
 
     return {
@@ -77,11 +69,43 @@ export async function anchorDataToAvalanche(data: any) {
   }
 }
 
-export function getVerificationBadge(hash: string | null) {
-  if (!hash) return null;
-  return {
-    label: "On-Chain Verified",
-    network: "Avalanche",
-    status: "Verified"
-  };
+/**
+ * Server-side: Anchors data using a private key (for automated proofs like payment)
+ */
+export async function anchorPaymentServer(paymentData: { id: string, amount: number, email: string }) {
+  const rpcUrl = process.env.AVAX_RPC || "https://api.avax-test.network/ext/bc/C/rpc";
+  const privateKey = process.env.AVAX_PRIVATE_KEY;
+
+  if (!privateKey) {
+    console.warn("AVAX_PRIVATE_KEY is missing. Skipping real on-chain anchor.");
+    return { hash: "mock-hash", txId: "mock-tx-hash-" + Date.now() };
+  }
+
+  try {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const wallet = new ethers.Wallet(privateKey, provider);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, DATA_PROOF_ABI, wallet);
+
+    // Create a deterministic hash of stable payment fields
+    const paymentString = JSON.stringify({
+      id: paymentData.id,
+      amount: paymentData.amount,
+      email: paymentData.email,
+      timestamp: new Date().toISOString().split('T')[0] // Day accuracy for privacy
+    });
+    const hash = ethers.keccak256(ethers.toUtf8Bytes(paymentString));
+
+    // Sign and send transaction
+    const tx = await contract.storeHash(hash);
+    const receipt = await tx.wait();
+
+    return {
+      hash,
+      txId: receipt.hash,
+      verified: true
+    };
+  } catch (error) {
+    console.error("Server-side blockchain anchor failed:", error);
+    throw error;
+  }
 }
