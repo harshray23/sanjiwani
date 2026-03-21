@@ -89,42 +89,56 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
     const setupRouting = (start: [number, number], end: [number, number], ambId: string) => {
       if (!mapRef.current || !isMountedRef.current) return;
 
+      // EXTREMELY DEFENSIVE CLEANUP
       if (routingControlRef.current) {
         try {
-          mapRef.current.removeControl(routingControlRef.current);
+          const ctrl = routingControlRef.current;
+          // Clear points to trigger internal line clearing before removal
+          if (ctrl.getPlan) ctrl.getPlan().setWaypoints([]);
+          if (mapRef.current && mapRef.current.removeControl) {
+            mapRef.current.removeControl(ctrl);
+          }
         } catch (e) {
-          console.warn("Could not remove existing routing control", e);
+          console.warn("Soft-error during LRM control removal:", e);
         }
+        routingControlRef.current = null;
       }
 
-      if (!(L as any).Routing) return;
+      if (!(L as any).Routing) {
+        console.error("L.Routing not available");
+        return;
+      }
 
-      const control = (L as any).Routing.control({
-        waypoints: [
-          L.latLng(start[0], start[1]),
-          L.latLng(end[0], end[1])
-        ],
-        routeWhileDragging: false,
-        addWaypoints: false,
-        show: false,
-        lineOptions: {
-          styles: [{ color: '#f97316', weight: 6, opacity: 0.8 }]
-        }
-      }).addTo(mapRef.current);
+      try {
+        const control = (L as any).Routing.control({
+          waypoints: [
+            L.latLng(start[0], start[1]),
+            L.latLng(end[0], end[1])
+          ],
+          routeWhileDragging: false,
+          addWaypoints: false,
+          show: false,
+          lineOptions: {
+            styles: [{ color: '#f97316', weight: 6, opacity: 0.8 }]
+          }
+        }).addTo(mapRef.current);
 
-      routingControlRef.current = control;
+        routingControlRef.current = control;
 
-      control.on('routesfound', (e: any) => {
-        if (!isMountedRef.current) return;
-        const route = e.routes[0];
-        if (onRouteFound) {
-          onRouteFound({
-            distance: route.summary.totalDistance,
-            time: route.summary.totalTime,
-            ambulanceId: ambId
-          });
-        }
-      });
+        control.on('routesfound', (e: any) => {
+          if (!isMountedRef.current || !mapRef.current) return;
+          const route = e.routes[0];
+          if (onRouteFound && route) {
+            onRouteFound({
+              distance: route.summary.totalDistance,
+              time: route.summary.totalTime,
+              ambulanceId: ambId
+            });
+          }
+        });
+      } catch (err) {
+        console.error("Failed to initialize LRM control:", err);
+      }
     };
 
     const generateMockAmbulances = (lat: number, lon: number) => {
@@ -212,16 +226,23 @@ export default function HealthcareMap({ onRouteFound, onAmbulancesFound }: Healt
 
     return () => {
       isMountedRef.current = false;
-      if (mapRef.current) {
-        if (routingControlRef.current) {
-          try {
-            mapRef.current.removeControl(routingControlRef.current);
-          } catch (e) {
-            // Silently fail if control was already removed
-          }
-          routingControlRef.current = null;
+      
+      // CRITICAL: REMOVE ROUTING CONTROL BEFORE THE MAP
+      if (routingControlRef.current && mapRef.current) {
+        try {
+          mapRef.current.removeControl(routingControlRef.current);
+        } catch (e) {
+          // Ignore removal errors during unmount
         }
-        mapRef.current.remove();
+        routingControlRef.current = null;
+      }
+
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+        } catch (e) {
+          // Ignore removal errors
+        }
         mapRef.current = null;
       }
     };
