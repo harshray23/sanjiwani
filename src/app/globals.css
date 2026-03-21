@@ -140,5 +140,6 @@
         display: inline-block;
         white-space: nowrap;
         animation: marquee 30s linear infinite;
+        will-change: transform; /* Hint for browser hardware acceleration */
     }
 }

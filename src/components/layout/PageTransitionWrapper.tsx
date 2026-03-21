@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -25,7 +26,7 @@ export function PageTransitionWrapper({ children }: { children: React.ReactNode 
       const timer = setTimeout(() => {
         setIsPageLoading(false);
         sessionStorage.setItem('currentPath', pathname);
-      }, 2000); 
+      }, 800); // Reduced from 2000ms to 800ms
 
       return () => clearTimeout(timer);
     }
