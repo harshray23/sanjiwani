@@ -25,6 +25,7 @@ export async function connectWallet() {
       const provider = new ethers.BrowserProvider((window as any).ethereum);
       
       const network = await provider.getNetwork();
+      // Avalanche Fuji Chain ID is 43113
       if (network.chainId !== 43113n) {
         alert("Please switch your MetaMask network to Avalanche Fuji Testnet!");
         return null;

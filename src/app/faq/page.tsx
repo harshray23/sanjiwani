@@ -10,8 +10,8 @@ const faqSections = [
     title: "General Services",
     faqs: [
       {
-        question: "What services does Sanjiwani Health provide?",
-        answer: "Sanjiwani Health offers online doctor consultations, appointment booking, medical record storage, medicine delivery, and diagnostic test booking—all in one app.",
+        question: "What services does Sanjeevani provide?",
+        answer: "Sanjeevani offers online doctor consultations, appointment booking, medical record storage, medicine delivery, and diagnostic test booking—all in one app.",
       },
       {
         question: "How do I create a patient account?",
@@ -27,11 +27,11 @@ const faqSections = [
       },
       {
         question: "Can I consult doctors from other cities?",
-        answer: "Yes! Sanjiwani Health enables cross-city online consultations, so you can talk to specialists anywhere in India.",
+        answer: "Yes! Sanjeevani enables cross-city online consultations, so you can talk to specialists anywhere in India.",
       },
       {
         question: "How do I receive my prescription after a consultation?",
-        answer: "Your digital prescription will appear in the My Records section immediately after the doctor completes your consultation.",
+        answer: "Your digital prescription will appear in the Health Vault section immediately after the doctor completes your consultation.",
       },
       {
         question: "Can family members use my account?",
@@ -39,7 +39,7 @@ const faqSections = [
       },
       {
         question: "Can I track my health records over time?",
-        answer: "Yes, your app automatically stores reports, prescriptions, and test results so you can monitor progress anytime.",
+        answer: "Yes, your app automatically stores reports, prescriptions, and test results in the Health Vault so you can monitor progress anytime.",
       },
       {
         question: "Do I need internet access to use the app?",
@@ -47,7 +47,7 @@ const faqSections = [
       },
       {
         question: "How can I contact customer support?",
-        answer: "Type “Talk to Support” in the app or email us at support@sanjiwanihealth.in for quick help.",
+        answer: "Visit our Contact Us page or email us at healthsanjeevani@gmail.com for quick help.",
       },
     ],
   },
@@ -72,7 +72,7 @@ const faqSections = [
       },
       {
         question: "How do I issue a digital prescription?",
-        answer: "After consultation, click Generate Prescription, fill in the details, and submit—it will auto-save to the patient’s account.",
+        answer: "After consultation, click Generate Prescription, fill in the details, and submit—it will auto-save to the patient’s Health Vault.",
       },
       {
         question: "Can hospitals register multiple doctors?",
@@ -109,11 +109,11 @@ const faqSections = [
         },
         {
             question: "Will I get my lab reports digitally?",
-            answer: "Yes, once your test is completed, the lab uploads your report, and it appears under My Reports."
+            answer: "Yes, once your test is completed, the lab uploads your report, and it appears under Health Vault."
         },
         {
             question: "Can I use health insurance for payments?",
-            answer: "Yes, Sanjiwani Health supports selected health insurance partners. You can upload your policy details in your profile."
+            answer: "Yes, Sanjeevani supports selected health insurance partners. You can upload your policy details in your profile."
         }
     ]
   },
@@ -171,7 +171,7 @@ const faqSections = [
         },
         {
             question: "How do I update the app?",
-            answer: "Visit Google Play Store or Apple App Store, search “Sanjiwani Health,” and tap Update."
+            answer: "Visit Google Play Store or Apple App Store, search “Sanjeevani,” and tap Update."
         }
     ]
   },
@@ -183,7 +183,7 @@ const faqSections = [
             answer: "After your session, rate your doctor and share feedback under My Consultations → Feedback."
         },
         {
-            question: "Can I refer Sanjiwani Health to others?",
+            question: "Can I refer Sanjeevani to others?",
             answer: "Yes! Use your referral code in Profile → Refer & Earn to invite friends and earn rewards."
         },
         {
@@ -191,11 +191,11 @@ const faqSections = [
             answer: "Type “Report issue” in the app, and I’ll log it automatically or connect you to our support team."
         },
         {
-            question: "Is Sanjiwani Health available in regional languages?",
+            question: "Is Sanjeevani available in regional languages?",
             answer: "Yes, the app supports English, Hindi, and several Indian languages for better accessibility."
         },
         {
-            question: "Does Sanjiwani Health have a premium plan?",
+            question: "Does Sanjeevani have a premium plan?",
             answer: "Yes, premium members get unlimited consultations, faster service, and exclusive wellness features."
         }
     ]
