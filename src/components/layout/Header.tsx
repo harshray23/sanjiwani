@@ -1,10 +1,9 @@
-
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, FileText, Trophy } from 'lucide-react';
+import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, FileText, Trophy, Activity } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Image from 'next/image';
@@ -21,6 +20,7 @@ export function Header() {
 
   const navItems = [
     { href: '/', label: 'Home' },
+    { href: '/triage', label: 'AI Triage', icon: <Activity className="h-4 w-4 mr-1.5 text-primary"/> },
     { href: '/appointments', label: 'My Appointments' },
     { href: '/records', label: 'Health Vault', icon: <FileText className="h-4 w-4 mr-1.5"/> },
     { href: '/rewards', label: 'Rewards', icon: <Trophy className="h-4 w-4 mr-1.5 text-yellow-500 fill-yellow-500"/> },

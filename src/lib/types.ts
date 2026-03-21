@@ -1,4 +1,3 @@
-
 import type { Timestamp } from 'firebase/firestore';
 
 export interface User {
@@ -12,10 +11,61 @@ export interface User {
   medicalHistory?: any;
   walletAddress?: string;
   sanjeevaniPoints?: number;
-  // New profile fields
   bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
   age?: number;
   dob?: string;
+}
+
+export interface BloodInventory {
+  'A+': number;
+  'A-': number;
+  'B+': number;
+  'B-': number;
+  'O+': number;
+  'O-': number;
+  'AB+': number;
+  'AB-': number;
+}
+
+export interface Donor {
+  id: string;
+  name: string;
+  bloodGroup: string;
+  location: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
+  available: boolean;
+  lastDonated: string;
+}
+
+export interface Hospital {
+  id: string;
+  name: string;
+  location: {
+    address: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    }
+  };
+  contact: string;
+  rating: number;
+  specialties: string[];
+  imageUrl?: string;
+  dataAiHint?: string;
+  emergencyAvailable: boolean;
+  beds: {
+    general: { total: number; available: number };
+    icu: { total: number; available: number };
+    ventilator: { total: number; available: number };
+    oxygen: { total: number; available: number };
+  };
+  bloodInventory?: BloodInventory;
+  lastUpdated: any;
+  onChainVerified?: boolean;
+  lastVerificationHash?: string;
 }
 
 export interface DoctorDetails {
@@ -53,18 +103,6 @@ export interface ClinicDetails {
 export interface ClinicProfile extends Omit<User, 'name'>, Omit<ClinicDetails, 'id' | 'userId'> {
 }
 
-export interface DiagnosisCentreDetails {
-  id: string;
-  userId: string;
-  name: string;
-  servicesOffered: string[];
-  licenseNo: string;
-  verified: boolean;
-}
-
-export interface DiagnosisCentreProfile extends Omit<User, 'name'>, Omit<DiagnosisCentreDetails, 'id' | 'userId'> {
-}
-
 export interface Appointment {
   id: string;
   patientId: string;
@@ -77,7 +115,7 @@ export interface Appointment {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   scheduledAt: any;
   createdAt: any;
-  date: any; // for display
+  date: any; 
   bedType?: string;
   testName?: string;
   patient?: User;
@@ -85,17 +123,8 @@ export interface Appointment {
   clinic?: ClinicProfile;
   hospital?: Hospital;
   centre?: DiagnosticsCentre;
-  // Blockchain Proofs
   onChainHash?: string;
   txHash?: string;
-}
-
-export interface Report {
-  id: string;
-  appointmentId: string;
-  uploadedBy: string;
-  fileUrl: string;
-  createdAt: any;
 }
 
 export interface MedicalRecord {
@@ -122,110 +151,6 @@ export interface RewardActivity {
   txHash?: string;
 }
 
-export interface Payment {
-  id: string;
-  userId: string;
-  serviceId: string;
-  amount: number;
-  status: 'pending' | 'success' | 'failed' | 'refunded';
-  createdAt: any;
-  onChainHash?: string;
-  txHash?: string;
-}
-
-export interface AdminLog {
-  id: string;
-  action: string;
-  performedBy: string;
-  timestamp: any;
-}
-
-export interface VideoConsultationDetails {
-    meetingLink: string;
-    preliminaryAdvice: string;
-}
-
-export interface AppointmentFeedback {
-    doctorBehaviour: number;
-    clinicExperience: number;
-    overallService: number;
-    comments: string;
-}
-
-export type Doctor = {
-  id: string;
-  name: string;
-  specialty: string;
-  qualifications: string[] | string;
-  experience: number;
-  imageUrl: string;
-  dataAiHint?: string;
-  rating: number;
-  reviewCount: number;
-  clinicId: string;
-  bio: string;
-  consultationFee: number;
-  availableSlots: { time: string, isAvailable: boolean }[];
-  address?: string;
-}
-
-export type Clinic = {
-  id: string;
-  name: string;
-  location: string;
-  imageUrl: string;
-  dataAiHint?: string;
-  rating: number;
-  specialties: string[];
-  doctors: Doctor[];
-  about: string;
-  contact: {
-    phone: string;
-    address: string;
-  }
-}
-
-export interface Hospital {
-  id: string;
-  name: string;
-  location: {
-    address: string;
-    coordinates?: {
-      latitude: number;
-      longitude: number;
-    }
-  };
-  contact: string;
-  rating: number;
-  specialties: string[];
-  imageUrl?: string;
-  dataAiHint?: string;
-  emergencyAvailable: boolean;
-  beds: {
-    general: { total: number; available: number };
-    icu: { total: number; available: number };
-    ventilator: { total: number; available: number };
-    oxygen: { total: number; available: number };
-  };
-  lastUpdated: any;
-  onChainVerified?: boolean;
-  lastVerificationHash?: string;
-}
-
-export interface Pathologist {
-  id: string;
-  name: string;
-  qualifications: string[];
-  imageUrl: string;
-}
-
-export interface DiagnosticTest {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-}
-
 export interface DiagnosticsCentre {
   id: string;
   name: string;
@@ -241,6 +166,20 @@ export interface DiagnosticsCentre {
   pathologists: Pathologist[];
 }
 
+export interface DiagnosticTest {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
+
+export interface Pathologist {
+  id: string;
+  name: string;
+  qualifications: string[];
+  imageUrl: string;
+}
+
 export interface TestAppointment {
   id: string;
   patientId: string;
@@ -253,4 +192,11 @@ export interface TestAppointment {
   reportUrl?: string;
   onChainHash?: string;
   txHash?: string;
+}
+
+export interface AppointmentFeedback {
+    doctorBehaviour: number;
+    clinicExperience: number;
+    overallService: number;
+    comments: string;
 }
