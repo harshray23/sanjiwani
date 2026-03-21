@@ -12,6 +12,10 @@ export interface User {
   medicalHistory?: any;
   walletAddress?: string;
   sanjeevaniPoints?: number;
+  // New profile fields
+  bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+  age?: number;
+  dob?: string;
 }
 
 export interface DoctorDetails {

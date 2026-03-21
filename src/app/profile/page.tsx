@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -19,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/animations/Loading_Screen.json';
@@ -29,6 +29,9 @@ import type { User as AppUser } from '@/lib/types';
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number." }),
+  bloodGroup: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], { required_error: "Please select your blood group." }),
+  age: z.coerce.number().min(1, "Age must be a positive number").max(120, "Age must be valid"),
+  dob: z.string().min(1, "Date of birth is required"),
 });
 
 export default function ProfilePage() {
@@ -42,6 +45,9 @@ export default function ProfilePage() {
     defaultValues: {
       name: "",
       phone: "",
+      bloodGroup: "O+",
+      age: 0,
+      dob: "",
     },
   });
 
@@ -52,7 +58,10 @@ export default function ProfilePage() {
       setUserProfile(profile);
       form.reset({
           name: profile.name || "",
-          phone: profile.phone || ""
+          phone: profile.phone || "",
+          bloodGroup: profile.bloodGroup || "O+",
+          age: profile.age || 0,
+          dob: profile.dob || "",
       });
     }
     setIsLoading(false);
@@ -167,6 +176,58 @@ export default function ProfilePage() {
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input placeholder="+91 98765 43210" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="bloodGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Blood Group</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Blood Group" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                            <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="age"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="30" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
