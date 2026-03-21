@@ -1,23 +1,26 @@
+
 "use client";
 
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Use public paths for marker icons
-L.Icon.Default.mergeOptions({
-  iconUrl: "/leaflet/marker-icon.png",
-  iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-  shadowUrl: "/leaflet/marker-shadow.png",
-});
-
-
 export default function HealthcareMap() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (!containerRef.current || mapRef.current) return;
+
+    // Fix for default marker icons in Leaflet with Next.js
+    // We do this inside useEffect to ensure window is defined
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    });
 
     // Initialize map
     const map = L.map(containerRef.current, {
@@ -97,7 +100,7 @@ export default function HealthcareMap() {
           await fetchNearbyHealthcare(lat, lon);
         },
         () => {
-          alert("Unable to access your location. Showing default area.");
+          console.warn("Unable to access your location. Showing default area.");
           fetchNearbyHealthcare(20.5937, 78.9629);
         }
       );
@@ -114,7 +117,7 @@ export default function HealthcareMap() {
 
   return (
     <div className="relative w-full h-full">
-      <div ref={containerRef} id="map" className="w-full h-full rounded-xl shadow-lg" />
+      <div ref={containerRef} id="map" className="w-full h-full rounded-xl shadow-lg border border-accent/20" />
     </div>
   );
 }
