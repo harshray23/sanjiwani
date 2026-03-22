@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getClinicById, getAppointmentsForClinic, getUserProfile } from '@/lib/data';
+import { getClinicById, getAppointmentsForClinic } from '@/lib/data';
 import type { ClinicDetails, Appointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import Image from 'next/image';
 const ClinicDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [clinic, setClinic] = useState<ClinicDetails | null | undefined>(undefined);
-  const [appointments, setAppointments] = useState<Appointment[] | undefined>(undefined);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const ClinicDashboard = () => {
                 ]);
 
                 if (clinicData) {
-                  setClinic(clinicData);
+                  setClinic(clinicData as any);
                   setAppointments(appointmentData);
                 } else {
                   setClinic(null);
@@ -52,6 +52,9 @@ const ClinicDashboard = () => {
                 toast({ title: "Error", description: "Could not load clinic data.", variant: "destructive"});
                 setClinic(null);
             }
+        } else {
+            // Stop loading if the role is incorrect or user is not logged in
+            setClinic(null);
         }
     };
     fetchData();
@@ -84,7 +87,7 @@ const ClinicDashboard = () => {
   if (!userProfile || userProfile?.role !== 'clinic') {
     return (
       <div className="text-center p-8">
-        <Card className="max-w-md mx-auto p-8">
+        <Card className="max-w-md mx-auto p-8 mt-20">
             <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
             <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
             <p className="mt-2 text-muted-foreground">
@@ -104,9 +107,12 @@ const ClinicDashboard = () => {
   if (!clinic) {
     return (
          <div className="text-center p-8">
-            <Card className="max-w-md mx-auto p-8">
+            <Card className="max-w-md mx-auto p-8 mt-20">
                 <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
                 <p className="mt-2 text-muted-foreground">We couldn't find a clinic profile associated with your account.</p>
+                <Button asChild className="mt-6" variant="outline">
+                    <Link href="/">Back to Home</Link>
+                </Button>
             </Card>
         </div>
     )
@@ -121,8 +127,8 @@ const ClinicDashboard = () => {
 
        <Tabs defaultValue="appointments">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="appointments">Appointments ({appointments?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="doctors">Doctors ({clinic.doctors.length})</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="doctors">Doctors ({clinic.doctors?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="profile">Clinic Profile</TabsTrigger>
         </TabsList>
 
@@ -133,18 +139,18 @@ const ClinicDashboard = () => {
                     <CardDescription>All appointments scheduled at your clinic.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {appointments && appointments.length > 0 ? (
+                    {appointments.length > 0 ? (
                         <div className="space-y-4">
                         {appointments.map(app => (
                             <Card key={app.id} className="p-4 flex justify-between items-center">
                             <div>
                                 <p className="font-semibold">{app.patientName}</p>
-                                <p className="text-sm text-muted-foreground">with <span className="font-medium text-foreground">{app.doctor.name}</span></p>
+                                <p className="text-sm text-muted-foreground">with <span className="font-medium text-foreground">{app.doctor?.name || 'Doctor'}</span></p>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                     <span className="flex items-center gap-1.5"> {format(new Date(app.date), 'PPp')}</span>
                                 </p>
                             </div>
-                            <p className="text-sm font-bold">{app.status}</p>
+                            <p className="text-sm font-bold capitalize">{app.status}</p>
                             </Card>
                         ))}
                         </div>
@@ -165,24 +171,28 @@ const ClinicDashboard = () => {
                 </CardHeader>
                 <CardContent>
                      <div className="space-y-4">
-                        {clinic.doctors.map(doc => (
-                            <Card key={doc.id} className="p-4 flex justify-between items-center">
-                                <div className="flex items-center gap-4">
-                                     <Avatar className="h-12 w-12">
-                                        <AvatarImage src={doc.imageUrl} alt={doc.name} />
-                                        <AvatarFallback>{doc.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-semibold text-lg">{doc.name}</p>
-                                        <p className="text-sm text-muted-foreground">{doc.specialization}</p>
+                        {clinic.doctors && clinic.doctors.length > 0 ? (
+                            clinic.doctors.map(doc => (
+                                <Card key={doc.id} className="p-4 flex justify-between items-center">
+                                    <div className="flex items-center gap-4">
+                                         <Avatar className="h-12 w-12">
+                                            <AvatarImage src={doc.imageUrl} alt={doc.name} />
+                                            <AvatarFallback>{doc.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold text-lg">{doc.name}</p>
+                                            <p className="text-sm text-muted-foreground">{doc.specialization}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <Button variant="outline" size="sm" className="mr-2" onClick={() => handleAction('edit', 'doctor', doc.id)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
-                                    <Button variant="destructive" size="sm" onClick={() => handleAction('remove', 'doctor', doc.id)}><Trash2 className="mr-2 h-4 w-4"/>Remove</Button>
-                                </div>
-                            </Card>
-                        ))}
+                                    <div>
+                                        <Button variant="outline" size="sm" className="mr-2" onClick={() => handleAction('edit', 'doctor', doc.id)}><Pencil className="mr-2 h-4 w-4"/> Edit</Button>
+                                        <Button variant="destructive" size="sm" onClick={() => handleAction('remove', 'doctor', doc.id)}><Trash2 className="mr-2 h-4 w-4"/>Remove</Button>
+                                    </div>
+                                </Card>
+                            ))
+                        ) : (
+                            <p className="text-center text-muted-foreground py-8">No doctors listed for this clinic.</p>
+                        )}
                      </div>
                 </CardContent>
             </Card>
@@ -197,13 +207,18 @@ const ClinicDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1 space-y-2">
                              <label className="font-semibold">Clinic Picture</label>
-                             <Image 
-                                src={clinic.imageUrl || ''} 
-                                alt={clinic.name}
-                                width={200}
-                                height={200}
-                                className="w-full aspect-square object-cover rounded-lg border"
-                             />
+                             <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted flex items-center justify-center">
+                                {clinic.imageUrl ? (
+                                    <Image 
+                                        src={clinic.imageUrl} 
+                                        alt={clinic.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <Hourglass className="h-12 w-12 text-muted-foreground" />
+                                )}
+                             </div>
                               <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
                                 <Upload className="mr-2 h-4 w-4"/>
                                 Upload New Photo

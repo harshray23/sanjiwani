@@ -1,13 +1,12 @@
 
-
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getDiagnosticsCentreById, getTestAppointmentsForCentre, getUserProfile } from '@/lib/data';
+import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/data';
 import type { DiagnosticsCentre, TestAppointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert } from "lucide-react";
+import { UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert, Activity } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -23,7 +22,7 @@ import { Input } from '@/components/ui/input';
 const DiagnosticsDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [centre, setCentre] = useState<DiagnosticsCentre | null | undefined>(undefined);
-  const [appointments, setAppointments] = useState<TestAppointment[] | undefined>(undefined);
+  const [appointments, setAppointments] = useState<TestAppointment[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,6 +52,9 @@ const DiagnosticsDashboard = () => {
                 toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
                 setCentre(null);
             }
+        } else {
+            // Stop loading if the role is incorrect or user is not logged in
+            setCentre(null);
         }
     };
     fetchData();
@@ -88,7 +90,7 @@ const DiagnosticsDashboard = () => {
   if (!userProfile || userProfile.role !== 'diagnostics_centres') {
     return (
       <div className="text-center p-8">
-        <Card className="max-w-md mx-auto p-8">
+        <Card className="max-w-md mx-auto p-8 mt-20">
             <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
             <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
             <p className="mt-2 text-muted-foreground">
@@ -105,9 +107,12 @@ const DiagnosticsDashboard = () => {
   if (!centre) {
      return (
          <div className="text-center p-8">
-            <Card className="max-w-md mx-auto p-8">
+            <Card className="max-w-md mx-auto p-8 mt-20">
                 <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
                 <p className="mt-2 text-muted-foreground">We couldn't find a diagnostics centre profile associated with your account.</p>
+                <Button asChild className="mt-6" variant="outline">
+                    <Link href="/">Back to Home</Link>
+                </Button>
             </Card>
         </div>
     )
@@ -122,10 +127,10 @@ const DiagnosticsDashboard = () => {
 
        <Tabs defaultValue="appointments">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="appointments">Appointments ({appointments?.length ?? 0})</TabsTrigger>
-          <TabsTrigger value="tests">Available Tests ({centre.tests.length})</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments ({appointments.length})</TabsTrigger>
+          <TabsTrigger value="tests">Available Tests ({centre.tests?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="reports">Test Reports</TabsTrigger>
-          <TabsTrigger value="staff">Manage Staff ({centre.pathologists.length})</TabsTrigger>
+          <TabsTrigger value="staff">Manage Staff ({centre.pathologists?.length ?? 0})</TabsTrigger>
           <TabsTrigger value="profile">Centre Profile</TabsTrigger>
         </TabsList>
 
@@ -136,28 +141,32 @@ const DiagnosticsDashboard = () => {
                     <CardDescription>Manage all scheduled tests for your centre.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Patient</TableHead>
-                                <TableHead>Test Booked</TableHead>
-                                <TableHead>Date & Time</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {appointments && appointments.map(app => (
-                                <TableRow key={app.id}>
-                                    <TableCell className="font-medium">{app.patientName}</TableCell>
-                                    <TableCell>{app.test.name}</TableCell>
-                                    <TableCell>{format(new Date(app.date), 'PPp')}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
-                                    </TableCell>
+                    {appointments.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Test Booked</TableHead>
+                                    <TableHead>Date & Time</TableHead>
+                                    <TableHead>Status</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {appointments.map(app => (
+                                    <TableRow key={app.id}>
+                                        <TableCell className="font-medium">{app.patientName}</TableCell>
+                                        <TableCell>{app.test?.name ?? 'Test'}</TableCell>
+                                        <TableCell>{format(new Date(app.date), 'PPp')}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">No appointments found.</p>
+                    )}
                 </CardContent>
             </Card>
         </TabsContent>
@@ -171,29 +180,33 @@ const DiagnosticsDashboard = () => {
                     <Button onClick={() => handleAction('add', 'test', '')}><PlusCircle className="mr-2"/> Add New Test</Button>
                 </CardHeader>
                 <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Test Name</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead className="text-right">Price</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {centre.tests.map(test => (
-                                <TableRow key={test.id}>
-                                    <TableCell className="font-medium">{test.name}</TableCell>
-                                    <TableCell>{test.category}</TableCell>
-                                    <TableCell>₹{test.price.toFixed(2)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'test', test.id)}><Pencil className="h-4 w-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'test', test.id)}><Trash2 className="h-4 w-4"/></Button>
-                                    </TableCell>
+                     {centre.tests && centre.tests.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Test Name</TableHead>
+                                    <TableHead>Category</TableHead>
+                                    <TableHead className="text-right">Price</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {centre.tests.map(test => (
+                                    <TableRow key={test.id}>
+                                        <TableCell className="font-medium">{test.name}</TableCell>
+                                        <TableCell>{test.category}</TableCell>
+                                        <TableCell className="text-right">₹{test.price.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'test', test.id)}><Pencil className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'test', test.id)}><Trash2 className="h-4 w-4"/></Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                     ) : (
+                        <p className="text-center text-muted-foreground py-8">No tests available.</p>
+                     )}
                 </CardContent>
             </Card>
         </TabsContent>
@@ -204,38 +217,42 @@ const DiagnosticsDashboard = () => {
                     <CardDescription>View completed tests and upload patient reports.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Patient</TableHead>
-                                <TableHead>Test</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {appointments && appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').map(app => (
-                                <TableRow key={app.id}>
-                                    <TableCell className="font-medium">{app.patientName}</TableCell>
-                                    <TableCell>{app.test.name}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {app.reportUrl ? (
-                                            <Button variant="outline" size="sm" asChild>
-                                                <Link href={app.reportUrl} target="_blank"><Download className="mr-2 h-4 w-4"/> View Report</Link>
-                                            </Button>
-                                        ) : (
-                                            <Button variant="secondary" size="sm" onClick={() => handleAction('upload report for', 'appointment', app.id)}>
-                                                <Upload className="mr-2 h-4 w-4"/> Upload Report
-                                            </Button>
-                                        )}
-                                    </TableCell>
+                    {appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Test</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {appointments.filter(a => a.status === 'Completed' || a.status === 'Report Ready').map(app => (
+                                    <TableRow key={app.id}>
+                                        <TableCell className="font-medium">{app.patientName}</TableCell>
+                                        <TableCell>{app.test?.name ?? 'Test'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusBadgeVariant(app.status)}>{app.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {app.reportUrl ? (
+                                                <Button variant="outline" size="sm" asChild>
+                                                    <Link href={app.reportUrl} target="_blank"><Download className="mr-2 h-4 w-4"/> View Report</Link>
+                                                </Button>
+                                            ) : (
+                                                <Button variant="secondary" size="sm" onClick={() => handleAction('upload report for', 'appointment', app.id)}>
+                                                    <Upload className="mr-2 h-4 w-4"/> Upload Report
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">No reports pending or ready.</p>
+                    )}
                 </CardContent>
             </Card>
         </TabsContent>
@@ -249,33 +266,37 @@ const DiagnosticsDashboard = () => {
                      <Button onClick={() => handleAction('add', 'staff member', '')}><UserPlus className="mr-2"/> Add Staff Member</Button>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Qualifications</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {centre.pathologists.map(staff => (
-                                <TableRow key={staff.id}>
-                                    <TableCell className="font-medium flex items-center gap-3">
-                                        <Avatar className="h-9 w-9">
-                                            <AvatarImage src={staff.imageUrl}/>
-                                            <AvatarFallback>{staff.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        {staff.name}
-                                    </TableCell>
-                                    <TableCell>{staff.qualifications.join(', ')}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'staff', staff.id)}><Pencil className="h-4 w-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'staff', staff.id)}><Trash2 className="h-4 w-4"/></Button>
-                                    </TableCell>
+                    {centre.pathologists && centre.pathologists.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Qualifications</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {centre.pathologists.map(staff => (
+                                    <TableRow key={staff.id}>
+                                        <TableCell className="font-medium flex items-center gap-3">
+                                            <Avatar className="h-9 w-9">
+                                                <AvatarImage src={staff.imageUrl}/>
+                                                <AvatarFallback>{staff.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            {staff.name}
+                                        </TableCell>
+                                        <TableCell>{staff.qualifications?.join(', ') ?? 'N/A'}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleAction('edit', 'staff', staff.id)}><Pencil className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleAction('remove', 'staff', staff.id)}><Trash2 className="h-4 w-4"/></Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">No staff listed.</p>
+                    )}
                 </CardContent>
             </Card>
         </TabsContent>
@@ -289,14 +310,19 @@ const DiagnosticsDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1 space-y-2">
                              <label className="font-semibold">Centre Image</label>
-                             <Image 
-                                src={centre.imageUrl} 
-                                alt={centre.name}
-                                width={200}
-                                height={200}
-                                className="w-full aspect-square object-cover rounded-lg border"
-                             />
-                              <Button className="w-full" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
+                             <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted flex items-center justify-center">
+                                {centre.imageUrl ? (
+                                    <Image 
+                                        src={centre.imageUrl} 
+                                        alt={centre.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <Activity className="h-12 w-12 text-muted-foreground" />
+                                )}
+                             </div>
+                              <Button className="w-full mt-2" variant="outline" onClick={() => toast({title: "Feature coming soon!"})}>
                                 <Upload className="mr-2 h-4 w-4"/>
                                 Upload New Photo
                             </Button>
@@ -308,11 +334,11 @@ const DiagnosticsDashboard = () => {
                             </div>
                             <div className="space-y-2">
                                 <label className="font-semibold">Contact Phone</label>
-                                <Input defaultValue={centre.contact.phone} />
+                                <Input defaultValue={centre.contact?.phone ?? ''} />
                             </div>
                             <div className="space-y-2">
                                 <label className="font-semibold">Contact Email</label>
-                                <Input defaultValue={centre.contact.email} />
+                                <Input defaultValue={centre.contact?.email ?? ''} />
                             </div>
                         </div>
                     </div>

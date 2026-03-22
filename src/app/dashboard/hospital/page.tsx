@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -68,6 +69,9 @@ const HospitalDashboard = () => {
                 console.error("Error fetching hospital data:", error);
                 setHospital(null);
             }
+        } else {
+            // Stop loading if the role is incorrect or user is not logged in
+            setHospital(null);
         }
     };
     
@@ -162,7 +166,7 @@ const HospitalDashboard = () => {
   if (!userProfile || userProfile?.role !== 'hospital') {
     return (
       <div className="text-center p-8">
-        <Card className="max-w-md mx-auto p-8">
+        <Card className="max-w-md mx-auto p-8 mt-20">
             <ShieldAlert className="mx-auto h-16 w-16 text-destructive mb-4" />
             <h2 className="text-2xl font-bold font-headline text-destructive">Access Denied</h2>
             <p className="mt-2 text-muted-foreground">You must be logged in as a hospital administrator.</p>
@@ -173,7 +177,17 @@ const HospitalDashboard = () => {
   }
 
   if (!hospital) {
-     return <div className="text-center p-8"><Card className="max-w-md mx-auto p-8"><h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2></Card></div>;
+     return (
+        <div className="text-center p-8">
+            <Card className="max-w-md mx-auto p-8 mt-20">
+                <h2 className="text-2xl font-bold font-headline text-destructive">Profile Not Found</h2>
+                <p className="mt-2 text-muted-foreground">We couldn't find a hospital profile associated with your account.</p>
+                <Button asChild className="mt-6" variant="outline">
+                    <Link href="/">Back to Home</Link>
+                </Button>
+            </Card>
+        </div>
+     );
   }
   
   const BedInput = ({ label, available, total }: { label: string, available: number, total: number }) => (
@@ -391,8 +405,14 @@ const HospitalDashboard = () => {
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1 space-y-2">
-                             <Image src={hospital.imageUrl || ''} alt={hospital.name} width={200} height={200} className="w-full aspect-square object-cover rounded-lg border" />
-                             <Button className="w-full" variant="outline">Upload New Image</Button>
+                             <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted flex items-center justify-center">
+                                {hospital.imageUrl ? (
+                                    <Image src={hospital.imageUrl} alt={hospital.name} fill className="object-cover" />
+                                ) : (
+                                    <Activity className="h-12 w-12 text-muted-foreground" />
+                                )}
+                             </div>
+                             <Button className="w-full mt-2" variant="outline">Upload New Image</Button>
                         </div>
                         <div className="md:col-span-2 space-y-4">
                             <div className="space-y-2">
