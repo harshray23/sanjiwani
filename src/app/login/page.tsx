@@ -205,7 +205,7 @@ export default function LoginPage() {
              <div className="hidden md:flex flex-col items-center justify-center p-8 bg-accent/10 text-accent-foreground relative">
                 <Image src="https://picsum.photos/seed/login-art/800/1200" alt="Healthcare" fill objectFit="cover" className="opacity-20"/>
                  <div className="relative z-10 text-center">
-                    <Logo className="h-24 w-24 text-accent mx-auto"/>
+                    <Logo className="text-6xl text-accent mx-auto mb-4"/>
                     <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjiwani</h2>
                     <p className="mt-2 text-foreground/80">Your trusted partner in health verification.</p>
                 </div>

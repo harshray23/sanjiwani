@@ -30,8 +30,8 @@ export function AppLoader({ children }: { children: React.ReactNode }) {
             </div>
         )}
         <div className="relative z-10 flex flex-col items-center justify-center text-center">
-            <Logo className="h-32 w-32 text-primary animate-pulse" />
-            <p className="text-lg text-muted-foreground mt-4">Initializing Sanjiwani...</p>
+            <Logo className="text-5xl sm:text-6xl text-primary animate-pulse mb-4" />
+            <p className="text-lg text-muted-foreground">Initializing Sanjiwani...</p>
         </div>
       </div>
     );

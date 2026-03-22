@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTr
 import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, FileText, Trophy, Activity } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
-import Image from 'next/image';
+import Logo from './Logo';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
@@ -31,15 +31,7 @@ export function Header() {
       <header className="bg-card/95 backdrop-blur-sm border-b shadow-sm">
         <div className="container mx-auto px-4 h-24 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 text-accent hover:text-accent/90 transition-colors">
-            <Image
-              src="/logo.jpg"
-              alt="Sanjiwani Logo"
-              width={80}
-              height={80}
-              className="rounded-full"
-              priority
-            />
-            <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani</h1>
+            <Logo className="text-2xl sm:text-3xl" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">

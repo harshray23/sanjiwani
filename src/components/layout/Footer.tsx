@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin, Heart, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Logo from "./Logo";
 
 export function Footer() {
   
@@ -42,16 +42,7 @@ export function Footer() {
           {/* Column 1: Company Info */}
           <div className="space-y-4 md:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 text-accent">
-                <Image
-                  src="/logo.jpg"
-                  alt="Sanjiwani Logo"
-                  width={72}
-                  height={72}
-                  className="rounded-full"
-                />
-                <div>
-                    <h2 className="text-2xl font-bold font-headline">Sanjiwani</h2>
-                </div>
+                <Logo className="text-3xl" />
             </Link>
             <p className="text-muted-foreground text-sm">
                 Bridging the healthcare gap with trusted doctors, real-time hospital information, and seamless appointment booking. Your health, our priority.
