@@ -1,4 +1,3 @@
-
 "use client";
 
 import { 
@@ -144,28 +143,6 @@ export function Footer() {
               ))}
             </ul>
           </div>
-        </div>
-
-        {/* BOTTOM METRICS BAR */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-10 border-t border-white/5">
-            <div className="flex items-center gap-3 group">
-                <div className="p-2 rounded-xl bg-cyan-400/10 border border-cyan-400/20 group-hover:neon-glow-cyan transition-all">
-                    <ShieldCheck className="h-5 w-5 text-cyan-400" />
-                </div>
-                <span className="text-sm font-black text-white/80 uppercase tracking-tighter">Blockchain Verified</span>
-            </div>
-            <div className="flex items-center gap-3 group">
-                <div className="p-2 rounded-xl bg-purple-400/10 border border-purple-400/20 group-hover:neon-glow-purple transition-all">
-                    <Hospital className="h-5 w-5 text-purple-400" />
-                </div>
-                <span className="text-sm font-black text-white/80 uppercase tracking-tighter">200+ Partner Hospitals</span>
-            </div>
-            <div className="flex items-center gap-3 group">
-                <div className="p-2 rounded-xl bg-purple-400/10 border border-purple-400/20 group-hover:neon-glow-purple transition-all">
-                    <Star className="h-5 w-5 text-purple-400 fill-purple-400" />
-                </div>
-                <span className="text-sm font-black text-white/80 uppercase tracking-tighter">4.8 Patient Rating</span>
-            </div>
         </div>
         
         {/* FINAL BOTTOM BAR */}
