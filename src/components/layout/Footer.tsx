@@ -1,4 +1,3 @@
-
 import { Phone, Mail, MapPin, Heart, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
