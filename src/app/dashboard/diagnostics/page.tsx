@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -6,11 +5,9 @@ import { getDiagnosticsCentreById, getTestAppointmentsForCentre } from '@/lib/da
 import type { DiagnosticsCentre, TestAppointment, User as AppUser } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert, Activity } from "lucide-react";
+import { UserPlus, Download, Upload, PlusCircle, Pencil, Trash2, LogIn, ShieldAlert, Activity, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Lottie from 'lottie-react';
-import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -18,47 +15,44 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
+import { useUser } from '@/firebase';
 
 const DiagnosticsDashboard = () => {
-  const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
-  const [centre, setCentre] = useState<DiagnosticsCentre | null | undefined>(undefined);
+  const { user: userProfile, loading: authLoading } = useUser();
+  const [centre, setCentre] = useState<DiagnosticsCentre | null>(null);
   const [appointments, setAppointments] = useState<TestAppointment[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('mockUser');
-    const currentUser = storedUser ? JSON.parse(storedUser) : null;
-    setUserProfile(currentUser);
-    
     const fetchData = async () => {
-        if (currentUser && currentUser.role === 'diagnostics_centres') {
+        if (authLoading) return;
+
+        if (userProfile && userProfile.role === 'diagnostics_centres') {
             try {
                 // Mock: Assume user's diagnostics centre is their UID
-                const centreId = currentUser.uid; 
+                const centreId = userProfile.uid; 
                 const [centreData, appointmentData] = await Promise.all([
                   getDiagnosticsCentreById(centreId),
                   getTestAppointmentsForCentre(centreId)
                 ]);
                 
-                if (centreData) {
-                  setCentre(centreData);
-                  setAppointments(appointmentData);
-                } else {
-                  setCentre(null);
-                  setAppointments([]);
-                }
+                setCentre(centreData || null);
+                setAppointments(appointmentData || []);
             } catch(error) {
                 console.error("Error fetching diagnostics data:", error);
                 toast({ title: "Error", description: "Could not load diagnostics data.", variant: "destructive"});
                 setCentre(null);
+            } finally {
+                setIsDataLoading(false);
             }
         } else {
-            // Stop loading if the role is incorrect or user is not logged in
             setCentre(null);
+            setIsDataLoading(false);
         }
     };
     fetchData();
-  }, [toast]);
+  }, [userProfile, authLoading, toast]);
   
   const handleAction = (action: string, entity: string, id: string) => {
     toast({
@@ -77,11 +71,10 @@ const DiagnosticsDashboard = () => {
     }
   }
 
-
-  if (userProfile === undefined || centre === undefined) {
+  if (authLoading || isDataLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 h-screen">
-        <Lottie animationData={loadingAnimation} loop={true} className="w-32 h-32" />
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
         <p className="mt-4 text-muted-foreground">Loading Diagnostics Dashboard...</p>
       </div>
     );
