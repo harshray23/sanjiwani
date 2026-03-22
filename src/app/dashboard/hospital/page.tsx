@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { searchHospitals, updateHospitalBloodInventory } from '@/lib/data';
-import type { Hospital, User as AppUser, BloodInventory } from '@/lib/types';
+import type { Hospital, User as AppUser, BloodInventory, DoctorDetails } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BedDouble, Droplet, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2, ExternalLink, Activity, Save } from "lucide-react";
+import { BedDouble, Droplet, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2, ExternalLink, Activity, Save, UserPlus, Search, GraduationCap } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Lottie from 'lottie-react';
@@ -14,15 +14,38 @@ import loadingAnimation from '@/assets/animations/Loading_Screen.json';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Image from 'next/image';
 import axios from 'axios';
+
+// Mock initial staff for the demo
+const MOCK_STAFF: (DoctorDetails & { role: string })[] = [
+  { id: 'st-1', userId: 'doc-101', name: 'Dr. Sarah Ahmed', email: 'sarah.a@hospital.com', specialization: 'Cardiology', licenseNo: 'MC-99281', consultationFee: 1200, availability: [], role: 'Doctor', imageUrl: 'https://i.pravatar.cc/150?u=sarah' },
+  { id: 'st-2', userId: 'doc-102', name: 'Dr. Robert Chen', email: 'robert.c@hospital.com', specialization: 'Neurology', licenseNo: 'MC-88273', consultationFee: 1500, availability: [], role: 'Doctor', imageUrl: 'https://i.pravatar.cc/150?u=robert' },
+  { id: 'st-3', userId: 'ns-101', name: 'Nurse Priya Wilson', email: 'priya.w@hospital.com', specialization: 'Emergency Care', licenseNo: 'NS-1122', consultationFee: 0, availability: [], role: 'Nurse', imageUrl: 'https://i.pravatar.cc/150?u=priya' },
+];
 
 const HospitalDashboard = () => {
   const [userProfile, setUserProfile] = useState<AppUser | null | undefined>(undefined);
   const [hospital, setHospital] = useState<Hospital | null | undefined>(undefined);
+  const [staff, setStaff] = useState(MOCK_STAFF);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddingStaff, setIsAddingStaff] = useState(false);
   const { toast } = useToast();
+
+  const [newStaff, setNewStaff] = useState({
+    name: '',
+    role: 'Doctor',
+    specialization: '',
+    licenseNo: '',
+    email: '',
+    phone: '',
+  });
 
   useEffect(() => {
     const storedUser = localStorage.getItem('mockUser');
@@ -74,6 +97,24 @@ const HospitalDashboard = () => {
     }
   };
 
+  const handleAddStaff = () => {
+    const member = {
+      ...newStaff,
+      id: `st-${Date.now()}`,
+      userId: `user-${Date.now()}`,
+      consultationFee: newStaff.role === 'Doctor' ? 800 : 0,
+      availability: [],
+      imageUrl: `https://i.pravatar.cc/150?u=${newStaff.name}`,
+    };
+    setStaff([...staff, member as any]);
+    setIsAddingStaff(false);
+    toast({
+      title: "Member Added",
+      description: `${newStaff.name} has been added to the hospital directory.`,
+    });
+    setNewStaff({ name: '', role: 'Doctor', specialization: '', licenseNo: '', email: '', phone: '' });
+  };
+
   const handleAvalancheVerify = async () => {
     if (!hospital) return;
 
@@ -82,6 +123,7 @@ const HospitalDashboard = () => {
       const anchorData = {
         beds: hospital.beds,
         blood: hospital.bloodInventory,
+        staffCount: staff.length,
         timestamp: new Date().toISOString()
       };
       const response = await axios.post('/api/anchor', { data: anchorData });
@@ -146,7 +188,7 @@ const HospitalDashboard = () => {
   );
 
   return (
-    <div className="py-12 w-full max-w-5xl mx-auto space-y-8">
+    <div className="py-12 w-full max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline text-accent">Hospital Dashboard</h1>
@@ -228,10 +270,117 @@ const HospitalDashboard = () => {
 
         <TabsContent value="staff">
              <Card>
-                <CardHeader><CardTitle>Staff Management</CardTitle></CardHeader>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-20"/>
-                  <p>Provider staff management active.</p>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div>
+                      <CardTitle className="font-headline">Personnel Management</CardTitle>
+                      <CardDescription>Manage doctors, nurses, and administrative staff.</CardDescription>
+                    </div>
+                    <Dialog open={isAddingStaff} onOpenChange={setIsAddingStaff}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-primary hover:bg-primary/90">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Add Staff Member
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                          <DialogTitle>Add New Personnel</DialogTitle>
+                          <DialogDescription>
+                            Enter the professional details of the new staff member.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">Full Name</Label>
+                            <Input id="name" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="role" className="text-right">Role</Label>
+                            <Select value={newStaff.role} onValueChange={v => setNewStaff({...newStaff, role: v})}>
+                              <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Select Role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Doctor">Doctor</SelectItem>
+                                <SelectItem value="Nurse">Nurse</SelectItem>
+                                <SelectItem value="Technician">Technician</SelectItem>
+                                <SelectItem value="Administrator">Administrator</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {newStaff.role === 'Doctor' && (
+                            <>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="spec" className="text-right">Specialty</Label>
+                                <Input id="spec" value={newStaff.specialization} onChange={e => setNewStaff({...newStaff, specialization: e.target.value})} className="col-span-3" placeholder="e.g. Cardiology" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="lic" className="text-right">License No</Label>
+                                <Input id="lic" value={newStaff.licenseNo} onChange={e => setNewStaff({...newStaff, licenseNo: e.target.value})} className="col-span-3" />
+                              </div>
+                            </>
+                          )}
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="email" className="text-right">Email</Label>
+                            <Input id="email" type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} className="col-span-3" />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setIsAddingStaff(false)}>Cancel</Button>
+                          <Button onClick={handleAddStaff} disabled={!newStaff.name || !newStaff.email}>Add Member</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[250px]">Name</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Specialization</TableHead>
+                          <TableHead>Credentials</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {staff.map((member) => (
+                          <TableRow key={member.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={member.imageUrl} />
+                                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-bold text-sm leading-tight">{member.name}</p>
+                                  <p className="text-xs text-muted-foreground">{member.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="font-medium">{member.role}</Badge>
+                            </TableCell>
+                            <TableCell>{member.specialization || '-'}</TableCell>
+                            <TableCell>
+                              <div className="text-xs space-y-0.5">
+                                <p className="font-mono text-muted-foreground">{member.licenseNo}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
             </Card>
         </TabsContent>
@@ -246,9 +395,18 @@ const HospitalDashboard = () => {
                              <Button className="w-full" variant="outline">Upload New Image</Button>
                         </div>
                         <div className="md:col-span-2 space-y-4">
-                            <Input defaultValue={hospital.name} />
-                            <Input defaultValue={hospital.contact} />
-                            <Textarea defaultValue={hospital.specialties.join(', ')} />
+                            <div className="space-y-2">
+                              <Label>Hospital Name</Label>
+                              <Input defaultValue={hospital.name} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Contact Number</Label>
+                              <Input defaultValue={hospital.contact} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Specialties (Comma separated)</Label>
+                              <Textarea defaultValue={hospital.specialties.join(', ')} />
+                            </div>
                         </div>
                     </div>
                     <Button onClick={() => toast({title: "Profile Saved"})}>Save Changes</Button>
