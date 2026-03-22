@@ -1,39 +1,48 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Stethoscope, FlaskConical, ChevronDown, Building, Hospital, FileText, Trophy, Activity } from 'lucide-react';
+import { Menu, Home, Activity, Calendar, FileText, Trophy, ChevronDown, LogIn } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Logo from './Logo';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export function Header() {
-  const serviceItems = [
-    { href: '/search', label: 'Find Doctors', icon: <Stethoscope className="h-4 w-4"/> },
-    { href: '/clinics', label: 'Find Clinics', icon: <Building className="h-4 w-4"/> },
-    { href: '/hospitals', label: 'Find Hospitals', icon: <Hospital className="h-4 w-4"/> },
-    { href: '/diagnostics', label: 'Find Diagnostics', icon: <FlaskConical className="h-4 w-4"/> },
-  ];
+  const pathname = usePathname();
 
   const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/appointments', label: 'My Appointments' },
-    { href: '/records', label: 'Health Vault' },
+    { href: '/', label: 'Home', icon: <Home className="h-4 w-4" /> },
+    { href: '/triage', label: 'AI Triage', icon: <Activity className="h-4 w-4" /> },
+    { href: '/appointments', label: 'My Appointments', icon: <Calendar className="h-4 w-4" /> },
+    { href: '/records', label: 'Health Vault', icon: <FileText className="h-4 w-4" /> },
+    { href: '/rewards', label: 'Rewards', icon: <Trophy className="h-4 w-4" /> },
   ];
 
   return (
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-      <header className="bg-white/95 backdrop-blur-md border shadow-lg rounded-full w-full max-w-6xl h-16 flex items-center justify-between px-8 pointer-events-auto transition-all duration-300">
+      <header className="glass-morphism rounded-full w-full max-w-7xl h-16 flex items-center justify-between px-6 pointer-events-auto transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <Logo className="text-xl sm:text-2xl" />
+          <Logo className="text-xl sm:text-2xl text-white" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
           {navItems.map((item) => (
-            <Button key={item.label} variant="ghost" asChild className="text-[#0f4c5c] font-semibold hover:bg-transparent hover:text-primary">
+            <Button 
+              key={item.label} 
+              variant="ghost" 
+              asChild 
+              className={cn(
+                "text-white/80 font-medium hover:bg-white/10 hover:text-white rounded-full flex items-center gap-2",
+                pathname === item.href && "bg-white/20 text-white"
+              )}
+            >
               <Link href={item.href}>
+                {item.icon}
                 {item.label}
               </Link>
             </Button>
@@ -41,67 +50,55 @@ export function Header() {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-[#0f4c5c] font-semibold hover:bg-transparent hover:text-primary group">
+                <Button variant="ghost" className="text-white/80 font-medium hover:bg-white/10 hover:text-white rounded-full group">
                     Our Services
                     <ChevronDown className="ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl mt-2">
-              {serviceItems.map((item) => (
-                <DropdownMenuItem key={item.label} asChild>
-                  <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
-                    {item.icon}
-                    {item.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent align="end" className="glass-morphism text-white rounded-xl mt-2">
+              <DropdownMenuItem asChild>
+                <Link href="/search" className="cursor-pointer">Find Doctors</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/clinics" className="cursor-pointer">Clinics</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/hospitals" className="cursor-pointer">Hospitals</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/diagnostics" className="cursor-pointer">Diagnostics</Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           <div className="ml-4">
-            <Suspense fallback={<Button disabled size="sm" className="rounded-full">Loading...</Button>}>
+            <Suspense fallback={<Button disabled className="rounded-full">...</Button>}>
               <UserNav />
             </Suspense>
           </div>
         </nav>
 
-        <div className="md:hidden flex items-center gap-2">
-          <Suspense>
-            <UserNav />
-          </Suspense>
+        <div className="lg:hidden flex items-center gap-2">
+          <UserNav />
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-[#0f4c5c]">
+              <Button variant="ghost" size="icon" className="text-white">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="rounded-l-3xl">
-              <SheetHeader className="sr-only">
-                  <SheetTitle>Menu</SheetTitle>
-                  <SheetDescription>Main navigation links for Sanjiwani.</SheetDescription>
+            <SheetContent side="right" className="bg-[#020817] border-l-white/10">
+              <SheetHeader className="text-left border-b border-white/5 pb-4">
+                  <Logo className="text-2xl text-white" />
               </SheetHeader>
               <nav className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
-                  <Button key={item.label} variant="ghost" className="justify-start text-lg text-[#0f4c5c] font-semibold" asChild>
-                    <Link href={item.href}>
+                  <Button key={item.label} variant="ghost" className="justify-start text-white/80" asChild>
+                    <Link href={item.href} className="flex items-center gap-3">
+                      {item.icon}
                       {item.label}
                     </Link>
                   </Button>
                 ))}
-                <div className="border-t pt-4">
-                    <h3 className="px-3 text-sm font-semibold text-muted-foreground uppercase">Our Services</h3>
-                    <div className="mt-2 space-y-2">
-                        {serviceItems.map((item) => (
-                            <Button key={item.label} variant="ghost" className="justify-start text-lg w-full text-[#0f4c5c]" asChild>
-                                <Link href={item.href} className="flex items-center gap-2">
-                                    {item.icon}
-                                    {item.label}
-                                </Link>
-                            </Button>
-                        ))}
-                    </div>
-                </div>
               </nav>
             </SheetContent>
           </Sheet>

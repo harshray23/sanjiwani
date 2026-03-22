@@ -1,18 +1,19 @@
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 export default function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn("font-headline font-bold text-[#0f4c5c] whitespace-nowrap flex items-center justify-center gap-2", className)}>
-      <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+    <div className={cn("font-headline font-bold flex items-center gap-2", className)}>
+      <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 neon-glow-cyan bg-[#020817]">
         <Image 
           src="/logo.jpg" 
           alt="Sanjiwani Logo" 
           fill
-          className="rounded-lg object-cover"
+          className="object-cover"
         />
       </div>
-      <span className="tracking-tight uppercase">Sanjiwani</span>
+      <span className="tracking-tight uppercase text-white font-black">Sanjiwani</span>
     </div>
   );
 }
