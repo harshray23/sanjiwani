@@ -5,6 +5,7 @@ import { searchHospitals, updateHospitalBloodInventory } from '@/lib/data';
 import type { Hospital, User as AppUser, BloodInventory } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { BedDouble, Droplet, Users, LogIn, Trash2, Pencil, Upload, ShieldAlert, ShieldCheck, Link as LinkIcon, Loader2, ExternalLink, Activity, Save } from "lucide-react";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
