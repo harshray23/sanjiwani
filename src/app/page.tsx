@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function HomePage() {
             </h1>
             <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
               Find trusted doctors and real-time hospital availability verified on the <br/>
-              <span className="text-white font-bold border-b border-accent/50 pb-1">**Avalanche Blockchain**</span>. Quality healthcare, anchored in truth.
+              <span className="text-white font-bold border-b border-accent/50 pb-1">Avalanche Blockchain</span>. Quality healthcare, anchored in truth.
             </p>
           </div>
 
