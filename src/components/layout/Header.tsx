@@ -33,12 +33,13 @@ export function Header() {
           <Link href="/" className="flex items-center gap-3 text-accent hover:text-accent/90 transition-colors">
             <Image
               src="/logo.jpg"
-              alt="Sanjeevani Logo"
+              alt="Sanjiwani Logo"
               width={80}
               height={80}
               className="rounded-full"
+              priority
             />
-            <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjeevani</h1>
+            <h1 className="text-2xl font-bold font-headline hidden sm:block">Sanjiwani</h1>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
@@ -91,7 +92,7 @@ export function Header() {
               <SheetContent side="right">
                 <SheetHeader className="sr-only">
                     <SheetTitle>Menu</SheetTitle>
-                    <SheetDescription>Main navigation links for Sanjeevani.</SheetDescription>
+                    <SheetDescription>Main navigation links for Sanjiwani.</SheetDescription>
                 </SheetHeader>
                 <nav className="flex flex-col space-y-4 mt-8">
                   {navItems.map((item) => (

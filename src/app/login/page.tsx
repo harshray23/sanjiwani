@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -164,7 +163,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      toast({ title: "Signed In Successfully", description: "Welcome to Sanjeevani!" });
+      toast({ title: "Signed In Successfully", description: "Welcome to Sanjiwani!" });
       router.push('/');
     } catch (error: any) {
       console.error("Google Login Error:", error);
@@ -207,7 +206,7 @@ export default function LoginPage() {
                 <Image src="https://picsum.photos/seed/login-art/800/1200" alt="Healthcare" fill objectFit="cover" className="opacity-20"/>
                  <div className="relative z-10 text-center">
                     <Logo className="h-24 w-24 text-accent mx-auto"/>
-                    <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjeevani</h2>
+                    <h2 className="text-3xl font-bold font-headline mt-4 text-accent">Welcome to Sanjiwani</h2>
                     <p className="mt-2 text-foreground/80">Your trusted partner in health verification.</p>
                 </div>
             </div>

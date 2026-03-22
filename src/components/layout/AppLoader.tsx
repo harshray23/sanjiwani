@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -17,7 +16,7 @@ export function AppLoader({ children }: { children: React.ReactNode }) {
 
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1000); // Reduced from 2500ms to 1000ms
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -32,7 +31,7 @@ export function AppLoader({ children }: { children: React.ReactNode }) {
         )}
         <div className="relative z-10 flex flex-col items-center justify-center text-center">
             <Logo className="h-32 w-32 text-primary animate-pulse" />
-            <p className="text-lg text-muted-foreground mt-4">Initializing Sanjeevani...</p>
+            <p className="text-lg text-muted-foreground mt-4">Initializing Sanjiwani...</p>
         </div>
       </div>
     );

@@ -6,7 +6,7 @@ export default function Logo({ className }: { className?: string }) {
     <div className={cn("relative aspect-square", className)}>
       <Image
         src="/logo.jpg"
-        alt="Sanjeevani Logo"
+        alt="Sanjiwani Logo"
         fill
         className="object-contain rounded-full"
         priority

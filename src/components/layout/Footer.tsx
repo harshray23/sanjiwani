@@ -44,13 +44,13 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3 text-accent">
                 <Image
                   src="/logo.jpg"
-                  alt="Sanjeevani Logo"
+                  alt="Sanjiwani Logo"
                   width={72}
                   height={72}
                   className="rounded-full"
                 />
                 <div>
-                    <h2 className="text-2xl font-bold font-headline">Sanjeevani</h2>
+                    <h2 className="text-2xl font-bold font-headline">Sanjiwani</h2>
                 </div>
             </Link>
             <p className="text-muted-foreground text-sm">
@@ -113,7 +113,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
             <p className="text-center sm:text-left mb-4 sm:mb-0">
-                &copy; {new Date().getFullYear()} Sanjeevani. All rights reserved. | Built with <Heart className="inline h-4 w-4 text-red-500 fill-current"/> for better healthcare.
+                &copy; {new Date().getFullYear()} Sanjiwani. All rights reserved. | Built with <Heart className="inline h-4 w-4 text-red-500 fill-current"/> for better healthcare.
             </p>
             <div className="flex items-center gap-4">
                 <span>Follow us:</span>
