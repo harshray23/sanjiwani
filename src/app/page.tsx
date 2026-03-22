@@ -4,7 +4,26 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Search, ShieldCheck, Link as LinkIcon, Calendar, Star, Mic, Brain, Zap, Shield, Coins, Activity, SearchCheck, CheckCircle2, FlaskConical, MapPin } from "lucide-react";
+import { 
+  Search, 
+  ShieldCheck, 
+  Link as LinkIcon, 
+  Calendar, 
+  Star, 
+  Mic, 
+  Brain, 
+  Zap, 
+  Shield, 
+  Coins, 
+  Activity, 
+  SearchCheck, 
+  CheckCircle2, 
+  FlaskConical, 
+  MapPin, 
+  Eye, 
+  Rocket, 
+  Sparkles 
+} from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import { useState } from "react";
@@ -245,7 +264,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 rounded-full border border-cyan-500/30 animate-ping" />
                   <div className="absolute inset-4 rounded-full border border-cyan-500/20" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="glass-morphism rounded-full p-10 border-cyan-500/50 shadow-[0_0_30px_rgba(0,242,255,0.2)] group-hover:scale-110 transition-transform duration-500">
+                    <div className="glass-morphism rounded-full p-10 border-cyan-500/50 shadow-[0_0_30px_rgba(0,242,255,0.2)] group-hover:neon-glow-cyan transition-all duration-500">
                       <Search className="h-12 w-12 text-cyan-400" />
                     </div>
                   </div>
@@ -267,7 +286,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative">
                       <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-2xl group-hover:bg-orange-500/40 transition-colors" />
-                      <div className="relative glass-morphism rounded-[2.5rem] p-10 border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.2)] group-hover:scale-110 transition-transform duration-500">
+                      <div className="relative glass-morphism rounded-[2.5rem] p-10 border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.2)] group-hover:neon-glow-orange transition-all duration-500">
                         <ShieldCheck className="h-12 w-12 text-orange-400" />
                         {/* Connecting Hexagon bits */}
                         <div className="absolute -top-2 -left-2 h-4 w-4 bg-orange-500 rounded-sm rotate-45 animate-pulse" />
@@ -300,7 +319,7 @@ export default function HomePage() {
                         <Coins className="h-4 w-4 text-yellow-400 opacity-30" />
                       </div>
                       
-                      <div className="relative glass-morphism rounded-full p-10 border-purple-500/50 shadow-[0_0_30px_rgba(139,92,246,0.2)] group-hover:scale-110 transition-transform duration-500">
+                      <div className="relative glass-morphism rounded-full p-10 border-purple-500/50 shadow-[0_0_30px_rgba(139,92,246,0.2)] group-hover:neon-glow-purple transition-all duration-500">
                         <div className="relative">
                           <CheckCircle2 className="h-12 w-12 text-purple-400" />
                           <div className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full p-1">
@@ -321,6 +340,81 @@ export default function HomePage() {
                   </p>
                 </Card>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Mission Section */}
+      <section className="relative z-10 py-32 px-4 bg-black/40 overflow-hidden">
+        {/* Background Accents */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/10 rounded-full blur-[150px] opacity-50" />
+            <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white] animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/3 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white] animate-pulse delay-700" />
+            <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white] animate-pulse delay-300" />
+            
+            {/* Geometric Mandala Watermark */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 opacity-10">
+                <svg width="600" height="600" viewBox="0 0 200 200" className="text-accent fill-none stroke-current stroke-[0.5]">
+                    <path d="M100 10 L110 40 L140 50 L110 60 L100 90 L90 60 L60 50 L90 40 Z" />
+                    <circle cx="100" cy="100" r="80" strokeDasharray="2 2" />
+                    <circle cx="100" cy="100" r="60" />
+                    <circle cx="100" cy="100" r="40" strokeDasharray="4 4" />
+                </svg>
+            </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto space-y-24 relative">
+          {/* Shloka Header */}
+          <div className="text-center space-y-10">
+            <div className="space-y-4">
+                <h2 className="text-2xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-orange-300 to-orange-500 drop-shadow-[0_0_15px_rgba(251,146,60,0.4)] leading-relaxed">
+                    धर्मार्थकाममोक्षाणां स्वास्थ्यं मूलमुत्तमम् । <br/>
+                    स्वस्थस्य कुशलं श्रेय: स्वास्थ्यं सर्वार्थसाधनम् ॥
+                </h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto rounded-full" />
+            </div>
+            <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto italic font-medium leading-relaxed">
+                Health is the supreme foundation for achieving the four goals of life: <br/>
+                <span className="text-white font-bold not-italic">Righteousness, Prosperity, Desire, and Liberation.</span>
+            </p>
+          </div>
+
+          {/* Vision/Mission Grid */}
+          <div className="grid md:grid-cols-2 gap-10">
+            {/* Vision Card */}
+            <div className="glass-morphism rounded-[2rem] p-10 space-y-6 relative group overflow-hidden border-white/5 hover:border-accent/30 transition-all duration-500">
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-[60px] group-hover:bg-accent/20 transition-colors" />
+                
+                <div className="relative w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:neon-glow-cyan transition-all duration-500">
+                    <div className="absolute inset-0 bg-accent/5 rounded-2xl animate-pulse" />
+                    <Eye className="h-10 w-10 text-accent relative z-10" />
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                    <h3 className="text-3xl font-black text-white font-headline">Our Vision</h3>
+                    <p className="text-lg text-white/60 leading-relaxed font-medium">
+                        To create a transparent and accessible healthcare ecosystem where decentralized trust empowers individuals to find care without misinformation.
+                    </p>
+                </div>
+            </div>
+
+            {/* Mission Card */}
+            <div className="glass-morphism rounded-[2rem] p-10 space-y-6 relative group overflow-hidden border-white/5 hover:border-orange-400/30 transition-all duration-500">
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/10 rounded-full blur-[60px] group-hover:bg-orange-500/20 transition-colors" />
+                
+                <div className="relative w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:neon-glow-orange transition-all duration-500">
+                    <div className="absolute inset-0 bg-orange-500/5 rounded-2xl animate-pulse" />
+                    <Rocket className="h-10 w-10 text-orange-400 relative z-10" />
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                    <h3 className="text-3xl font-black text-white font-headline">Our Mission</h3>
+                    <p className="text-lg text-white/60 leading-relaxed font-medium">
+                        To bridge the critical information gap in healthcare using the Avalanche blockchain as a verification layer, saving lives through data integrity.
+                    </p>
+                </div>
             </div>
           </div>
         </div>
