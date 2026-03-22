@@ -55,18 +55,23 @@
     }
     
     .neon-glow-cyan {
-        @apply border-[#00f2ff]/50;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.2), inset 0 0 5px rgba(0, 242, 255, 0.1);
+        @apply border-accent/60;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4), 0 0 30px rgba(0, 242, 255, 0.2), inset 0 0 10px rgba(0, 242, 255, 0.1);
     }
 
     .neon-glow-orange {
-        @apply border-[#ff8c00]/50;
-        box-shadow: 0 0 15px rgba(255, 140, 0, 0.2), inset 0 0 5px rgba(255, 140, 0, 0.1);
+        @apply border-orange-500/60;
+        box-shadow: 0 0 15px rgba(255, 140, 0, 0.4), 0 0 30px rgba(255, 140, 0, 0.2), inset 0 0 10px rgba(255, 140, 0, 0.1);
+    }
+
+    .neon-glow-purple {
+        @apply border-purple-500/60;
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.4), 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 10px rgba(168, 85, 247, 0.1);
     }
 
     .neon-glow-red {
-        @apply border-[#ff0000]/50;
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.2), inset 0 0 5px rgba(255, 0, 0, 0.1);
+        @apply border-red-500/60;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4), 0 0 30px rgba(239, 68, 68, 0.2), inset 0 0 10px rgba(239, 68, 68, 0.1);
     }
 
     .btn-gradient-orange {

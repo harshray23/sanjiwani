@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -310,7 +311,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <Card className="glass-morphism border-purple-500/20 rounded-[2rem] p-8 text-center space-y-4 hover:border-purple-500/50 transition-all duration-500">
+                <Card className="glass-morphism border-purple-500/20 rounded-[2rem] p-8 text-center space-y-4 group-hover:neon-glow-purple transition-all duration-500">
                   <div className="flex items-center justify-center gap-3">
                     <span className="text-2xl font-black text-purple-400">03</span>
                     <h3 className="text-xl font-bold text-white">Verify & Earn</h3>
