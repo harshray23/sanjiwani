@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Stethoscope, Search, ArrowRight, Hospital, Shield, Star, ShieldCheck, H
 import Image from 'next/image';
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import placeholderImages from '@/app/lib/placeholder-images.json';
 
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
@@ -24,16 +26,45 @@ export default function HomePage() {
     { value: '4.8/5', label: 'patient rating', icon: null },
   ];
 
+  const quickAccessItems = [
+    {
+      id: "01.",
+      title: "FIND DOCTORS",
+      desc: "consult with verified specialists",
+      img: placeholderImages.doctor3d,
+      href: "/search"
+    },
+    {
+      id: "02.",
+      title: "HOSPITALS",
+      desc: "real-time bed availability",
+      img: placeholderImages.hospital3d,
+      href: "/hospitals"
+    },
+    {
+      id: "03.",
+      title: "DIAGNOSTICS",
+      desc: "book lab tests & health checkups",
+      img: placeholderImages.diagnostics3d,
+      href: "/diagnostics"
+    },
+    {
+      id: "04.",
+      title: "EMERGENCY",
+      desc: "24/7 emergency services",
+      img: placeholderImages.emergency3d,
+      href: "/emergency"
+    }
+  ];
+
   const scrollingText = "SANJIWANI IS A MODERN AI-POWERED WEB APP DEDICATED TO SIMPLIFYING HEALTHCARE ACCESS";
 
   return (
     <div className="w-full min-h-screen bg-[#e8f5f3]">
       {/* Hero Section */}
       <section className="relative w-full min-h-screen pt-32 pb-20 px-4 md:px-8 lg:px-16 overflow-hidden">
-        {/* Background Decorative elements could go here if needed, but the teal bg is key */}
         <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-12">
           
-          {/* Left Content */}
           <div className="w-full lg:w-3/5 space-y-8 z-10 animate-fade-in-up">
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-black text-[#0f4c5c] leading-[1.1] tracking-tight font-headline">
@@ -46,7 +77,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Search Bar */}
             <div className="max-w-2xl bg-white rounded-full p-1.5 shadow-xl border-4 border-[#7abdb4]/30">
               <form action="/search" method="GET" className="relative flex items-center">
                 <div className="flex-1 flex items-center px-6">
@@ -65,17 +95,15 @@ export default function HomePage() {
               </form>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-wrap gap-4 pt-4">
               <Button asChild size="lg" className="bg-white text-[#7abdb4] hover:bg-white/90 rounded-xl h-14 px-8 text-lg font-bold shadow-md">
                 <Link href="/search">Book Appointment</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent text-white border-2 border-white hover:bg-white/10 rounded-xl h-14 px-8 text-lg font-bold">
+              <Button asChild size="lg" variant="outline" className="bg-transparent text-[#0f4c5c] border-2 border-[#0f4c5c] hover:bg-white/10 rounded-xl h-14 px-8 text-lg font-bold">
                 <Link href="/emergency">Emergency Verification</Link>
               </Button>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8">
               {stats.map((stat, idx) => (
                 <div key={idx} className="bg-white/40 backdrop-blur-sm rounded-[2rem] p-6 flex flex-col items-center justify-center text-center gap-2 border border-white/50 shadow-sm transition-transform hover:scale-105 duration-300">
@@ -89,7 +117,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Content - Doctor Image */}
           <div className="w-full lg:w-2/5 relative flex justify-end">
             <div className="relative w-full max-w-[500px] aspect-[4/5] z-0">
               <Image
@@ -100,7 +127,6 @@ export default function HomePage() {
                 priority
                 data-ai-hint="asian doctor stethoscope"
               />
-              {/* Overlays or decorative shapes could be added here to match the mockup's flair */}
             </div>
           </div>
         </div>
@@ -118,7 +144,58 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Other sections below remain but are styled to fit the new aesthetic */}
+      {/* Quick Access Section */}
+      <section className="py-24 px-4 bg-gradient-to-b from-[#e8f5f3] to-white">
+        <div className="container mx-auto">
+          <div className="text-center mb-16 space-y-2">
+            <h2 className="text-4xl md:text-5xl font-black text-[#58a49c] uppercase tracking-tight font-headline">
+              Quick Access To Healthcare
+            </h2>
+            <p className="text-lg text-[#58a49c]/80 font-medium">
+              everything you need for your health journey in one place.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20 max-w-6xl mx-auto px-4 lg:px-12">
+            {quickAccessItems.map((item) => (
+              <Link key={item.id} href={item.href} className="group">
+                <div className="relative flex items-center h-48 sm:h-56">
+                  {/* Decorative Teal Box */}
+                  <div className="absolute right-0 w-[85%] h-full bg-[#58a49c] rounded-[2.5rem] shadow-xl transition-transform group-hover:scale-[1.02] duration-300">
+                    <div className="flex flex-col justify-center h-full pl-24 pr-8 sm:pl-32 sm:pr-12">
+                      <h3 className="text-2xl sm:text-3xl font-black text-white uppercase leading-tight mb-1">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm sm:text-base text-white/90 font-medium leading-tight">
+                        {item.desc}
+                      </p>
+                    </div>
+                    {/* Number Badge */}
+                    <div className="absolute -top-4 -right-4 w-14 h-14 sm:w-16 sm:h-16 bg-[#0f4c5c] rounded-full border-4 border-white flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-lg">
+                      {item.id}
+                    </div>
+                  </div>
+                  
+                  {/* 3D Illustration Overlay */}
+                  <div className="absolute left-0 w-32 h-32 sm:w-44 sm:h-44 z-10 transition-transform group-hover:-translate-y-2 duration-300">
+                    <div className="relative w-full h-full">
+                      <Image 
+                        src={item.img.url}
+                        alt={item.title}
+                        fill
+                        className="object-contain"
+                        data-ai-hint={item.img.hint}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Avalanche Trust Protocol */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-black text-[#0f4c5c] mb-12 font-headline uppercase tracking-tight">The Avalanche Trust Protocol</h2>

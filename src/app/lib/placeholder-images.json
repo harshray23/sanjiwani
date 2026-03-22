@@ -1,0 +1,27 @@
+
+{
+  "doctor3d": {
+    "url": "https://picsum.photos/seed/doc3d/400/400",
+    "hint": "3d doctor",
+    "width": 400,
+    "height": 400
+  },
+  "hospital3d": {
+    "url": "https://picsum.photos/seed/hosp3d/400/400",
+    "hint": "3d hospital",
+    "width": 400,
+    "height": 400
+  },
+  "diagnostics3d": {
+    "url": "https://picsum.photos/seed/diag3d/400/400",
+    "hint": "3d clipboard",
+    "width": 400,
+    "height": 400
+  },
+  "emergency3d": {
+    "url": "https://picsum.photos/seed/emer3d/400/400",
+    "hint": "3d emergency",
+    "width": 400,
+    "height": 400
+  }
+}
