@@ -22,7 +22,9 @@ import {
   MapPin, 
   Eye, 
   Rocket, 
-  Sparkles 
+  Sparkles,
+  Globe,
+  ArrowRight
 } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
@@ -416,6 +418,40 @@ export default function HomePage() {
                     </p>
                 </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL JOIN CTA SECTION */}
+      <section className="relative z-10 py-32 px-4 bg-black/20 overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-cyan-500/30 rounded-full blur-3xl animate-pulse" />
+            <div className="relative glass-morphism rounded-full p-6 border border-cyan-500/50 shadow-[0_0_40px_rgba(0,242,255,0.3)]">
+              <div className="relative">
+                <Globe className="h-16 w-16 text-cyan-400" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-cyan-400/20 rounded-full p-2">
+                  <span className="text-[10px] font-black text-cyan-400">AI</span>
+                </div>
+                <div className="absolute -top-2 -right-2 bg-purple-500 rounded-full p-1 animate-bounce">
+                  <Zap className="h-4 w-4 text-white fill-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h2 className="text-4xl md:text-6xl font-black font-headline text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 leading-tight">
+            Join the Future of Trusted Healthcare
+          </h2>
+          
+          <p className="text-xl text-white/60 max-w-2xl mx-auto font-medium">
+            Ready to integrate decentralized trust? Join pilot hospitals on the Avalanche blockchain and build the network.
+          </p>
+
+          <div className="pt-6">
+            <Button asChild size="lg" className="btn-gradient-orange rounded-full h-16 px-12 text-xl font-black neon-glow-orange hover:scale-105 transition-all">
+              <Link href="/login">Join the Network</Link>
+            </Button>
           </div>
         </div>
       </section>
