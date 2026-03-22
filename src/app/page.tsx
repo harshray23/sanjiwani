@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ShieldCheck, Link as LinkIcon, Calendar, Star, Mic, Brain, Zap, Shield, Coins, Activity } from "lucide-react";
+import { Search, ShieldCheck, Link as LinkIcon, Calendar, Star, Mic, Brain, Zap, Shield, Coins, Activity, SearchCheck, CheckCircle2, FlaskConical, MapPin } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
 import { useState } from "react";
@@ -187,6 +187,144 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="relative z-10 py-32 px-4 bg-[#050a15] overflow-hidden">
+        {/* Hexagonal Grid Background Overlay */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#00f2ff 0.5px, transparent 0.5px)', backgroundSize: '30px 30px' }} />
+        
+        <div className="max-w-7xl mx-auto space-y-20 relative">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-6xl font-black font-headline text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
+              How It Works
+            </h2>
+            <p className="text-xl text-white/60 font-medium">Your Intelligent Care Journey</p>
+          </div>
+
+          <div className="relative">
+            {/* The Wavy Care Path Line */}
+            <div className="hidden lg:block absolute top-1/2 left-0 w-full h-32 -translate-y-1/2 pointer-events-none z-0">
+              <svg className="w-full h-full" viewBox="0 0 1200 100" preserveAspectRatio="none">
+                <path 
+                  d="M0,50 C150,50 250,20 400,20 C550,20 650,80 800,80 C950,80 1050,50 1200,50" 
+                  fill="none" 
+                  stroke="url(#care-path-gradient)" 
+                  strokeWidth="3" 
+                  strokeDasharray="10,10"
+                  className="animate-flow-dash"
+                />
+                <defs>
+                  <linearGradient id="care-path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#00f2ff" stopOpacity="0.2" />
+                    <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#ec4899" stopOpacity="0.2" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Floating AI Node on Path */}
+              <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-purple-500/50 rounded-full blur-xl animate-pulse" />
+                  <div className="relative glass-morphism rounded-full p-3 border border-purple-500/50 shadow-[0_0_20px_rgba(139,92,246,0.5)]">
+                    <Brain className="h-6 w-6 text-purple-400" />
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 relative z-10">
+              {/* Step 1 */}
+              <div className="space-y-6 group">
+                <div className="relative mx-auto w-48 h-48">
+                  {/* Radar Animation */}
+                  <div className="absolute inset-0 rounded-full border border-cyan-500/30 animate-ping" />
+                  <div className="absolute inset-4 rounded-full border border-cyan-500/20" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="glass-morphism rounded-full p-10 border-cyan-500/50 shadow-[0_0_30px_rgba(0,242,255,0.2)] group-hover:scale-110 transition-transform duration-500">
+                      <Search className="h-12 w-12 text-cyan-400" />
+                    </div>
+                  </div>
+                </div>
+                <Card className="glass-morphism border-cyan-500/20 rounded-[2rem] p-8 text-center space-y-4 group-hover:neon-glow-cyan transition-all duration-500">
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-2xl font-black text-cyan-400">01</span>
+                    <h3 className="text-xl font-bold text-white">Find Your Care</h3>
+                  </div>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    Search for hospitals or doctors. Filter by specialty and Avalanche-verified availability.
+                  </p>
+                </Card>
+              </div>
+
+              {/* Step 2 */}
+              <div className="space-y-6 group">
+                <div className="relative mx-auto w-48 h-48">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-2xl group-hover:bg-orange-500/40 transition-colors" />
+                      <div className="relative glass-morphism rounded-[2.5rem] p-10 border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.2)] group-hover:scale-110 transition-transform duration-500">
+                        <ShieldCheck className="h-12 w-12 text-orange-400" />
+                        {/* Connecting Hexagon bits */}
+                        <div className="absolute -top-2 -left-2 h-4 w-4 bg-orange-500 rounded-sm rotate-45 animate-pulse" />
+                        <div className="absolute -bottom-2 -right-2 h-4 w-4 bg-orange-500 rounded-sm rotate-45 animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Card className="glass-morphism border-orange-500/20 rounded-[2rem] p-8 text-center space-y-4 group-hover:neon-glow-orange transition-all duration-500">
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-2xl font-black text-orange-400">02</span>
+                    <h3 className="text-xl font-bold text-white">Trust the Proof</h3>
+                  </div>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    Check the blockchain anchor to confirm the data is current and tamper-proof.
+                  </p>
+                </Card>
+              </div>
+
+              {/* Step 3 */}
+              <div className="space-y-6 group">
+                <div className="relative mx-auto w-48 h-48">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative">
+                      {/* Floating Coins Effect */}
+                      <div className="absolute -top-4 right-0 animate-bounce delay-100">
+                        <Coins className="h-6 w-6 text-yellow-400 opacity-50" />
+                      </div>
+                      <div className="absolute top-8 -left-4 animate-bounce delay-300">
+                        <Coins className="h-4 w-4 text-yellow-400 opacity-30" />
+                      </div>
+                      
+                      <div className="relative glass-morphism rounded-full p-10 border-purple-500/50 shadow-[0_0_30px_rgba(139,92,246,0.2)] group-hover:scale-110 transition-transform duration-500">
+                        <div className="relative">
+                          <CheckCircle2 className="h-12 w-12 text-purple-400" />
+                          <div className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full p-1">
+                            <Coins className="h-4 w-4 text-black" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Card className="glass-morphism border-purple-500/20 rounded-[2rem] p-8 text-center space-y-4 hover:border-purple-500/50 transition-all duration-500">
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-2xl font-black text-purple-400">03</span>
+                    <h3 className="text-xl font-bold text-white">Verify & Earn</h3>
+                  </div>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    Visit the clinic and earn community rewards for verifying the resource availability.
+                  </p>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Decorative Star/Flare in corner */}
       <div className="fixed bottom-8 right-8 z-20 pointer-events-none opacity-40">
         <Zap className="h-12 w-12 text-white fill-white animate-pulse" />
@@ -198,9 +336,18 @@ export default function HomePage() {
             stroke-dashoffset: -400;
           }
         }
+        @keyframes flow-dash {
+          to {
+            stroke-dashoffset: -100;
+          }
+        }
         .animate-draw-pulse {
           stroke-dashoffset: 0;
           animation: draw-pulse 4s linear infinite;
+        }
+        .animate-flow-dash {
+          stroke-dashoffset: 0;
+          animation: flow-dash 10s linear infinite;
         }
         .split-border {
           position: relative;
