@@ -26,7 +26,8 @@ import {
   FileText,
   Star,
   Zap,
-  Globe
+  Globe,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import Logo from "./Logo";
