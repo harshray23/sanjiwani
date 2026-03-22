@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Home, Activity, Calendar, FileText, Trophy, ChevronDown, LogIn } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, Home, Activity, Calendar, FileText, Trophy, ChevronDown } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { Suspense } from 'react';
 import Logo from './Logo';
@@ -25,7 +25,7 @@ export function Header() {
 
   return (
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-      <header className="glass-morphism rounded-full w-full max-w-7xl h-16 flex items-center justify-between px-6 pointer-events-auto transition-all duration-300">
+      <header className="glass-morphism neon-glow-cyan rounded-full w-full max-w-7xl h-16 flex items-center justify-between px-6 pointer-events-auto transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
           <Logo className="text-xl sm:text-2xl text-white" />
         </Link>
@@ -37,8 +37,8 @@ export function Header() {
               variant="ghost" 
               asChild 
               className={cn(
-                "text-white/80 font-medium hover:bg-white/10 hover:text-white rounded-full flex items-center gap-2",
-                pathname === item.href && "bg-white/20 text-white"
+                "text-white/80 font-medium hover:bg-white/10 hover:text-white rounded-full flex items-center gap-2 px-4 transition-all duration-200",
+                pathname === item.href && "bg-white/10 text-white neon-glow-cyan"
               )}
             >
               <Link href={item.href}>
@@ -55,7 +55,7 @@ export function Header() {
                     <ChevronDown className="ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-morphism text-white rounded-xl mt-2">
+            <DropdownMenuContent align="end" className="glass-morphism neon-glow-cyan text-white rounded-xl mt-2 border-white/10">
               <DropdownMenuItem asChild>
                 <Link href="/search" className="cursor-pointer">Find Doctors</Link>
               </DropdownMenuItem>
