@@ -1,8 +1,8 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Search, ShieldCheck, Link as LinkIcon, Calendar, Star, Mic, Brain, Zap, Shield, Coins, Activity, SearchCheck, CheckCircle2, FlaskConical, MapPin } from "lucide-react";
 import Image from 'next/image';
 import Link from "next/link";
