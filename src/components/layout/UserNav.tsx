@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react";
@@ -44,10 +43,7 @@ export function UserNav() {
 
     checkUser();
 
-    // Listen for storage changes to update the nav when user logs in/out from another tab
     window.addEventListener('storage', checkUser);
-    
-    // Listen for the custom 'authChange' event
     window.addEventListener('authChange', checkUser);
 
     return () => {
@@ -57,21 +53,20 @@ export function UserNav() {
   }, []);
 
   const handleLogout = async () => {
-    // MOCK: Clear localStorage and redirect
     localStorage.removeItem('mockUser');
     setUser(null);
-    window.dispatchEvent(new Event('authChange')); // Dispatch event on logout
+    window.dispatchEvent(new Event('authChange'));
     toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
     router.push('/login');
   }
 
   if (isLoading) {
-    return <div className="w-24 h-10 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+    return <div className="w-24 h-10 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-[#7abdb4]" /></div>;
   }
 
   if (!user) {
     return (
-      <Button asChild>
+      <Button asChild className="bg-[#7abdb4] hover:bg-[#69a89f] text-white rounded-full px-6 font-bold">
         <Link href="/login">Login / Sign Up</Link>
       </Button>
     );
@@ -98,7 +93,7 @@ export function UserNav() {
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full border-2 border-[#7abdb4]/20 p-0 overflow-hidden">
           <Avatar className="h-10 w-10">
             <AvatarFallback className={`${fallbackColor} text-white font-bold`}>
                 {user.email ? getInitials(user.email) : 'U'}
@@ -106,12 +101,12 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64" align="end" forceMount>
+      <DropdownMenuContent className="w-64 rounded-2xl" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <div className="flex justify-between items-center">
-              <p className="text-sm font-bold leading-none">{user.name}</p>
-              <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] py-0">
+              <p className="text-sm font-bold leading-none text-[#0f4c5c]">{user.name}</p>
+              <Badge variant="secondary" className="bg-[#7abdb4]/10 text-[#7abdb4] text-[10px] py-0">
                 <Coins className="h-2 w-2 mr-1"/> {user.sanjeevaniPoints || 0} pts
               </Badge>
             </div>
@@ -122,29 +117,29 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
               <Link href="/profile">
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
               </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
               <Link href="/rewards">
                   <Trophy className="mr-2 h-4 w-4 text-yellow-500" />
                   <span>Rewards & Impact</span>
               </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
               <Link href="/records">
-                  <FileText className="mr-2 h-4 w-4 text-accent" />
+                  <FileText className="mr-2 h-4 w-4 text-[#7abdb4]" />
                   <span>Health Vault</span>
               </Link>
           </DropdownMenuItem>
 
           {user.role === 'patient' && (
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                   <Link href="/appointments">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>My Appointments</span>
@@ -153,7 +148,7 @@ export function UserNav() {
           )}
 
           {userDashboard && (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                 <Link href={userDashboard.href}>
                     {React.cloneElement(userDashboard.icon as React.ReactElement, { className: 'mr-2 h-4 w-4' })}
                     <span>{userDashboard.label}</span>
@@ -163,7 +158,7 @@ export function UserNav() {
         
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={handleLogout} className="rounded-lg cursor-pointer text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

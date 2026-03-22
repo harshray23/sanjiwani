@@ -3,16 +3,16 @@ import Image from "next/image";
 
 export default function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn("font-headline font-bold text-accent whitespace-nowrap flex items-center justify-center gap-3", className)}>
-      <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
+    <div className={cn("font-headline font-bold text-[#0f4c5c] whitespace-nowrap flex items-center justify-center gap-2", className)}>
+      <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
         <Image 
           src="/logo.jpg" 
           alt="Sanjiwani Logo" 
           fill
-          className="rounded-full object-cover border-2 border-primary/20"
+          className="rounded-lg object-cover"
         />
       </div>
-      <span>Sanjiwani</span>
+      <span className="tracking-tight uppercase">Sanjiwani</span>
     </div>
   );
 }
